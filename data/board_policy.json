@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "source_of_truth": "CozyCrazyZones 0.3.4 CozyZonesApi.regionalCellAt(ServerLevel,x,z)",
+  "principles": [
+    "Shared Core boards stay generic; cardinal identity begins in the transition band.",
+    "Established boards use both macro-region and radial tier.",
+    "Repeatable postings may include a modest share of one-tier-lower work so towns still feel inhabited.",
+    "Signature authored quests do not randomly pair objectives and rewards; they require narrow issuance.",
+    "Dread Reaches boards are not boss vending machines; final-location knowledge still comes from maps, journals, and proof chains."
+  ],
+  "cells": {
+    "SHARED_CORE": {
+      "HEARTHLANDS": {
+        "quest_sources": [{"catalog": "CORE", "tier": "HEARTHLANDS", "weight": 1.0}],
+        "notes": "No strong cardinal flavor yet."
+      }
+    },
+    "CARDINAL_TRANSITION": {
+      "HEARTHLANDS": {
+        "quest_sources": [
+          {"catalog": "CORE", "tier": "HEARTHLANDS", "weight": 0.55},
+          {"catalog": "CURRENT_REGION", "tier": "HEARTHLANDS", "weight": 0.45}
+        ],
+        "notes": "First villages can teach regional identity without making the inner world feel like four hard biomes."
+      }
+    },
+    "ESTABLISHED": {
+      "HEARTHLANDS": {
+        "quest_sources": [
+          {"catalog": "CURRENT_REGION", "tier": "HEARTHLANDS", "weight": 0.8},
+          {"catalog": "CORE", "tier": "HEARTHLANDS", "weight": 0.2}
+        ]
+      },
+      "FRONTIER": {
+        "quest_sources": [
+          {"catalog": "CURRENT_REGION", "tier": "FRONTIER", "weight": 0.72},
+          {"catalog": "CURRENT_REGION", "tier": "HEARTHLANDS", "weight": 0.18},
+          {"catalog": "CORE", "tier": "HEARTHLANDS", "weight": 0.10}
+        ]
+      },
+      "WILDLANDS": {
+        "quest_sources": [
+          {"catalog": "CURRENT_REGION", "tier": "WILDLANDS", "weight": 0.72},
+          {"catalog": "CURRENT_REGION", "tier": "FRONTIER", "weight": 0.20},
+          {"catalog": "CURRENT_REGION", "tier": "HEARTHLANDS", "weight": 0.08}
+        ]
+      },
+      "DREAD_REACHES": {
+        "quest_sources": [
+          {"catalog": "CURRENT_REGION", "tier": "DREAD_REACHES", "weight": 0.74},
+          {"catalog": "CURRENT_REGION", "tier": "WILDLANDS", "weight": 0.20},
+          {"catalog": "CURRENT_REGION", "tier": "FRONTIER", "weight": 0.06}
+        ]
+      }
+    }
+  },
+  "board_population": {
+    "target_visible_postings": {"min": 4, "max": 7},
+    "mix_guideline": {
+      "mundane_repeatable": "2-3",
+      "regional_repeatable": "1-2",
+      "structure_or_recovery": "0-1 when a valid nearby target exists",
+      "signature_or_story": "0-1 and only when explicitly unlocked or issued"
+    }
+  }
+}
