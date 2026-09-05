@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "principle": "Regional UI flavor is cosmetic. Server-side board position and CozyCrazyZones remain authoritative for what work may exist.",
+  "regions": {
+    "CORE": {
+      "display_name": "Local Notices",
+      "accent": "#78644b",
+      "paper": "#eadbb8",
+      "ink": "#382c21",
+      "motif": "plain village seal",
+      "subtitle_pattern": "{tier} · Shared Hearthlands"
+    },
+    "NORTH": {
+      "display_name": "Frostmarch",
+      "accent": "#718899",
+      "paper": "#e7e4d7",
+      "ink": "#29343c",
+      "motif": "small snow-line compass stamp",
+      "subtitle_pattern": "{tier} · Frostmarch"
+    },
+    "EAST": {
+      "display_name": "Greenveil",
+      "accent": "#607850",
+      "paper": "#e6dfbd",
+      "ink": "#2f3825",
+      "motif": "pressed-leaf seal",
+      "subtitle_pattern": "{tier} · Greenveil"
+    },
+    "SOUTH": {
+      "display_name": "Sunscar",
+      "accent": "#a26d3f",
+      "paper": "#ead5a8",
+      "ink": "#44301f",
+      "motif": "sun-and-road stamp",
+      "subtitle_pattern": "{tier} · Sunscar"
+    },
+    "WEST": {
+      "display_name": "Harvestlands",
+      "accent": "#8c5c3e",
+      "paper": "#ead5ad",
+      "ink": "#402c22",
+      "motif": "wheat/pumpkin seal kept subtle before deep tiers",
+      "subtitle_pattern": "{tier} · Harvestlands"
+    }
+  },
+  "tier_labels": {
+    "HEARTHLANDS": {"display": "Hearthlands", "stamp": "LOCAL"},
+    "FRONTIER": {"display": "The Frontier", "stamp": "FRONTIER"},
+    "WILDLANDS": {"display": "Wildlands", "stamp": "EXPEDITION"},
+    "DREAD_REACHES": {"display": "Dread Reaches", "stamp": "DEEP COUNTRY"}
+  },
+  "notice_classes": {
+    "LOCAL_NOTICE": {"label": "LOCAL NOTICE", "icon_concept": "paper"},
+    "WATCH_NOTICE": {"label": "WATCH NOTICE", "icon_concept": "shield"},
+    "SUPPLY_CONTRACT": {"label": "SUPPLY CONTRACT", "icon_concept": "crate"},
+    "RECOVERY_CONTRACT": {"label": "RECOVERY CONTRACT", "icon_concept": "sealed satchel"},
+    "HUNT_NOTICE": {"label": "HUNT NOTICE", "icon_concept": "crossed spear"},
+    "GREAT_HUNT": {"label": "GREAT HUNT", "icon_concept": "wax-sealed fang"},
+    "FARM_NOTICE": {"label": "FARM NOTICE", "icon_concept": "wheat"},
+    "COMMUNITY_NOTICE": {"label": "COMMUNITY NOTICE", "icon_concept": "bell"},
+    "NATURALIST_NOTICE": {"label": "NATURALIST NOTICE", "icon_concept": "leaf sketch"},
+    "BOTANIST_NOTICE": {"label": "BOTANIST NOTICE", "icon_concept": "flower press"},
+    "ANIMAL_NOTICE": {"label": "KEEPER'S NOTICE", "icon_concept": "lead"},
+    "ARCHAEOLOGY_CONTRACT": {"label": "EXCAVATION NOTICE", "icon_concept": "brush"},
+    "ECOLOGY_CONTRACT": {"label": "KEEPER'S CONTRACT", "icon_concept": "hoof print"},
+    "SERVICE_REWARD": {"label": "SERVICE REQUEST", "icon_concept": "village seal"},
+    "REGIONAL_FINALE": {"label": "MAJOR CONTRACT", "icon_concept": "double wax seal"},
+    "EPILOGUE": {"label": "LOCAL REQUEST", "icon_concept": "simple handwritten note"}
+  },
+  "layout": {
+    "left_column": "4-7 pinned notices with title, class, issuer, and objective/reward icons",
+    "detail_paper": "selected notice title, issuer, 1-3 sentence body, exact objective progress, exact payment, timer",
+    "reputation": "small board-trust line; never dominate the screen",
+    "story_rule": "Prose may be atmospheric, but the exact mechanical objective must always be plainly visible."
+  }
+}
