@@ -20,12 +20,26 @@ config/bountiful/
 
 ```json
 "dataPackExclusions": [
-  "bounty_pools/*",
-  "bounty_decrees/*"
+  "bounty_pools/.+",
+  "bounty_decrees/.+"
 ]
 ```
 
-Bountiful's exact 1.20.1 `ResourceLoadStrategy` filters datapack resources first, then separately loads JSON files found in the config-pack directories. Therefore the custom files in:
+### Why this uses `.+` instead of the documented-looking `*`
+
+The exact 1.20.1 implementation converts each exclusion string directly into a Java/Kotlin `Regex`; only literal `*` characters are replaced with Bountiful's own restricted wildcard class:
+
+```text
+([A-Za-z_/]+)
+```
+
+That built-in wildcard does **not** include digits or hyphens, even though valid Minecraft resource paths can contain them. A broad `bounty_pools/*` rule can therefore fail to match some mod-added resource names.
+
+Because the rest of the exclusion string is passed through as regex syntax, `bounty_pools/.+` and `bounty_decrees/.+` match every non-empty resource path beneath those folders, including paths containing digits/hyphens.
+
+This is deliberate hardening based on the exact 1.20.1 source, not newer-version documentation.
+
+Bountiful filters datapack resources first, then separately loads JSON files found in its config-pack directories. Therefore the custom files in:
 
 ```text
 config/bountiful/bounty_pools/
@@ -42,6 +56,21 @@ Result:
 - the Bounty Board block/mechanics remain
 - village board generation remains
 - only CozyCrazyCraft config-pack pools/decrees should be available
+
+## Clean-folder requirement
+
+The exclusions affect **datapack resources**, not arbitrary JSON files already sitting in the local Bountiful config-pack folders.
+
+Before installing the custom-only baseline, remove any old test/custom JSON files from:
+
+```text
+config/bountiful/bounty_pools/
+config/bountiful/bounty_decrees/
+```
+
+Then copy in only this repository's files.
+
+The current exported CozyCrazyCraft configuration contained only `config/bountiful/bountiful.json`, so there was no existing local pool/decree content in that export. This warning protects later iterations from stale files.
 
 ## Why this is deliberately only one decree right now
 
