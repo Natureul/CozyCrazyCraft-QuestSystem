@@ -4,8 +4,8 @@
   "flatBonusTimePerBounty": 0,
   "shouldBountiesHaveTimersAndExpire": true,
   "dataPackExclusions": [
-    "bounty_pools/*",
-    "bounty_decrees/*"
+    "bounty_pools/.+",
+    "bounty_decrees/.+"
   ],
   "objectiveModifier": 0,
   "maxNumRewards": 2,
