@@ -1,127 +1,151 @@
 # Integration Boundary
 
-This file exists to prevent the quest project from inventing fake interfaces while the zoning/world-substrate project is still under active development.
+This file keeps the quest layer coupled to the **real** world-substrate API instead of duplicating or guessing geography.
 
-## Safe to build now
+## Current handoff: CozyCrazyZones 0.3.4
 
-These artifacts do not depend on the final world API:
+The previous conceptual geography placeholder is now superseded by the actual public API shipped in `CozyCrazyZones 0.3.4`.
 
-- Bountiful 6.0.4 custom-only configuration
-- objective/reward reliability documentation
-- broad repeatable bounty pools
-- quest archetype definitions
-- regional quest/reward design catalog
-- proof-item registry/specification
-- named reward weapon specification
-- item/entity/structure registry audits
-- balance tables
-- static validators
-- in-game smoke-test procedures
-- neutral data models that describe intended quest content without claiming runtime support
+Production quest code may now depend on these public methods:
 
-## Must wait for the developer thread
+```java
+CozyZonesApi.distanceFromSpawn(ServerLevel level, double x, double z)
+CozyZonesApi.regionAt(ServerLevel level, double x, double z)
+CozyZonesApi.regionForDistance(double distance)
+CozyZonesApi.influenceBandAt(ServerLevel level, double x, double z)
+CozyZonesApi.regionalStrengthAt(ServerLevel level, double x, double z)
+CozyZonesApi.macroRegionAt(ServerLevel level, double x, double z)
+CozyZonesApi.macroBoundaryStrengthAt(ServerLevel level, double x, double z)
+CozyZonesApi.regionalCellAt(ServerLevel level, double x, double z)
+CozyZonesApi.structureAllowed(ServerLevel level, ResourceLocation structureId, double x, double z)
+CozyZonesApi.naturalEntityAllowed(ServerLevel level, ResourceLocation entityId, double x, double z)
+CozyZonesApi.isDaytimeCandidate(ResourceLocation entityId)
+```
 
-Do not implement these until the final world substrate is known:
+The authoritative classifications are:
+
+```text
+Region:
+  HEARTHLANDS
+  FRONTIER
+  WILDLANDS
+  DREAD_REACHES
+
+MacroRegion:
+  NORTH  -> Frostmarch
+  EAST   -> Greenveil
+  SOUTH  -> Sunscar
+  WEST   -> Harvestlands
+
+RegionalInfluenceBand:
+  SHARED_CORE
+  CARDINAL_TRANSITION
+  ESTABLISHED
+```
+
+`RegionalCell` supplies all three classifications together plus distance, regional strength, and macro-boundary strength.
+
+## What this unlocks now
 
 ### Regional board assignment
 
-Need authoritative answers for:
+This is no longer blocked.
+
+The server can classify a Bountiful board from its real block position:
 
 ```text
-getMacroRegion(pos)
-getRadialZone(pos)
+cell = CozyZonesApi.regionalCellAt(level, boardX, boardZ)
 ```
 
-or whatever equivalent API the developer thread actually ships.
+The quest layer should use that result to choose the board's permitted decree family. It should **not** reimplement the 700/1200/2500/5500/9000 distance logic itself.
+
+### Regional quest filtering
+
+This is no longer blocked.
+
+A candidate quest can be checked against:
+
+- radial tier
+- macro-region
+- shared/transition/established influence
+
+For world content, `ZoneRuleRegistry` and the API's `structureAllowed` / `naturalEntityAllowed` methods are authoritative.
+
+### Structure and mob catalog joins
+
+This is no longer blocked at the classification level.
+
+`ZoneRuleRegistry` exposes:
+
+```java
+structureRule(ResourceLocation)
+minimumStructureRegion(ResourceLocation)
+structures()
+naturalEntityRule(ResourceLocation)
+naturalEntities()
+```
+
+Structure rules expose minimum region, macro-region restrictions, minimum influence band, and a note. Natural-entity rules additionally expose daytime-candidate and enabled flags.
+
+The 0.3.4 registry already contains concrete quest-relevant IDs including Dungeons Enhanced, Better Dungeons, Valhelsia Structures, Born in Chaos, Mowzie's Mobs, Skarrier Mobs, Myths of the Sea, and the permitted Cataclysm exception.
+
+## Still separate work
+
+The zoning handoff answers **where** a thing is legal. It does not by itself solve every quest mechanic.
 
 ### Useful structure targeting
 
-Need final structure registry/region rules and a stable method to locate permitted generated instances.
+Still needed: a quest-side locator that finds a real generated instance under constraints such as:
+
+```text
+structure id/tag
+correct radial tier
+correct macro-region
+minimum/ideal/maximum distance from issuing board
+prefer unexplored
+avoid repeat targets
+outward quests must actually point outward
+```
+
+This should consume CozyCrazyZones truth rather than duplicate it.
 
 ### Regional cartographer maps
 
-Need target selection + map creation integration.
+Still needs the target selector plus map creation/integration.
 
 ### Same-board redemption
 
-Needs chosen runtime owner for bounty source metadata and redemption interception.
+Still needs source-board metadata and redemption interception if we keep the same-board rule.
 
 ### Structure proof placement
 
-Needs chosen worldgen hook/data path for reliably adding a unique proof item to the intended generated structure.
-
-### Authored named quest issuance
-
-Bountiful's broad random generator is intentionally combinatorial. Signature objective/reward pairs may need a narrow decree or direct custom issuance. Wait until the runtime owner is decided.
+Still needs a deterministic insertion path for a unique proof item in a generated structure. Do not fake exact-structure completion with a generic Bountiful kill criterion.
 
 ### Main-story state
 
-Regional boss completion, final relic requirements, Stronghold/End progression, and one-time story flags are outside the current baseline.
+Regional boss completion, final relic requirements, Stronghold/End progression, and one-time story flags remain a separate lightweight state layer.
 
 ### Rescue-pet ownership transfer
 
-Do not assume a command/NBT trick. Build this only after a deterministic method is selected and tested.
+Still requires a deterministic tested method.
 
 ---
 
-# Interface we expect conceptually, not literally
+# Client-facing geography
 
-The quest layer will eventually need capabilities equivalent to:
+CozyCrazyZones 0.3.4 already synchronizes the current radial region, macro-region, and influence band to the client through `ClientRegionState`.
+
+That is enough for the quest UI to decorate a board with contextual labels such as:
 
 ```text
-WorldRegion classify(BlockPos)
+HEARTHLANDS NOTICE
+Frostmarch
 
-WorldRegion:
-    macroRegion = NORTH | EAST | SOUTH | WEST | CORE/TRANSITION
-    radialTier = HEARTHLANDS | FRONTIER | WILDLANDS | DREAD_REACHES
+FRONTIER CONTRACT
+Sunscar
 ```
 
-and a target-selection service capable of returning a real generated destination under constraints.
-
-These names are documentation placeholders only.
-
-**Do not write production code against them until the developer project hands off its actual API.**
-
----
-
-# Data we want from the developer thread
-
-When available, request/export:
-
-## Biomes
-
-- registry ID
-- assigned macro-region(s)
-- transition/common status
-- radial/intensity notes if relevant
-
-## Structures
-
-- registry ID
-- macro-region assignment(s)
-- minimum radial tier
-- actual generation mechanism
-- contained mobs/bosses
-- important loot/value notes
-- whether the structure is safe for quest proof insertion
-
-## Natural mobs
-
-- entity registry ID
-- macro-region assignment(s)
-- minimum radial tier
-- daylight/night viability
-- spawn mechanism
-- authored/raid exemptions
-
-## Existing bosses
-
-- exact entity ID
-- containing structure ID if any
-- spawn mechanism
-- region/tier assignment
-
-Once those exist, the quest catalog can be joined to real world content without guessing.
+The story UI should treat that as presentation context only. Server-side board/decree assignment must still be based on the board's authoritative server position.
 
 ---
 
