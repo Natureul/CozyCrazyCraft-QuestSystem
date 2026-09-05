@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  validate-bountiful:
+  validate-quest-content:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,3 +14,5 @@ jobs:
           python-version: '3.12'
       - name: Validate Bountiful config-pack content
         run: python tools/validate_bountiful_content.py
+      - name: Validate neutral regional quest catalog
+        run: python tools/validate_quest_catalog.py
