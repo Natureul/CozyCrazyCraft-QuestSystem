@@ -20,6 +20,11 @@ CONFIG = BOUNTIFUL / "bountiful.json"
 SUPPORTED_TYPES = {"item", "item_tag", "entity", "criteria", "command"}
 GREEN_TYPES = {"item", "item_tag", "entity"}
 
+# Exact 1.20.1 ResourceLoadStrategy treats exclusion strings as Regex after
+# replacing literal '*' with a restricted [A-Za-z_/]+ group. These patterns
+# intentionally avoid '*' and use regex '.+' so digits/hyphens are also caught.
+CUSTOM_ONLY_EXCLUSIONS = {"bounty_pools/.+", "bounty_decrees/.+"}
+
 errors: list[str] = []
 warnings: list[str] = []
 
@@ -39,12 +44,19 @@ def validate_main_config() -> None:
         return
 
     exclusions = set(data.get("dataPackExclusions", []))
-    required = {"bounty_pools/*", "bounty_decrees/*"}
-    missing = required - exclusions
+    missing = CUSTOM_ONLY_EXCLUSIONS - exclusions
     if missing:
         errors.append(
-            "bountiful.json does not fully enforce custom-only content; missing exclusions: "
+            "bountiful.json does not fully enforce the hardened custom-only content rules; missing: "
             + ", ".join(sorted(missing))
+        )
+
+    # Catch accidental regression to the tempting but incomplete wildcard.
+    weak = {"bounty_pools/*", "bounty_decrees/*"} & exclusions
+    if weak:
+        warnings.append(
+            "Found Bountiful '*' exclusions. Exact 1.20.1 turns '*' into [A-Za-z_/]+, "
+            "which may miss valid paths containing digits/hyphens; prefer the .+ rules."
         )
 
     if data.get("maxNumRewards") != 2:
