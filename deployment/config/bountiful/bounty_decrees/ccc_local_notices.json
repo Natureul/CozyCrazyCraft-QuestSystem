@@ -1,0 +1,9 @@
+{
+  "objectives": [
+    "ccc_local_objs"
+  ],
+  "rewards": [
+    "ccc_local_rews"
+  ],
+  "name": "Local Notices"
+}
