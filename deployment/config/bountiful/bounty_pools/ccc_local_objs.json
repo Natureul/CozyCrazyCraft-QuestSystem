@@ -1,0 +1,67 @@
+{
+  "content": {
+    "ccc_local_wheat": {
+      "type": "item",
+      "content": "minecraft:wheat",
+      "amount": {
+        "min": 8,
+        "max": 24
+      },
+      "unitWorth": 100
+    },
+    "ccc_local_logs": {
+      "type": "item_tag",
+      "content": "minecraft:logs",
+      "amount": {
+        "min": 8,
+        "max": 20
+      },
+      "unitWorth": 120
+    },
+    "ccc_local_wool": {
+      "type": "item_tag",
+      "content": "minecraft:wool",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 180
+    },
+    "ccc_local_string": {
+      "type": "item",
+      "content": "minecraft:string",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 160
+    },
+    "ccc_local_zombie": {
+      "type": "entity",
+      "content": "minecraft:zombie",
+      "amount": {
+        "min": 1,
+        "max": 5
+      },
+      "unitWorth": 650
+    },
+    "ccc_local_skeleton": {
+      "type": "entity",
+      "content": "minecraft:skeleton",
+      "amount": {
+        "min": 1,
+        "max": 5
+      },
+      "unitWorth": 700
+    },
+    "ccc_local_spider": {
+      "type": "entity",
+      "content": "minecraft:spider",
+      "amount": {
+        "min": 1,
+        "max": 5
+      },
+      "unitWorth": 550
+    }
+  }
+}
