@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "source": "CozyCrazyZones registry dump supplied from the current CozyCrazyCraft Zoning instance",
+  "purpose": "Exact-ID audit only. Region/tier legality remains owned by CozyCrazyZones/developer classification and must be checked before live quest issuance.",
+  "bosses": [
+    {
+      "role": "north_wildlands_buildup",
+      "entity": "mowziesmobs:frostmaw",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": "mowziesmobs:frostmaw_spawn",
+      "structure_status": "VERIFIED_REGISTRY_DUMP",
+      "intended_cell": "NORTH/WILDLANDS",
+      "quest": "north_w3_sleeping_mountain",
+      "audit_notes": ["Bountiful can safely track the entity type; exact mapped-instance kill would need extra targeting glue."]
+    },
+    {
+      "role": "north_regional_finale",
+      "entity": "aquamirae:captain_cornelia",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": null,
+      "structure_status": "CONTAINMENT_MECHANISM_NEEDS_AUDIT",
+      "intended_cell": "NORTH/DREAD_REACHES",
+      "quest": "north_d4_captain_in_ice",
+      "audit_notes": ["Aquamirae structure registry includes aquamirae:outpost, aquamirae:shelter, and aquamirae:ship. Do not assume any of those is Cornelia's final containing structure without source/world test."]
+    },
+    {
+      "role": "south_wildlands_buildup",
+      "entity": "mowziesmobs:umvuthi",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": "mowziesmobs:umvuthana_grove",
+      "structure_status": "VERIFIED_REGISTRY_DUMP",
+      "intended_cell": "SOUTH/WILDLANDS",
+      "quest": "south_w3_sunbird",
+      "audit_notes": []
+    },
+    {
+      "role": "south_regional_finale",
+      "entity": "cataclysm:ancient_remnant",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": "cataclysm:cursed_pyramid",
+      "structure_status": "VERIFIED_REGISTRY_DUMP",
+      "intended_cell": "SOUTH/DREAD_REACHES",
+      "quest": "south_d4_ancient_remnant",
+      "audit_notes": ["CozyCrazyCraft intends to isolate the Cursed Pyramid package rather than expose all Cataclysm worldgen/progression."]
+    },
+    {
+      "role": "south_dread_pyramid_miniboss",
+      "entity": "cataclysm:wadjet",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": "cataclysm:cursed_pyramid",
+      "structure_status": "VERIFIED_REGISTRY_DUMP",
+      "intended_cell": "SOUTH/DREAD_REACHES",
+      "quest": "south_d4_guardian_in_sand",
+      "audit_notes": ["Only use if the isolated pyramid package retains this encounter cleanly."]
+    },
+    {
+      "role": "south_dread_pyramid_miniboss",
+      "entity": "cataclysm:kobolediator",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": "cataclysm:cursed_pyramid",
+      "structure_status": "VERIFIED_REGISTRY_DUMP",
+      "intended_cell": "SOUTH/DREAD_REACHES",
+      "quest": "south_d4_arena_below",
+      "audit_notes": ["Only use if the isolated pyramid package retains this encounter cleanly."]
+    },
+    {
+      "role": "west_wildlands_buildup",
+      "entity": "born_in_chaos_v1:sir_pumpkinhead",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": null,
+      "structure_status": "SPAWN_MECHANISM_NEEDS_AUDIT",
+      "intended_cell": "WEST/WILDLANDS",
+      "quest": "west_w3_headless_road",
+      "audit_notes": ["Registry also contains sir_pumpkinhead_without_horse and sir_the_headless. Confirm the actual encounter form and kill-credit behavior before finalizing the objective."]
+    },
+    {
+      "role": "west_regional_finale",
+      "entity": "born_in_chaos_v1:lord_pumpkinhead",
+      "entity_status": "VERIFIED_REGISTRY_DUMP",
+      "known_structure": null,
+      "structure_status": "SPAWN_MECHANISM_NEEDS_AUDIT",
+      "intended_cell": "WEST/DREAD_REACHES",
+      "quest": "west_d4_old_harvest",
+      "audit_notes": ["Registry also contains lord_pumpkinhead_withouta_horse, lord_the_headless, lord_pumpkinhead_head, and lords_felsteed. Confirm which entity is the stable kill objective."]
+    },
+    {
+      "role": "east_regional_finale",
+      "entity": null,
+      "entity_status": "DEFERRED_JUNGLE_ABOMINATION_IMPORT",
+      "known_structure": null,
+      "structure_status": "DEFERRED_JUNGLE_ABOMINATION_IMPORT",
+      "intended_cell": "EAST/DREAD_REACHES",
+      "quest": "east_d4_thing_beneath_canopy",
+      "audit_notes": ["Do not invent a registry ID. The encounter is being adapted separately."]
+    }
+  ],
+  "quest_structure_candidates": {
+    "north": [
+      {"id": "mowziesmobs:frostmaw_spawn", "status": "VERIFIED_REGISTRY_DUMP", "use": "Frostmaw destination"},
+      {"id": "dungeons_enhanced:ice_pit", "status": "VERIFIED_REGISTRY_DUMP", "use": "cold recovery/hunt candidate"},
+      {"id": "aquamirae:outpost", "status": "VERIFIED_REGISTRY_DUMP", "use": "frozen-coast information/recovery candidate"},
+      {"id": "aquamirae:shelter", "status": "VERIFIED_REGISTRY_DUMP", "use": "frozen-coast recovery candidate"},
+      {"id": "aquamirae:ship", "status": "VERIFIED_REGISTRY_DUMP", "use": "frozen-coast journal/navigation candidate"},
+      {"id": "bettermineshafts:mineshaft_ice", "status": "VERIFIED_REGISTRY_DUMP", "use": "northern mine expedition candidate"},
+      {"id": "bettermineshafts:mineshaft_spruce_snowy", "status": "VERIFIED_REGISTRY_DUMP", "use": "northern mine expedition candidate"}
+    ],
+    "east": [
+      {"id": "betterjungletemples:jungle_temple", "status": "VERIFIED_REGISTRY_DUMP", "use": "major temple/recovery candidate"},
+      {"id": "dungeons_enhanced:jungle_monument", "status": "VERIFIED_REGISTRY_DUMP", "use": "major jungle expedition candidate"},
+      {"id": "bettermineshafts:mineshaft_jungle", "status": "VERIFIED_REGISTRY_DUMP", "use": "jungle mine expedition candidate"},
+      {"id": "bettermineshafts:mineshaft_lush", "status": "VERIFIED_REGISTRY_DUMP", "use": "lush mine expedition candidate"},
+      {"id": "bettermineshafts:mineshaft_overgrown", "status": "VERIFIED_REGISTRY_DUMP", "use": "overgrown recovery candidate"}
+    ],
+    "south": [
+      {"id": "mowziesmobs:umvuthana_grove", "status": "VERIFIED_REGISTRY_DUMP", "use": "Umvuthi destination"},
+      {"id": "betterdeserttemples:desert_temple", "status": "VERIFIED_REGISTRY_DUMP", "use": "archaeology/recovery candidate"},
+      {"id": "dungeons_enhanced:desert_temple", "status": "VERIFIED_REGISTRY_DUMP", "use": "desert expedition candidate"},
+      {"id": "dungeons_enhanced:desert_tomb", "status": "VERIFIED_REGISTRY_DUMP", "use": "archaeology/recovery candidate"},
+      {"id": "bettermineshafts:mineshaft_desert", "status": "VERIFIED_REGISTRY_DUMP", "use": "desert mine expedition candidate"},
+      {"id": "bettermineshafts:mineshaft_red_desert", "status": "VERIFIED_REGISTRY_DUMP", "use": "deep-desert mine candidate"},
+      {"id": "bettermineshafts:mineshaft_mesa", "status": "VERIFIED_REGISTRY_DUMP", "use": "badlands expedition candidate"},
+      {"id": "cataclysm:cursed_pyramid", "status": "VERIFIED_REGISTRY_DUMP", "use": "regional final dungeon; integration intentionally isolated"}
+    ],
+    "west": [
+      {"id": "dungeons_enhanced:stables", "status": "VERIFIED_REGISTRY_DUMP", "use": "The Empty Stalls candidate"},
+      {"id": "dungeons_enhanced:watch_tower", "status": "VERIFIED_REGISTRY_DUMP", "use": "watch/recovery candidate"},
+      {"id": "dungeons_enhanced:witch_tower", "status": "VERIFIED_REGISTRY_DUMP", "use": "old-forest/witch recovery candidate"},
+      {"id": "born_in_chaos_v1:farm", "status": "VERIFIED_REGISTRY_DUMP", "use": "abandoned-farm story candidate"},
+      {"id": "born_in_chaos_v1:mound_of_hounds", "status": "VERIFIED_REGISTRY_DUMP", "use": "deep-west hound hunt candidate"},
+      {"id": "born_in_chaos_v1:infernal_pumpkin", "status": "VERIFIED_REGISTRY_DUMP", "use": "deep-west pumpkin influence candidate"},
+      {"id": "born_in_chaos_v1:observation_tower_forest", "status": "VERIFIED_REGISTRY_DUMP", "use": "western survey/recovery candidate"},
+      {"id": "mowziesmobs:wrought_chamber", "status": "VERIFIED_REGISTRY_DUMP", "use": "ancient sideboss candidate; not west-exclusive by design"},
+      {"id": "valhelsia_structures:tower_ruin", "status": "VERIFIED_REGISTRY_DUMP", "use": "generic old-forest ruin candidate"},
+      {"id": "valhelsia_structures:castle_ruin", "status": "VERIFIED_REGISTRY_DUMP", "use": "larger old-forest ruin candidate"}
+    ]
+  },
+  "verified_regional_entity_candidates": {
+    "north": ["alexsmobs:froststalker", "alexsmobs:snow_leopard", "alexsmobs:moose", "aquamirae:maw", "aquamirae:anglerfish", "aquamirae:spinefish"],
+    "east": ["mowziesmobs:foliaath", "skarrier_mobs:zombiflore", "alexsmobs:gorilla", "alexsmobs:crocodile", "alexsmobs:capuchin_monkey", "alexsmobs:hummingbird"],
+    "south": ["alexsmobs:rattlesnake", "alexsmobs:roadrunner", "alexsmobs:elephant", "alexsmobs:gazelle", "alexsmobs:kangaroo", "alexsmobs:jerboa"],
+    "west": ["born_in_chaos_v1:dread_hound", "born_in_chaos_v1:dire_hound_leader", "born_in_chaos_v1:mr_pumpkin", "born_in_chaos_v1:mrs_pumpkin", "born_in_chaos_v1:pumpkin_bruiser", "born_in_chaos_v1:pumpkin_spirit", "born_in_chaos_v1:zombie_lumberjack", "alexsmobs:crow"]
+  },
+  "warning": "Presence in the registry dump is not proof of desired natural spawn location. Before a mob enters a repeatable regional bounty pool, cross-check CozyCrazyZones naturalEntityAllowed()/rule data and the developer mob classification."
+}
