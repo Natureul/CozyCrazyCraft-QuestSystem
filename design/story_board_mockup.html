@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CozyCrazyCraft Story Board UI Mockup</title>
+<style>
+:root { color-scheme: dark; }
+body { margin:0; background:#1b1713; font-family: Georgia, "Times New Roman", serif; color:#33281d; }
+.wrap { min-height:100vh; display:grid; place-items:center; padding:36px; box-sizing:border-box; }
+.board { width:min(1040px,96vw); min-height:560px; background:#9b6d43; border:14px solid #563923; box-shadow:0 18px 70px #000a, inset 0 0 0 3px #c89b63; padding:22px; box-sizing:border-box; }
+.header { display:flex; align-items:end; justify-content:space-between; color:#f2e4c4; margin:0 8px 14px; }
+.header h1 { margin:0; font-size:24px; letter-spacing:.08em; text-transform:uppercase; }
+.header .place { opacity:.9; font-size:15px; }
+.grid { display:grid; grid-template-columns:42% 58%; gap:18px; }
+.notices { display:grid; gap:10px; align-content:start; }
+.note { background:#e7d4a8; border:1px solid #a98a61; padding:12px 14px; box-shadow:4px 5px 0 #3b241b55; }
+.note.selected { transform:rotate(-.35deg); outline:3px solid #ead9b255; background:#f0dfb8; }
+.kicker { font:700 11px/1.2 Arial,sans-serif; letter-spacing:.11em; color:#76533c; }
+.note h3 { margin:4px 0 5px; font-size:18px; }
+.small { font-size:12px; color:#6e5744; }
+.detail { background:#f1dfb9; min-height:454px; padding:28px 30px; box-sizing:border-box; position:relative; box-shadow:5px 6px 0 #3b241b55; }
+.pin { width:13px;height:13px;border-radius:50%;background:#49352d;position:absolute;top:10px;left:50%;box-shadow:inset 2px 2px 2px #ffffff33,1px 2px 3px #0008; }
+.stamp { float:right; border:2px solid #855f49; color:#855f49; padding:5px 8px; font:700 11px Arial,sans-serif; letter-spacing:.08em; transform:rotate(3deg); text-transform:uppercase; opacity:.8; }
+.detail h2 { margin:8px 0 2px; font-size:29px; }
+.issuer { color:#70563e; font-style:italic; margin-bottom:22px; }
+.body { font-size:17px; line-height:1.46; max-width:650px; }
+.rule { height:1px;background:#bfa77d;margin:24px 0 16px; }
+.columns { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.label { font:700 11px Arial,sans-serif; letter-spacing:.12em; color:#78543d; margin-bottom:8px; }
+.item { display:flex; gap:8px; align-items:center; margin:7px 0; font-family:Arial,sans-serif; font-size:14px; }
+.icon { width:24px;height:24px;background:#8a6a47;border:2px solid #5c422d;display:inline-grid;place-items:center;color:#f3e6c6;font-size:12px; }
+.footer { position:absolute; bottom:18px; left:30px; right:30px; display:flex; justify-content:space-between; font:12px Arial,sans-serif; color:#80694e; }
+.reputation { color:#e8d9b7; font:12px Arial,sans-serif; margin-top:14px; display:flex; justify-content:space-between; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="board">
+    <div class="header">
+      <div><h1>Harvestlands Notice Board</h1><div class="place">Hearthlands · Established Region</div></div>
+      <div class="small" style="color:#eadbbd">Local work, recoveries, and road notices</div>
+    </div>
+    <div class="grid">
+      <div class="notices">
+        <div class="note selected"><div class="kicker">RECOVERY CONTRACT</div><h3>The Empty Stalls</h3><div class="small">Stablemaster · nearby road</div></div>
+        <div class="note"><div class="kicker">FARM NOTICE</div><h3>A Pest Worth Keeping</h3><div class="small">Village Farmer</div></div>
+        <div class="note"><div class="kicker">LOCAL NOTICE</div><h3>The Woodman's Order</h3><div class="small">Lumberer</div></div>
+        <div class="note"><div class="kicker">WATCH NOTICE</div><h3>Chime at Dusk</h3><div class="small">Innkeeper</div></div>
+        <div class="note"><div class="kicker">FARM NOTICE</div><h3>Harvest Supper</h3><div class="small">Innkeeper</div></div>
+      </div>
+      <section class="detail">
+        <div class="pin"></div>
+        <div class="stamp">Harvestlands</div>
+        <div class="kicker">RECOVERY CONTRACT</div>
+        <h2>The Empty Stalls</h2>
+        <div class="issuer">Posted by the Stablemaster</div>
+        <div class="body">The old roadside stable went silent three nights ago. Bring back the Stablemaster's Seal if you find it inside.</div>
+        <div class="rule"></div>
+        <div class="columns">
+          <div>
+            <div class="label">OBJECTIVE</div>
+            <div class="item"><span class="icon">S</span><span>Recover <b>Stablemaster's Seal</b> · 0/1</span></div>
+          </div>
+          <div>
+            <div class="label">PAYMENT</div>
+            <div class="item"><span class="icon">H</span><span><b>Saddle</b> ×1</span></div>
+            <div class="item"><span class="icon">E</span><span>Emeralds ×3–5</span></div>
+          </div>
+        </div>
+        <div class="footer"><span>Take the paper to accept the posting.</span><span>Expires in 2d 11h</span></div>
+      </section>
+    </div>
+    <div class="reputation"><span>Board reputation: Familiar</span><span>5 completed · better work appears as trust grows</span></div>
+  </div>
+</div>
+</body>
+</html>
