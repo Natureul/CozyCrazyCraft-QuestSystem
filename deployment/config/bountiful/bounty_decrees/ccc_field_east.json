@@ -1,0 +1,9 @@
+{
+  "objectives": [
+    "ccc_field_east_objs"
+  ],
+  "rewards": [
+    "ccc_regional_field_rews"
+  ],
+  "name": "Greenveil Field Jobs"
+}
