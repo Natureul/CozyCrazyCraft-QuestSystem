@@ -1,0 +1,8 @@
+{
+  "title": "Cartographer",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Need a map, or just trying to get your bearings?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Any news?","action":{"action":"dialogue.goto(1)"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Nothing right now.","action":{"action":"dialogue.close"}}]}]},
+    {"dialogue_options":[{"dialogue":"I sell maps. A route that needs walking is different work; if I have one, I'll say so.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Good to know.","action":{"action":"dialogue.close"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}}]}]}
+  ]
+}
