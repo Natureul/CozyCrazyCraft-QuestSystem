@@ -19,6 +19,7 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(VillageBoardManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(ProofLootInjector::onLootTableLoad);
         MinecraftForge.EVENT_BUS.addListener(BountyStoryTooltip::onTooltip);
+        MinecraftForge.EVENT_BUS.addListener(BountySourceTooltip::onTooltip);
         MinecraftForge.EVENT_BUS.addListener(BountyRedemptionGuard::onRightClickBlock);
         LOGGER.info("CozyCrazyQuests runtime V2 loaded");
     }
