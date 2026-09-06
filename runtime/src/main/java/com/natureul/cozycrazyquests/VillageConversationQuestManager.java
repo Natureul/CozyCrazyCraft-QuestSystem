@@ -25,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Authored villager quest lifecycle and first executable Zone 1 social lattice.
+ * Authored villager quest lifecycle and executable Zone 1 social lattice.
  *
- * Bountiful remains the public repeatable/civic layer. These first-clear contracts are village-owned,
+ * Bountiful remains the public repeatable/civic layer. These contracts are village-owned,
  * semantically categorized, recoverable through compatible professions, and grounded in real local
- * geography. The current slice proves COMMUNITY + EXPLORATION + PROFESSION before a later capstone.
+ * geography. Structure-bound work resolves an actual generated structure before it is offered and
+ * freezes that exact place into quest state.
  */
 public final class VillageConversationQuestManager {
     private static final String ROOT = "CozyCrazyVillagerQuests";
@@ -117,7 +118,7 @@ public final class VillageConversationQuestManager {
         if (dx * dx + dz * dz > (long) radius * radius) return;
 
         active.putBoolean("objective_complete", true);
-        active.putBoolean("surveyed", true); // compatibility with the 0.3.1 proof contract
+        active.putBoolean("surveyed", true);
         root.put(ACTIVE, active);
         saveRoot(player, root);
 
@@ -147,7 +148,9 @@ public final class VillageConversationQuestManager {
         if (active.isEmpty() || objectiveComplete(active)) return;
 
         VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-        if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.LOCAL_HOSTILE_CLEAR) return;
+        if (definition == null) return;
+        if (definition.objectiveType() != VillageQuestCatalog.ObjectiveType.LOCAL_HOSTILE_CLEAR
+                && definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR) return;
         if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) return;
 
         BlockPos target = readPos(active, "target");
@@ -164,8 +167,11 @@ public final class VillageConversationQuestManager {
         saveRoot(player, root);
 
         if (count >= required) {
+            String cleared = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR
+                    ? active.getString("target_name") + " is clear enough to report back"
+                    : "the area is clear";
             player.sendSystemMessage(
-                    Component.literal(definition.title() + ": the area is clear. "
+                    Component.literal(definition.title() + ": " + cleared + ". "
                                     + returnInstruction(definition, active.getString("village_name")))
                             .withStyle(ChatFormatting.AQUA)
             );
@@ -202,7 +208,16 @@ public final class VillageConversationQuestManager {
     ) {
         for (VillageQuestCatalog.Definition definition : VillageQuestCatalog.forProfession(villager.getVillagerData().getProfession())) {
             if (!definition.issuingTier().equals(village.cell().tier())) continue;
-            if (progress.categories().contains(definition.accomplishmentCategory())) continue;
+
+            if (definition.zoneOneCapstone()) {
+                // Capstone is an authored ratchet, never an ordinary early roll. Breadth first:
+                // COMMUNITY + EXPLORATION + PROFESSION/DANGER, then the serious local problem.
+                if (!progress.capstoneEligible() || progress.capstoneComplete()) continue;
+            } else if (definition.accomplishmentCategory() != null
+                    && progress.categories().contains(definition.accomplishmentCategory())) {
+                continue;
+            }
+
             if (isCompleted(root, definition, level, village)) continue;
 
             PreparedTarget target = prepareTarget(level, player, village, definition);
@@ -217,7 +232,8 @@ public final class VillageConversationQuestManager {
             VillageContext village,
             VillageQuestCatalog.Definition definition
     ) {
-        if (definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) {
+        if (definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY
+                || definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR) {
             NearbyStructureResolver.ResolvedStructure resolved = resolveStructureTarget(level, village, definition);
             if (resolved == null) return null;
 
@@ -319,9 +335,11 @@ public final class VillageConversationQuestManager {
         if (prefix.isBlank() || "the village".equals(prefix)) prefix = "Accepted";
         else prefix += " — " + definition.title();
 
-        String objective = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY
-                ? "survey " + active.getString("target_name")
-                : "clear " + definition.requiredKills() + " hostiles around " + active.getString("target_name");
+        String objective = switch (definition.objectiveType()) {
+            case STRUCTURE_SURVEY -> "survey " + active.getString("target_name");
+            case STRUCTURE_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles at " + active.getString("target_name");
+            case LOCAL_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles around " + active.getString("target_name");
+        };
         player.sendSystemMessage(
                 Component.literal(prefix + ": " + objective + ", about " + active.getInt("target_distance")
                                 + " blocks " + active.getString("target_direction") + ".")
@@ -329,7 +347,7 @@ public final class VillageConversationQuestManager {
         );
         if (atlasMarked) {
             player.sendSystemMessage(
-                    Component.literal("The cartographer marks " + active.getString("target_name") + " on your Atlas.")
+                    Component.literal(active.getString("target_name") + " has been added to your Atlas.")
                             .withStyle(ChatFormatting.AQUA)
             );
         }
@@ -365,12 +383,16 @@ public final class VillageConversationQuestManager {
             villageKey = recovered != null ? recovered.key() : legacyVillageKey(level, active, villageAnchor);
         }
 
-        VillageProgressState.recordAccomplishment(
-                player,
-                villageKey,
-                definition.accomplishmentCategory(),
-                definition.id()
-        );
+        if (definition.zoneOneCapstone()) {
+            VillageProgressState.markZoneOneCapstoneComplete(player, villageKey);
+        } else if (definition.accomplishmentCategory() != null) {
+            VillageProgressState.recordAccomplishment(
+                    player,
+                    villageKey,
+                    definition.accomplishmentCategory(),
+                    definition.id()
+            );
+        }
         VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, villageKey);
 
         String factId = active.getString("fact_id");
@@ -612,6 +634,7 @@ public final class VillageConversationQuestManager {
     private static String professionList(List<VillagerProfession> professions) {
         List<String> labels = new ArrayList<>();
         for (VillagerProfession profession : professions) labels.add("a " + professionLabel(profession));
+        if (labels.isEmpty()) return "a village representative";
         if (labels.size() == 1) return labels.get(0);
         if (labels.size() == 2) return labels.get(0) + " or " + labels.get(1);
         return String.join(", ", labels.subList(0, labels.size() - 1)) + ", or " + labels.get(labels.size() - 1);
