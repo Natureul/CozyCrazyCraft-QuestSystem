@@ -1,0 +1,26 @@
+{
+  "title": "The Missing Expedition",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "A northern expedition stopped reporting from a ruin beyond the settled road. Clear the site so someone can search it properly without becoming the next missing name.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "I'll clear the ruin.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_accept\"})"},
+                {"action": "dialogue.close"}
+              ]
+            },
+            {"reply": "I can't take that on yet.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
