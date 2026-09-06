@@ -1,0 +1,25 @@
+{
+  "title": "Local Work",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "You cleared the site? Good. That makes the road safer for everyone who has to pass it.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "It's handled.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_turnin\"})"},
+                {"action": "dialogue.close"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
