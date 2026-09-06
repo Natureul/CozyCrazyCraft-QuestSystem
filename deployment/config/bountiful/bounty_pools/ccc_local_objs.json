@@ -3,65 +3,58 @@
     "ccc_local_wheat": {
       "type": "item",
       "content": "minecraft:wheat",
-      "amount": {
-        "min": 8,
-        "max": 24
-      },
-      "unitWorth": 100
+      "amount": {"min": 8, "max": 24},
+      "unitWorth": 100,
+      "name": "Grain for the Storehouse",
+      "icon": "minecraft:wheat"
     },
     "ccc_local_logs": {
       "type": "item_tag",
       "content": "minecraft:logs",
-      "amount": {
-        "min": 8,
-        "max": 20
-      },
-      "unitWorth": 120
+      "amount": {"min": 8, "max": 20},
+      "unitWorth": 120,
+      "name": "Timber for Repairs",
+      "icon": "minecraft:oak_log"
     },
     "ccc_local_wool": {
       "type": "item_tag",
       "content": "minecraft:wool",
-      "amount": {
-        "min": 4,
-        "max": 12
-      },
-      "unitWorth": 180
+      "amount": {"min": 4, "max": 12},
+      "unitWorth": 180,
+      "name": "Wool for the Loom",
+      "icon": "minecraft:white_wool"
     },
     "ccc_local_string": {
       "type": "item",
       "content": "minecraft:string",
-      "amount": {
-        "min": 4,
-        "max": 16
-      },
-      "unitWorth": 160
+      "amount": {"min": 4, "max": 16},
+      "unitWorth": 160,
+      "name": "Cord and Canvas",
+      "icon": "minecraft:string"
     },
     "ccc_local_zombie": {
       "type": "entity",
       "content": "minecraft:zombie",
-      "amount": {
-        "min": 1,
-        "max": 5
-      },
-      "unitWorth": 650
+      "amount": {"min": 1, "max": 5},
+      "unitWorth": 650,
+      "name": "Keep the Road Clear",
+      "icon": "minecraft:iron_sword"
     },
     "ccc_local_skeleton": {
       "type": "entity",
       "content": "minecraft:skeleton",
-      "amount": {
-        "min": 1,
-        "max": 5
-      },
-      "unitWorth": 700
+      "amount": {"min": 1, "max": 5},
+      "unitWorth": 700,
+      "name": "Arrows in the Dark",
+      "icon": "minecraft:bow"
     },
     "ccc_local_spider": {
       "type": "entity",
       "content": "minecraft:spider",
-      "amount": {
-        "min": 1,
-        "max": 5
-      },
-      "unitWorth": 550
+      "amount": {"min": 1, "max": 5},
+      "unitWorth": 550,
+      "name": "Webs Near the Fields",
+      "icon": "minecraft:string"
     }
   }
 }
