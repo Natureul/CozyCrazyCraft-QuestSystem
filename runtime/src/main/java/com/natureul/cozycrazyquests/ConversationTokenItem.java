@@ -28,6 +28,11 @@ public final class ConversationTokenItem extends Item {
 
         String action = stack.getTag().getString(ACTION_TAG);
         stack.shrink(1);
+        CozyCrazyQuests.LOGGER.info(
+                "Received Conversations quest action '{}' from player {}",
+                action,
+                player.getGameProfile().getName()
+        );
         VillageConversationQuestManager.consumeConversationAction(player, action);
     }
 }
