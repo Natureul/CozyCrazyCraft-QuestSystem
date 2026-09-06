@@ -1,0 +1,32 @@
+{
+  "content": {
+    "ccc_field_emeralds": {
+      "type": "item",
+      "content": "minecraft:emerald",
+      "amount": {"min": 2, "max": 10},
+      "unitWorth": 1000,
+      "weightMult": 1.4
+    },
+    "ccc_field_arrows": {
+      "type": "item",
+      "content": "minecraft:arrow",
+      "amount": {"min": 8, "max": 24},
+      "unitWorth": 110,
+      "weightMult": 0.7
+    },
+    "ccc_field_food": {
+      "type": "item",
+      "content": "minecraft:cooked_beef",
+      "amount": {"min": 3, "max": 10},
+      "unitWorth": 280,
+      "weightMult": 0.65
+    },
+    "ccc_field_torches": {
+      "type": "item",
+      "content": "minecraft:torch",
+      "amount": {"min": 12, "max": 32},
+      "unitWorth": 80,
+      "weightMult": 0.55
+    }
+  }
+}
