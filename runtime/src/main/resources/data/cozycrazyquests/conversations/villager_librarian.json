@@ -1,0 +1,8 @@
+{
+  "title": "Librarian",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Looking for a book, a name, or a story someone forgot to write down?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Any news?","action":{"action":"dialogue.goto(1)"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Nothing right now.","action":{"action":"dialogue.close"}}]}]},
+    {"dialogue_options":[{"dialogue":"Old names and missing records usually end up on my table sooner or later.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Good to know.","action":{"action":"dialogue.close"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}}]}]}
+  ]
+}
