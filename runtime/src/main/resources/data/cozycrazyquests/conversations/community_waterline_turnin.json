@@ -1,0 +1,7 @@
+{
+  "title": "Trouble at the Waterline",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Good. Nets, buckets, and people can use the bank again without watching the reeds every second. Take this; it'll serve you better than it served the last owner.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Glad it's clear.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},{"action":"dialogue.close"}]}]}]}
+  ]
+}
