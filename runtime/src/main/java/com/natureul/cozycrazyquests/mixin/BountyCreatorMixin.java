@@ -2,6 +2,7 @@ package com.natureul.cozycrazyquests.mixin;
 
 import com.natureul.cozycrazyquests.BountifulBridge;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -9,10 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Pseudo
 @Mixin(targets = "io.ejekta.bountiful.content.BountyCreator", remap = false)
 public abstract class BountyCreatorMixin {
 
-    @Inject(method = "getAllPossibleObjectives", at = @At("RETURN"), cancellable = true, remap = false)
+    @Inject(method = "getAllPossibleObjectives", at = @At("RETURN"), cancellable = true, remap = false, require = 0)
     private void cozycrazyquests$honorObjectiveTrustRequirements(List<?> rewardPools, CallbackInfoReturnable<List<?>> cir) {
         List<?> original = cir.getReturnValue();
         if (original == null || original.isEmpty()) return;
