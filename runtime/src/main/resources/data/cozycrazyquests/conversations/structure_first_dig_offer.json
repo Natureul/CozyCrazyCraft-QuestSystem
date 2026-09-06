@@ -1,0 +1,26 @@
+{
+  "title": "The First Dig",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "There's a desert temple out beyond the easy roads. I don't need treasure. I need someone to stand at the ruin, look it over, and confirm which old site we're actually dealing with.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "I'll survey the temple.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_accept\"})"},
+                {"action": "dialogue.close"}
+              ]
+            },
+            {"reply": "Maybe another time.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
