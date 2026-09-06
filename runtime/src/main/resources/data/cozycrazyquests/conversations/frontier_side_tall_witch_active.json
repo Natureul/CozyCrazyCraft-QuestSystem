@@ -1,0 +1,1 @@
+{"title":"A Hut Above the Reeds","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Seven at the hut. Wet ground changes every retreat. Know where your feet are going before the fighting starts.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll choose the ground first.","action":{"action":"dialogue.close"}}]}]}]}

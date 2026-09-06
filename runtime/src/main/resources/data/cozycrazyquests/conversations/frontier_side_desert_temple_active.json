@@ -1,0 +1,1 @@
+{"title":"Sand in the Doorway","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Seven at the temple. Keep your exit visible. Desert ruins are very good at making one room look like the whole problem.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll keep the exit in mind.","action":{"action":"dialogue.close"}}]}]}]}

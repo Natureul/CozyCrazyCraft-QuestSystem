@@ -1,0 +1,1 @@
+{"title":"Tracks Around the Mound","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Eight at the mound. Long reach helps when the thing charging you has already decided where the fight will happen.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll keep them at reach.","action":{"action":"dialogue.close"}}]}]}]}

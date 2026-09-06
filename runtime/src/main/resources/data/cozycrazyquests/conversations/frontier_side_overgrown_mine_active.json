@@ -1,0 +1,1 @@
+{"title":"Roots in the Shaft","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Seven at the overgrown mine. Watch the ceiling and the floor; vines make both look safer than they are.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll watch my footing.","action":{"action":"dialogue.close"}}]}]}]}

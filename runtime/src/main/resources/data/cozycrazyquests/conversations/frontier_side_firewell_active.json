@@ -1,0 +1,1 @@
+{"title":"Ash Around the Well","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Eight at the firewell. Keep something solid between you and open flame whenever you can. Courage does not reduce burn time.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll use the terrain.","action":{"action":"dialogue.close"}}]}]}]}

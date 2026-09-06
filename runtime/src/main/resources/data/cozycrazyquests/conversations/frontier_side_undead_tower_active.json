@@ -1,0 +1,1 @@
+{"title":"The Bell in the Dead Tower","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Eight at the tower. Stairwells turn bad fights into worse ones. Make the doorway yours before you climb.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll take it floor by floor.","action":{"action":"dialogue.close"}}]}]}]}
