@@ -50,6 +50,25 @@ def main() -> int:
         if stock.get("disable_stock_generation_before_replacement_proven") is not False:
             errors.append("do not disable stock board generation before companion replacement is proven")
 
+    petshop = policy.get("domestication_innovation_petshop")
+    if not isinstance(petshop, dict):
+        errors.append("village_board_policy.json: missing domestication_innovation_petshop object")
+    else:
+        if petshop.get("source_mod") != "domesticationinnovation":
+            errors.append("petshop source_mod must be domesticationinnovation")
+        if petshop.get("config_file") != "config/domestication-innovation.toml":
+            errors.append("petshop config_file must identify Domestication Innovation's common config")
+        if petshop.get("config_section") != "general" or petshop.get("config_key") != "petstore_village_weight":
+            errors.append("petshop suppression must use general.petstore_village_weight")
+        if petshop.get("desired_shipping_weight") != 0:
+            errors.append("shipping petstore_village_weight must be zero once board replacement is proven")
+        if petshop.get("avoid_brittle_one_to_one_jigsaw_template_swap") is not True:
+            errors.append("petshop replacement should not depend on a brittle one-to-one jigsaw template swap")
+        if petshop.get("keep_domestication_innovation_pet_mechanics") is not True:
+            errors.append("removing the petshop must not disable Domestication Innovation's pet mechanics")
+        if petshop.get("apply_disable_only_when_village_board_guarantee_is_proven") is not True:
+            errors.append("petshop suppression must wait until the civic-board guarantee is proven")
+
     detection = policy.get("village_detection")
     if not isinstance(detection, dict):
         errors.append("village_board_policy.json: missing village_detection object")
