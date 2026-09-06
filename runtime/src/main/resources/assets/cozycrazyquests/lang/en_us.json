@@ -7,5 +7,7 @@
   "item.cozycrazyquests.greenveil_survey_notes.desc": "Water-stained field notes recovered from a jungle monument.",
   "item.cozycrazyquests.frostmarch_dispatch": "Frostmarch Dispatch",
   "item.cozycrazyquests.frostmarch_dispatch.desc": "A sealed dispatch recovered from an Ice Pit armory.",
-  "item.cozycrazyquests.quest_proof_hint": "Quest proof - a settlement may be looking for this."
+  "item.cozycrazyquests.quest_proof_hint": "Quest proof - a settlement may be looking for this.",
+  "item.cozycrazyquests.village_contract": "Village Contract",
+  "item.cozycrazyquests.conversation_token": "Quest Action"
 }
