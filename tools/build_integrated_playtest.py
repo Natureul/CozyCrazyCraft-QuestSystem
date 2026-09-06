@@ -26,6 +26,7 @@ Target: Minecraft Forge 1.20.1
 Requires your normal installed pack, including:
 - Bountiful 6.0.4
 - CozyCrazyZones (0.3.6+ API; use your newest test build)
+- Dungeons Enhanced 5.4.3
 - Domestication Innovation if you normally use it
 
 What this build is intended to test:
@@ -37,23 +38,44 @@ What this build is intended to test:
 6. The Bountiful reputation label reads Village Trust.
 7. Objective repRequired is honored by the runtime, allowing trusted-only work.
 8. Domestication Innovation pet-shop village pieces are suppressed for newly generated villages.
+9. Trusted regional boards can issue structure Recovery Contracts.
+10. Fresh target structures contain custom glowing proof items which Bountiful consumes on turn-in.
+
+Recovery Contract targets in this build:
+- Harvestwood / Trust 2: Dungeons Enhanced Stables -> Stablemaster's Seal
+- Sunscar / Trust 2: Dungeons Enhanced Desert Tomb -> Sunscar Tomb Tablet
+- Greenveil / Trust 3: Dungeons Enhanced Jungle Monument treasure -> Greenveil Survey Notes
+- Frostmarch / Trust 3: Dungeons Enhanced Ice Pit armory -> Frostmarch Dispatch
 
 Important limitations of this V1:
 - Already-generated pet shops are not removed from existing chunks.
 - Frontier/Wildlands/Dread dedicated Bountiful decrees are still being materialized; those cells currently fail safely to Local Notices.
 - Rich story-card UI is not yet implemented.
-- Exact structure proof placement and the final useful-target map locator are not yet implemented.
+- Recovery jobs currently name a structure type rather than binding to one exact structure instance.
+- Cartographer/useful-target map binding is still a separate layer.
+- Stock Bountiful still allows a completed contract to be redeemed at a different board; same-issuing-board return remains planned.
 - This archive is CI/build validated, but Minecraft behavior still needs your in-game smoke test.
 
-Suggested test:
+Suggested board test:
 - Use NEW village chunks for pet-shop suppression testing.
-- Visit a plains/taiga/savanna/desert/snowy village with no stock Bountiful gazebo and wait nearby for up to ~15 seconds.
+- Visit a village with no stock Bountiful gazebo and wait nearby for up to ~15 seconds.
 - Open the civic board and confirm 5–7 postings.
 - In Hearthlands, inspect the decree and compare it with /cozyzone debug or the zone overlay.
 - Take a bounty and confirm its paper no longer shows/counts down an expiration timer.
 - Complete several bounties at one board and watch Village Trust rise.
 
-Do not delete your normal Bountiful or CozyCrazyZones jars. This ZIP adds CozyCrazyQuests and replaces the quest-system Bountiful config only.
+Suggested Recovery Contract test:
+- Use a fresh target structure whose loot chest has never been opened.
+- Helpful commands:
+  /locate structure dungeons_enhanced:stables
+  /locate structure dungeons_enhanced:desert_tomb
+  /locate structure dungeons_enhanced:jungle_monument
+  /locate structure dungeons_enhanced:ice_pit
+- Open the relevant chest and confirm the named glowing proof item exists.
+- Return with the accepted bounty and proof item; the proof should be consumed on successful redemption.
+- For a no-travel turn-in smoke test you can /give the proof item by its cozycrazyquests ID.
+
+Do not delete your normal Bountiful, Dungeons Enhanced, or CozyCrazyZones jars. This ZIP adds CozyCrazyQuests and replaces the quest-system Bountiful config only.
 """
 
 

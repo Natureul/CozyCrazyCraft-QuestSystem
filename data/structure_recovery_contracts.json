@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "status": "PLAYTEST_V1",
+  "principle": "Recovery Contracts use unique CozyCrazyQuests item IDs placed only in a chosen structure loot table, then Bountiful consumes that proof item when the player returns the contract.",
+  "placement_semantics": "V1 injects one proof whenever the designated loot table is rolled. This guarantees a proof in the chosen chest type without world scanning or ticking. If a structure invokes that same table more than once it may contain duplicate proofs; exact-one-per-structure placement is a later refinement if playtesting shows it matters.",
+  "contracts": [
+    {
+      "id": "harvestwood_stables",
+      "macro_region": "WEST",
+      "issued_from_tier": "HEARTHLANDS",
+      "target_tier": "HEARTHLANDS",
+      "minimum_village_trust_rep": 2,
+      "structure_id": "dungeons_enhanced:stables",
+      "loot_table": "dungeons_enhanced:chests/stables",
+      "proof_item": "cozycrazyquests:stablemasters_seal",
+      "objective_pool": "ccc_hearth_west_objs",
+      "objective_id": "ccc_west_h1_recover_stable_seal"
+    },
+    {
+      "id": "sunscar_desert_tomb",
+      "macro_region": "SOUTH",
+      "issued_from_tier": "HEARTHLANDS",
+      "target_tier": "HEARTHLANDS",
+      "minimum_village_trust_rep": 2,
+      "structure_id": "dungeons_enhanced:desert_tomb",
+      "loot_table": "dungeons_enhanced:chests/desert_tomb",
+      "proof_item": "cozycrazyquests:sunscar_tomb_tablet",
+      "objective_pool": "ccc_hearth_south_objs",
+      "objective_id": "ccc_south_h1_recover_tomb_tablet"
+    },
+    {
+      "id": "greenveil_jungle_monument",
+      "macro_region": "EAST",
+      "issued_from_tier": "HEARTHLANDS",
+      "target_tier": "FRONTIER",
+      "minimum_village_trust_rep": 3,
+      "structure_id": "dungeons_enhanced:jungle_monument",
+      "loot_table": "dungeons_enhanced:chests/jungle_monument/treasure",
+      "proof_item": "cozycrazyquests:greenveil_survey_notes",
+      "objective_pool": "ccc_hearth_east_objs",
+      "objective_id": "ccc_east_h1_recover_survey_notes"
+    },
+    {
+      "id": "frostmarch_ice_pit",
+      "macro_region": "NORTH",
+      "issued_from_tier": "HEARTHLANDS",
+      "target_tier": "FRONTIER",
+      "minimum_village_trust_rep": 3,
+      "structure_id": "dungeons_enhanced:ice_pit",
+      "loot_table": "dungeons_enhanced:chests/ice_pit/armory",
+      "proof_item": "cozycrazyquests:frostmarch_dispatch",
+      "objective_pool": "ccc_hearth_north_objs",
+      "objective_id": "ccc_north_h1_recover_dispatch"
+    }
+  ]
+}

@@ -30,6 +30,8 @@ jobs:
         run: python tools/validate_village_board_policy.py
       - name: Validate village trust and cadence policy
         run: python tools/validate_village_trust_policy.py
+      - name: Validate structure recovery contracts
+        run: python tools/validate_structure_recovery.py
       - name: Validate target distance and selection policy
         run: python tools/validate_targeting_policy.py
       - name: Validate CozyCrazyZones world bindings
