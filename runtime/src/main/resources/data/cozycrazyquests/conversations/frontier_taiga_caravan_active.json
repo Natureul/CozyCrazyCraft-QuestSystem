@@ -1,0 +1,1 @@
+{"title":"The Cart in the Pines","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Six at the cart. Stay where the work is. Old woods are very good at turning one sensible task into three bad ideas.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll stay on the road.","action":[{"action":"dialogue.close"}]}]}]}]}

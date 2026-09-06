@@ -1,0 +1,1 @@
+{"title":"Heat in the Mine","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Seven at the mine, then come back. Do not cook yourself underground trying to make the count prettier than it needs to be.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"Seven, then home.","action":[{"action":"dialogue.close"}]}]}]}]}
