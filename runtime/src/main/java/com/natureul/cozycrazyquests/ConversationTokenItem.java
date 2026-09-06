@@ -10,8 +10,8 @@ import net.minecraft.world.level.Level;
  * Invisible-in-practice handshake item used by Conversations 1.0.5 reply actions.
  *
  * Conversations can give an item with NBT but does not expose a general external action callback.
- * A reply therefore gives one of these tokens with ccc_action=accept/turnin. On the next inventory
- * tick the server consumes the token and lets our quest manager perform the authoritative action.
+ * A reply therefore gives one of these tokens with ccc_action=... On the next inventory tick the
+ * server consumes the token and dispatches the authoritative CozyCrazy action.
  */
 public final class ConversationTokenItem extends Item {
     public static final String ACTION_TAG = "ccc_action";
@@ -33,6 +33,9 @@ public final class ConversationTokenItem extends Item {
                 action,
                 player.getGameProfile().getName()
         );
-        VillageConversationQuestManager.consumeConversationAction(player, action);
+
+        if (!VillageSocialConversationManager.consumeConversationAction(player, action)) {
+            VillageConversationQuestManager.consumeConversationAction(player, action);
+        }
     }
 }
