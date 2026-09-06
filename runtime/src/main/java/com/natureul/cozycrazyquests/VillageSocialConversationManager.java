@@ -9,9 +9,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,6 +27,7 @@ import java.util.Optional;
  */
 public final class VillageSocialConversationManager {
     private static final int BOARD_DIRECTION_RADIUS = 192;
+    private static final int SOCIAL_ROUTE_RADIUS = 112;
     private static final ResourceLocation GUARD_TYPE = new ResourceLocation("guardvillagers", "guard");
     private static final ResourceLocation GUARD_DIALOGUE = id("guard_local");
 
@@ -36,13 +40,9 @@ public final class VillageSocialConversationManager {
         if (!ConversationBridge.available() || !ConversationBridge.supports(target)) return;
 
         if (target instanceof Villager villager) {
-            // Name belongs to the person, not the job. This therefore runs even when the quest
-            // manager already selected a higher-priority authored conversation.
             VillagerNameService.ensureNamed(level, villager);
 
-            // Authored quest/turn-in dialogue selected by VillageConversationQuestManager wins.
             if (ConversationBridge.hasOwnDialogue(villager)) return;
-            // Respect any conversation deliberately attached by another mod/datapack.
             if (ConversationBridge.hasDialogue(villager)) return;
 
             ConversationBridge.setDialogue(villager, genericVillagerDialogue(villager));
@@ -54,8 +54,6 @@ public final class VillageSocialConversationManager {
         VillagerNameService.ensureNamed(level, target);
 
         if (!player.isShiftKeyDown()) {
-            // Do not hijack Guard Villagers' normal right-click UI. If this guard was spoken to on a
-            // previous click, clear our dialogue before Conversations' NORMAL-priority hook runs.
             ConversationBridge.clearOwnDialogue(target);
             return;
         }
@@ -66,9 +64,15 @@ public final class VillageSocialConversationManager {
     }
 
     static boolean consumeConversationAction(ServerPlayer player, String action) {
-        if (!"guard_board".equals(action)) return false;
-        pointToNoticeBoard(player);
-        return true;
+        if ("guard_board".equals(action)) {
+            pointToNoticeBoard(player);
+            return true;
+        }
+        if ("route_help".equals(action)) {
+            routeToUsefulPerson(player);
+            return true;
+        }
+        return false;
     }
 
     private static ResourceLocation genericVillagerDialogue(Villager villager) {
@@ -94,6 +98,75 @@ public final class VillageSocialConversationManager {
         return id("villager_" + path);
     }
 
+    private static void routeToUsefulPerson(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        VillageContext village = VillageContext.resolve(level, player.blockPosition());
+        if (village == null) {
+            player.sendSystemMessage(Component.literal("No one nearby seems to be speaking for a settlement here.")
+                    .withStyle(ChatFormatting.GRAY));
+            return;
+        }
+
+        VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, village.key());
+        List<VillagerProfession> wanted;
+        String reason;
+
+        if (progress.capstoneEligible() && !progress.capstoneComplete()) {
+            wanted = List.of(
+                    VillagerProfession.MASON,
+                    VillagerProfession.LIBRARIAN,
+                    VillagerProfession.CARTOGRAPHER,
+                    VillagerProfession.WEAPONSMITH,
+                    VillagerProfession.ARMORER
+            );
+            reason = "the larger problem people have started talking about";
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.COMMUNITY)) {
+            wanted = List.of(VillagerProfession.FARMER, VillagerProfession.SHEPHERD, VillagerProfession.BUTCHER);
+            reason = "a local problem around the village";
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.EXPLORATION)) {
+            wanted = List.of(VillagerProfession.MASON, VillagerProfession.LIBRARIAN, VillagerProfession.CLERIC, VillagerProfession.CARTOGRAPHER);
+            reason = "something outside town that needs checking";
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.PROFESSION)) {
+            wanted = List.of(VillagerProfession.WEAPONSMITH, VillagerProfession.ARMORER, VillagerProfession.FLETCHER, VillagerProfession.TOOLSMITH);
+            reason = "practical work for someone willing to travel";
+        } else {
+            wanted = List.of(VillagerProfession.CARTOGRAPHER, VillagerProfession.LIBRARIAN, VillagerProfession.MASON);
+            reason = progress.capstoneComplete()
+                    ? "what lies beyond the local roads"
+                    : "what the village still needs";
+        }
+
+        AABB area = new AABB(player.blockPosition()).inflate(SOCIAL_ROUTE_RADIUS, 48, SOCIAL_ROUTE_RADIUS);
+        Optional<Villager> candidate = level.getEntitiesOfClass(Villager.class, area, villager -> {
+                    if (villager.isBaby() || !wanted.contains(villager.getVillagerData().getProfession())) return false;
+                    VillageContext theirs = VillageContext.resolve(level, villager.blockPosition());
+                    return theirs != null && village.key().equals(theirs.key());
+                }).stream()
+                .min(Comparator.comparingDouble(v -> v.distanceToSqr(player)));
+
+        if (candidate.isEmpty()) {
+            player.sendSystemMessage(
+                    Component.literal("Nobody nearby fits that problem cleanly. Ask a guard or check the notice board; the village won't lose the lead.")
+                            .withStyle(ChatFormatting.GRAY)
+            );
+            return;
+        }
+
+        Villager villager = candidate.get();
+        VillagerNameService.ensureNamed(level, villager);
+        long dx = (long) villager.blockPosition().getX() - player.blockPosition().getX();
+        long dz = (long) villager.blockPosition().getZ() - player.blockPosition().getZ();
+        int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
+        String profession = professionLabel(villager.getVillagerData().getProfession());
+        String where = distance <= 10 ? "right nearby" : "about " + distance + " blocks " + direction(dx, dz);
+
+        player.sendSystemMessage(
+                Component.literal(villager.getDisplayName().getString() + ", the " + profession + ", may know about "
+                                + reason + ". They're " + where + ".")
+                        .withStyle(ChatFormatting.GOLD)
+        );
+    }
+
     private static void pointToNoticeBoard(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         Optional<VillageBoardSavedData.VillageRecord> record = VillageBoardSavedData.get(level)
@@ -114,6 +187,23 @@ public final class VillageSocialConversationManager {
                 Component.literal("Village Notice Board: about " + distance + " blocks " + direction(dx, dz) + ".")
                         .withStyle(ChatFormatting.GOLD)
         );
+    }
+
+    private static String professionLabel(VillagerProfession profession) {
+        if (profession == VillagerProfession.ARMORER) return "armorer";
+        if (profession == VillagerProfession.BUTCHER) return "butcher";
+        if (profession == VillagerProfession.CARTOGRAPHER) return "cartographer";
+        if (profession == VillagerProfession.CLERIC) return "cleric";
+        if (profession == VillagerProfession.FARMER) return "farmer";
+        if (profession == VillagerProfession.FISHERMAN) return "fisherman";
+        if (profession == VillagerProfession.FLETCHER) return "fletcher";
+        if (profession == VillagerProfession.LEATHERWORKER) return "leatherworker";
+        if (profession == VillagerProfession.LIBRARIAN) return "librarian";
+        if (profession == VillagerProfession.MASON) return "mason";
+        if (profession == VillagerProfession.SHEPHERD) return "shepherd";
+        if (profession == VillagerProfession.TOOLSMITH) return "toolsmith";
+        if (profession == VillagerProfession.WEAPONSMITH) return "weaponsmith";
+        return "villager";
     }
 
     private static String direction(long dx, long dz) {
