@@ -1,0 +1,7 @@
+{
+  "title": "Local Lead",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"You're looking below the surface. Sweep the area around the bearing for cave mouths, ravines, broken stone, or water cutting underground. Search outward before you start digging blind.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"That's what I needed.","action":{"action":"dialogue.close"}},{"reply":"I'll look around.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Trouble at the Waterline",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Something hostile keeps prowling the waterline after dark. Three of them cleared out would make the bank usable again.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I'll clear the waterline.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"accept\"})"},{"action":"dialogue.close"}]},{"reply":"Not right now.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

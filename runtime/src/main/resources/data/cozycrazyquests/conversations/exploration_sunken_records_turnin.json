@@ -1,0 +1,7 @@
+{
+  "title": "What the River Kept",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"So it really is an old site. That's worth more than another season of stories about stones under the nets. Keep this line; you've earned it.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I'll take it.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},{"action":"dialogue.close"}]}]}]}
+  ]
+}

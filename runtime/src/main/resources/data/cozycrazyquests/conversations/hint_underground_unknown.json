@@ -1,0 +1,7 @@
+{
+  "title": "Local Rumor",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"I've heard the name, but I couldn't tell you where the way in is. I wouldn't start digging just because the bearing puts you over it.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Who might know better?","action":{"action":"dialogue.close"}},{"reply":"All right.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

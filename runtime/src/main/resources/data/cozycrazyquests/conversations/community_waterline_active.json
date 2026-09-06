@@ -1,0 +1,7 @@
+{
+  "title": "Trouble at the Waterline",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Keep to the waterline. I'm worried about what is prowling that bank, not whatever happens to cross your road elsewhere.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Understood.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

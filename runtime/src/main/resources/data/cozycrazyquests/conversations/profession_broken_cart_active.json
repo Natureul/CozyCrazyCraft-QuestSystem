@@ -1,0 +1,7 @@
+{
+  "title": "The Cart That Didn't Return",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Stay near the trail the contract points to. Whatever happened to that cart happened there, not on the first monster you meet outside town.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Got it.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

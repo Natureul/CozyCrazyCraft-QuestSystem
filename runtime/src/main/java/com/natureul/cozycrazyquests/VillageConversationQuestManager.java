@@ -7,12 +7,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -25,22 +27,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Authored villager quest lifecycle and executable Zone 1 social lattice.
+ * Authored village-owned quest lifecycle.
  *
- * Bountiful remains the public repeatable/civic layer. These contracts are village-owned,
- * semantically categorized, recoverable through compatible professions, and grounded in real local
- * geography. Structure-bound work resolves an actual generated structure before it is offered and
- * freezes that exact place into quest state.
+ * One authored contract may be active per village, while contracts from different villages coexist.
+ * This keeps a village coherent without making the rest of the world go silent when the player
+ * travels. Structure work is grounded in a generated place before it is spoken about, and contract
+ * papers carry enough approach information to make underground targets fair without turning the
+ * Atlas into a quest tracker.
  */
 public final class VillageConversationQuestManager {
-    private static final String ROOT = "CozyCrazyVillagerQuests";
-    private static final String PENDING = "pending";
-    private static final String ACTIVE = "active";
-    private static final String COMPLETED = "completed";
-
     private static final long PENDING_LIFETIME = 2400L;
     private static final long TARGET_CACHE_LIFETIME = 6000L;
     private static final int VILLAGE_RETURN_RADIUS = 160;
+    private static final int UNDERGROUND_SURVEY_RADIUS = 96;
+    private static final int UNDERGROUND_VERTICAL_TOLERANCE = 56;
 
     private static final Map<String, CachedTarget> TARGET_CACHE = new HashMap<>();
 
@@ -58,8 +58,9 @@ public final class VillageConversationQuestManager {
             return;
         }
 
-        CompoundTag root = root(player);
-        CompoundTag active = root.getCompound(ACTIVE);
+        CompoundTag root = VillageQuestState.root(player);
+        VillageQuestState.noteConversation(root, village.key(), villager.getUUID().toString());
+        CompoundTag active = VillageQuestState.activeForVillage(root, village.key());
         if (!active.isEmpty()) {
             VillageQuestCatalog.Definition activeDefinition = VillageQuestCatalog.byId(active.getString("quest_id"));
             if (activeDefinition != null
@@ -70,22 +71,24 @@ public final class VillageConversationQuestManager {
                         objectiveComplete(active) ? activeDefinition.turninDialogue() : activeDefinition.activeDialogue()
                 );
             } else {
+                // The social layer runs after us and may attach a rumor/lead dialogue to this villager.
                 ConversationBridge.clearOwnDialogue(villager);
             }
+            VillageQuestState.save(player, root);
             return;
         }
 
         VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, village.key());
         Offer offer = selectOffer(level, player, villager, village, progress, root);
         if (offer == null) {
-            root.remove(PENDING);
-            saveRoot(player, root);
+            root.remove(VillageQuestState.PENDING);
+            VillageQuestState.save(player, root);
             ConversationBridge.clearOwnDialogue(villager);
             return;
         }
 
         writePending(root, level, player, villager, village, offer.definition(), offer.target());
-        saveRoot(player, root);
+        VillageQuestState.save(player, root);
         ConversationBridge.setDialogue(villager, offer.definition().offerDialogue());
 
         PreparedTarget target = offer.target();
@@ -103,39 +106,47 @@ public final class VillageConversationQuestManager {
         if (!(player.level() instanceof ServerLevel level)) return;
         if (player.tickCount % 20 != 0) return;
 
-        CompoundTag root = root(player);
-        CompoundTag active = root.getCompound(ACTIVE);
-        if (active.isEmpty() || objectiveComplete(active)) return;
+        CompoundTag root = VillageQuestState.root(player);
+        boolean changed = false;
+        for (CompoundTag active : VillageQuestState.allActives(root)) {
+            if (objectiveComplete(active)) continue;
 
-        VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-        if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) return;
-        if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) return;
+            VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
+            if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) continue;
+            if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
-        BlockPos target = readPos(active, "target");
-        int radius = active.getInt("target_radius");
-        long dx = (long) player.blockPosition().getX() - target.getX();
-        long dz = (long) player.blockPosition().getZ() - target.getZ();
-        if (dx * dx + dz * dz > (long) radius * radius) return;
+            BlockPos target = readPos(active, "target");
+            int radius = active.getInt("target_radius");
+            String approach = active.getString("target_approach");
+            if ("UNDERGROUND".equals(approach)) radius = Math.max(radius, UNDERGROUND_SURVEY_RADIUS);
 
-        active.putBoolean("objective_complete", true);
-        active.putBoolean("surveyed", true);
-        root.put(ACTIVE, active);
-        saveRoot(player, root);
+            long dx = (long) player.blockPosition().getX() - target.getX();
+            long dz = (long) player.blockPosition().getZ() - target.getZ();
+            if (dx * dx + dz * dz > (long) radius * radius) continue;
+            if ("UNDERGROUND".equals(approach)
+                    && Math.abs(player.blockPosition().getY() - target.getY()) > UNDERGROUND_VERTICAL_TOLERANCE) continue;
 
-        String targetKey = active.getString("target_key");
-        if (targetKey.isBlank()) targetKey = legacyTargetSubjectKey(level, active, target);
-        PlayerKnowledgeState.advance(
-                player,
-                targetKey,
-                PlayerKnowledgeState.Knowledge.CONFIRMED,
-                PlayerKnowledgeState.Provenance.QUEST_PROOF
-        );
+            active.putBoolean("objective_complete", true);
+            active.putBoolean("surveyed", true);
+            VillageQuestState.putActive(root, active.getString("village_key"), active);
+            changed = true;
 
-        player.sendSystemMessage(
-                Component.literal("Survey complete: " + active.getString("target_name") + ". "
-                                + returnInstruction(definition, active.getString("village_name")))
-                        .withStyle(ChatFormatting.AQUA)
-        );
+            String targetKey = active.getString("target_key");
+            if (targetKey.isBlank()) targetKey = legacyTargetSubjectKey(level, active, target);
+            PlayerKnowledgeState.advance(
+                    player,
+                    targetKey,
+                    PlayerKnowledgeState.Knowledge.CONFIRMED,
+                    PlayerKnowledgeState.Provenance.QUEST_PROOF
+            );
+
+            player.sendSystemMessage(
+                    Component.literal("Survey complete: " + active.getString("target_name") + ". "
+                                    + returnInstruction(definition, active.getString("village_name")))
+                            .withStyle(ChatFormatting.AQUA)
+            );
+        }
+        if (changed) VillageQuestState.save(player, root);
     }
 
     public static void onLivingDeath(LivingDeathEvent event) {
@@ -143,51 +154,57 @@ public final class VillageConversationQuestManager {
         if (!(player.level() instanceof ServerLevel level)) return;
         if (event.getEntity().getType().getCategory() != MobCategory.MONSTER) return;
 
-        CompoundTag root = root(player);
-        CompoundTag active = root.getCompound(ACTIVE);
-        if (active.isEmpty() || objectiveComplete(active)) return;
+        CompoundTag root = VillageQuestState.root(player);
+        boolean changed = false;
+        for (CompoundTag active : VillageQuestState.allActives(root)) {
+            if (objectiveComplete(active)) continue;
 
-        VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-        if (definition == null) return;
-        if (definition.objectiveType() != VillageQuestCatalog.ObjectiveType.LOCAL_HOSTILE_CLEAR
-                && definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR) return;
-        if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) return;
+            VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
+            if (definition == null) continue;
+            if (definition.objectiveType() != VillageQuestCatalog.ObjectiveType.LOCAL_HOSTILE_CLEAR
+                    && definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR) continue;
+            if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
-        BlockPos target = readPos(active, "target");
-        int radius = active.getInt("target_radius");
-        long dx = (long) event.getEntity().blockPosition().getX() - target.getX();
-        long dz = (long) event.getEntity().blockPosition().getZ() - target.getZ();
-        if (dx * dx + dz * dz > (long) radius * radius) return;
+            BlockPos target = readPos(active, "target");
+            int radius = active.getInt("target_radius");
+            long dx = (long) event.getEntity().blockPosition().getX() - target.getX();
+            long dz = (long) event.getEntity().blockPosition().getZ() - target.getZ();
+            if (dx * dx + dz * dz > (long) radius * radius) continue;
 
-        int required = Math.max(1, active.getInt("required_kills"));
-        int count = Math.min(required, active.getInt("kill_count") + 1);
-        active.putInt("kill_count", count);
-        if (count >= required) active.putBoolean("objective_complete", true);
-        root.put(ACTIVE, active);
-        saveRoot(player, root);
+            int required = Math.max(1, active.getInt("required_kills"));
+            int count = Math.min(required, active.getInt("kill_count") + 1);
+            active.putInt("kill_count", count);
+            if (count >= required) active.putBoolean("objective_complete", true);
+            VillageQuestState.putActive(root, active.getString("village_key"), active);
+            changed = true;
 
-        if (count >= required) {
-            String cleared = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR
-                    ? active.getString("target_name") + " is clear enough to report back"
-                    : "the area is clear";
-            player.sendSystemMessage(
-                    Component.literal(definition.title() + ": " + cleared + ". "
-                                    + returnInstruction(definition, active.getString("village_name")))
-                            .withStyle(ChatFormatting.AQUA)
-            );
-        } else {
-            player.displayClientMessage(
-                    Component.literal(definition.title() + "  •  " + count + "/" + required + " hostiles cleared")
-                            .withStyle(ChatFormatting.GOLD),
-                    true
-            );
+            if (count >= required) {
+                String cleared = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR
+                        ? active.getString("target_name") + " is clear enough to report back"
+                        : "the area is clear";
+                player.sendSystemMessage(
+                        Component.literal(definition.title() + ": " + cleared + ". "
+                                        + returnInstruction(definition, active.getString("village_name")))
+                                .withStyle(ChatFormatting.AQUA)
+                );
+            } else {
+                player.displayClientMessage(
+                        Component.literal(definition.title() + "  •  " + count + "/" + required + " hostiles cleared")
+                                .withStyle(ChatFormatting.GOLD),
+                        true
+                );
+            }
         }
+        if (changed) VillageQuestState.save(player, root);
     }
 
     public static void onPlayerClone(PlayerEvent.Clone event) {
         CompoundTag oldData = event.getOriginal().getPersistentData();
-        if (!oldData.contains(ROOT)) return;
-        event.getEntity().getPersistentData().put(ROOT, oldData.getCompound(ROOT).copy());
+        if (!oldData.contains(VillageQuestState.ROOT)) return;
+        event.getEntity().getPersistentData().put(
+                VillageQuestState.ROOT,
+                oldData.getCompound(VillageQuestState.ROOT).copy()
+        );
     }
 
     static void consumeConversationAction(ServerPlayer player, String action) {
@@ -196,6 +213,70 @@ public final class VillageConversationQuestManager {
         } else if ("turnin".equals(action)) {
             turnInActive(player);
         }
+    }
+
+    /** Contextual social dialogue for a non-giver while a contract from this village is active. */
+    static ResourceLocation socialHintDialogue(ServerPlayer player, LivingEntity speaker, VillageContext village) {
+        CompoundTag root = VillageQuestState.root(player);
+        CompoundTag active = VillageQuestState.activeForVillage(root, village.key());
+        if (active.isEmpty() || objectiveComplete(active)) return null;
+        if (active.getString("target_structure").isBlank()) return null;
+
+        VillageQuestState.noteConversation(root, village.key(), speaker.getUUID().toString());
+        VillageQuestState.save(player, root);
+
+        if (speaker instanceof Villager villager
+                && villager.getVillagerData().getProfession() == VillagerProfession.CARTOGRAPHER) {
+            return VillageQuestCatalog.id("hint_cartographer_target");
+        }
+
+        String approach = active.getString("target_approach");
+        if (!"UNDERGROUND".equals(approach) && !"SUBMERGED".equals(approach)) return null;
+
+        String speakerId = speaker.getUUID().toString();
+        String questId = active.getString("quest_id");
+        if (VillageQuestState.hintPaid(root, speakerId, questId)) {
+            return VillageQuestCatalog.id("hint_underground_lead");
+        }
+
+        int roll = Math.floorMod(speaker.getUUID().hashCode() * 31 + questId.hashCode(), 100);
+        if (roll < 20) return VillageQuestCatalog.id("hint_underground_unknown");
+        if (roll < 55) return VillageQuestCatalog.id("hint_underground_rumor");
+        if (roll < 90) return VillageQuestCatalog.id("hint_underground_lead");
+        return VillageQuestCatalog.id("hint_underground_reluctant");
+    }
+
+    static boolean buyCurrentHint(ServerPlayer player) {
+        CompoundTag root = VillageQuestState.root(player);
+        String villageKey = VillageQuestState.conversationVillage(root);
+        String speaker = VillageQuestState.conversationSpeaker(root);
+        CompoundTag active = VillageQuestState.activeForVillage(root, villageKey);
+        if (active.isEmpty() || speaker.isBlank()) return false;
+
+        if (!takeOneEmerald(player)) {
+            player.displayClientMessage(Component.literal("You don't have an emerald to offer.")
+                    .withStyle(ChatFormatting.GRAY), true);
+            return true;
+        }
+
+        VillageQuestState.markHintPaid(root, speaker, active.getString("quest_id"));
+        VillageQuestState.save(player, root);
+        return true;
+    }
+
+    static boolean markCurrentTargetOnAtlas(ServerPlayer player) {
+        CompoundTag root = VillageQuestState.root(player);
+        CompoundTag active = VillageQuestState.activeForVillage(root, VillageQuestState.conversationVillage(root));
+        if (active.isEmpty()) return false;
+        ResourceLocation targetId = ResourceLocation.tryParse(active.getString("target_structure"));
+        if (targetId == null) return false;
+        NamedPlaceBridge.revealStructureToAtlas(
+                player,
+                targetId,
+                readPos(active, "target"),
+                active.getString("target_name")
+        );
+        return true;
     }
 
     private static Offer selectOffer(
@@ -210,8 +291,6 @@ public final class VillageConversationQuestManager {
             if (!definition.issuingTier().equals(village.cell().tier())) continue;
 
             if (definition.zoneOneCapstone()) {
-                // Capstone is an authored ratchet, never an ordinary early roll. Breadth first:
-                // COMMUNITY + EXPLORATION + PROFESSION/DANGER, then the serious local problem.
                 if (!progress.capstoneEligible() || progress.capstoneComplete()) continue;
             } else if (definition.accomplishmentCategory() != null
                     && progress.categories().contains(definition.accomplishmentCategory())) {
@@ -219,7 +298,6 @@ public final class VillageConversationQuestManager {
             }
 
             if (isCompleted(root, definition, level, village)) continue;
-
             PreparedTarget target = prepareTarget(level, player, village, definition);
             if (target != null) return new Offer(definition, target);
         }
@@ -254,13 +332,16 @@ public final class VillageConversationQuestManager {
                     PlayerKnowledgeState.Provenance.MAP_RECORD
             );
 
+            ApproachInfo approach = approachInfo(level, resolved.pos());
             return new PreparedTarget(
                     resolved.pos(),
                     resolved.distanceBlocks(),
                     targetName,
                     resolved.id(),
                     targetKey,
-                    fact.factId()
+                    fact.factId(),
+                    approach.kind(),
+                    approach.depthBlocks()
             );
         }
 
@@ -278,23 +359,27 @@ public final class VillageConversationQuestManager {
                 local.label(),
                 level.getGameTime()
         );
-        return new PreparedTarget(local.pos(), local.distanceBlocks(), local.label(), null, "", fact.factId());
+        return new PreparedTarget(
+                local.pos(), local.distanceBlocks(), local.label(), null, "", fact.factId(), "SURFACE", 0
+        );
     }
 
     private static void acceptPending(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) return;
-        CompoundTag root = root(player);
-        if (!root.getCompound(ACTIVE).isEmpty()) return;
-
-        CompoundTag pending = root.getCompound(PENDING);
+        CompoundTag root = VillageQuestState.root(player);
+        CompoundTag pending = root.getCompound(VillageQuestState.PENDING);
         if (pending.isEmpty() || !sameDimension(level, pending)) return;
+
+        String villageKey = pending.getString("village_key");
+        if (!VillageQuestState.activeForVillage(root, villageKey).isEmpty()) return;
+
         VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(pending.getString("quest_id"));
         if (definition == null) return;
 
         long age = level.getGameTime() - pending.getLong("created_game_time");
         if (age < 0 || age > PENDING_LIFETIME) {
-            root.remove(PENDING);
-            saveRoot(player, root);
+            root.remove(VillageQuestState.PENDING);
+            VillageQuestState.save(player, root);
             player.sendSystemMessage(Component.literal("That local lead has gone stale. Speak to the villager again.")
                     .withStyle(ChatFormatting.GRAY));
             return;
@@ -305,16 +390,18 @@ public final class VillageConversationQuestManager {
         active.putBoolean("objective_complete", false);
         active.putBoolean("surveyed", false);
         active.putInt("kill_count", 0);
-        root.put(ACTIVE, active);
-        root.remove(PENDING);
-        saveRoot(player, root);
+        VillageQuestState.putActive(root, villageKey, active);
+        root.remove(VillageQuestState.PENDING);
+        VillageQuestState.save(player, root);
 
         ItemStack contract = new ItemStack(ModItems.VILLAGE_CONTRACT.get());
         contract.setHoverName(Component.literal(definition.title()).withStyle(ChatFormatting.GOLD));
         contract.getOrCreateTag().putString(VillageContractItem.QUEST_ID, definition.id());
+        contract.getOrCreateTag().putString(VillageContractItem.VILLAGE_KEY, villageKey);
         contract.getOrCreateTag().putString(VillageContractItem.TARGET_NAME, active.getString("target_name"));
         contract.getOrCreateTag().putInt(VillageContractItem.TARGET_DISTANCE, active.getInt("target_distance"));
         contract.getOrCreateTag().putString(VillageContractItem.TARGET_DIRECTION, active.getString("target_direction"));
+        contract.getOrCreateTag().putString(VillageContractItem.TARGET_APPROACH, active.getString("target_approach"));
         contract.getOrCreateTag().putString(VillageContractItem.ISSUING_VILLAGE, active.getString("village_name"));
         if (!player.addItem(contract)) player.drop(contract, false);
 
@@ -355,8 +442,14 @@ public final class VillageConversationQuestManager {
 
     private static void turnInActive(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) return;
-        CompoundTag root = root(player);
-        CompoundTag active = root.getCompound(ACTIVE);
+        CompoundTag root = VillageQuestState.root(player);
+        String selectedVillage = VillageQuestState.conversationVillage(root);
+        if (selectedVillage.isBlank()) {
+            VillageContext context = VillageContext.resolve(level, player.blockPosition());
+            if (context != null) selectedVillage = context.key();
+        }
+
+        CompoundTag active = VillageQuestState.activeForVillage(root, selectedVillage);
         if (active.isEmpty() || !objectiveComplete(active) || !sameDimension(level, active)) return;
 
         VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
@@ -414,10 +507,10 @@ public final class VillageConversationQuestManager {
         }
 
         markCompleted(root, definition, level, villageKey, active);
-        root.remove(ACTIVE);
-        root.remove(PENDING);
-        saveRoot(player, root);
-        removeContract(player, definition.id());
+        VillageQuestState.removeActive(root, villageKey);
+        root.remove(VillageQuestState.PENDING);
+        VillageQuestState.save(player, root);
+        removeContract(player, definition.id(), villageKey);
 
         String villageName = active.getString("village_name");
         String records = villageName.isBlank() || "the village".equals(villageName)
@@ -467,10 +560,12 @@ public final class VillageConversationQuestManager {
         pending.putString("target_name", target.displayName());
         pending.putInt("target_distance", target.distanceBlocks());
         pending.putString("target_direction", direction(village.anchor(), target.pos()));
+        pending.putString("target_approach", target.approach());
+        pending.putInt("target_depth", target.depthBlocks());
         pending.putLong("created_game_time", level.getGameTime());
         pending.putInt("trust_when_offered", village.legacyBoardTrust(level));
         pending.putString("semantic_trust_when_offered", VillageProgressState.snapshot(player, village.key()).trust().name());
-        root.put(PENDING, pending);
+        root.put(VillageQuestState.PENDING, pending);
     }
 
     private static NearbyStructureResolver.ResolvedStructure resolveStructureTarget(
@@ -526,7 +621,7 @@ public final class VillageConversationQuestManager {
             ServerLevel level,
             VillageContext village
     ) {
-        CompoundTag completed = root.getCompound(COMPLETED);
+        CompoundTag completed = root.getCompound(VillageQuestState.COMPLETED);
         if (completed.getBoolean(completionKey(definition.id(), village.key()))) return true;
         return village.hasBoard() && completed.getBoolean(legacyCompletionKey(definition.id(), level, village.boardPos()));
     }
@@ -538,10 +633,10 @@ public final class VillageConversationQuestManager {
             String villageKey,
             CompoundTag active
     ) {
-        CompoundTag completed = root.getCompound(COMPLETED);
+        CompoundTag completed = root.getCompound(VillageQuestState.COMPLETED);
         completed.putBoolean(completionKey(definition.id(), villageKey), true);
         if (active.contains("boardX")) completed.putBoolean(legacyCompletionKey(definition.id(), level, readPos(active, "board")), true);
-        root.put(COMPLETED, completed);
+        root.put(VillageQuestState.COMPLETED, completed);
     }
 
     private static String completionKey(String questId, String villageKey) {
@@ -582,16 +677,6 @@ public final class VillageConversationQuestManager {
         return level.dimension().location().toString().equals(expected);
     }
 
-    private static CompoundTag root(ServerPlayer player) {
-        CompoundTag persistent = player.getPersistentData();
-        if (!persistent.contains(ROOT)) persistent.put(ROOT, new CompoundTag());
-        return persistent.getCompound(ROOT);
-    }
-
-    private static void saveRoot(ServerPlayer player, CompoundTag root) {
-        player.getPersistentData().put(ROOT, root);
-    }
-
     private static void putPos(CompoundTag tag, String prefix, BlockPos pos) {
         tag.putInt(prefix + "X", pos.getX());
         tag.putInt(prefix + "Y", pos.getY());
@@ -602,12 +687,25 @@ public final class VillageConversationQuestManager {
         return new BlockPos(tag.getInt(prefix + "X"), tag.getInt(prefix + "Y"), tag.getInt(prefix + "Z"));
     }
 
+    private static ApproachInfo approachInfo(ServerLevel level, BlockPos target) {
+        int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE, target.getX(), target.getZ());
+        int depth = Math.max(0, surfaceY - target.getY());
+        BlockPos surfaceBlock = new BlockPos(target.getX(), Math.max(level.getMinBuildHeight(), surfaceY - 1), target.getZ());
+        if (!level.getFluidState(surfaceBlock).isEmpty() && depth >= 5) return new ApproachInfo("SUBMERGED", depth);
+        if (depth >= 12) return new ApproachInfo("UNDERGROUND", depth);
+        return new ApproachInfo("SURFACE", depth);
+    }
+
     private static void giveRewardStack(ServerPlayer player, VillageQuestCatalog.RewardStack reward) {
         Item item = ForgeRegistries.ITEMS.getValue(reward.itemId());
         if (item == null || item == Items.AIR || reward.count() <= 0) return;
         ItemStack stack = new ItemStack(item, reward.count());
         if (reward.customName() != null && !reward.customName().isBlank()) {
             stack.setHoverName(Component.literal(reward.customName()).withStyle(ChatFormatting.GOLD));
+        }
+        for (VillageQuestCatalog.RewardEnchant spec : reward.enchants()) {
+            var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(spec.enchantId());
+            if (enchantment != null && spec.level() > 0) stack.enchant(enchantment, spec.level());
         }
         giveOrDrop(player, stack);
     }
@@ -616,11 +714,23 @@ public final class VillageConversationQuestManager {
         if (!player.addItem(stack)) player.drop(stack, false);
     }
 
-    private static void removeContract(ServerPlayer player, String questId) {
+    private static boolean takeOneEmerald(ServerPlayer player) {
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            if (!stack.is(Items.EMERALD) || stack.isEmpty()) continue;
+            stack.shrink(1);
+            return true;
+        }
+        return false;
+    }
+
+    private static void removeContract(ServerPlayer player, String questId, String villageKey) {
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             if (!stack.is(ModItems.VILLAGE_CONTRACT.get()) || !stack.hasTag()) continue;
             if (!questId.equals(stack.getTag().getString(VillageContractItem.QUEST_ID))) continue;
+            String storedVillage = stack.getTag().getString(VillageContractItem.VILLAGE_KEY);
+            if (!storedVillage.isBlank() && !storedVillage.equals(villageKey)) continue;
             stack.shrink(1);
             return;
         }
@@ -680,13 +790,16 @@ public final class VillageConversationQuestManager {
     }
 
     private record CachedTarget(NearbyStructureResolver.ResolvedStructure target, long checkedAt) {}
+    private record ApproachInfo(String kind, int depthBlocks) {}
     private record PreparedTarget(
             BlockPos pos,
             int distanceBlocks,
             String displayName,
             ResourceLocation structureId,
             String targetKey,
-            String factId
+            String factId,
+            String approach,
+            int depthBlocks
     ) {}
     private record Offer(VillageQuestCatalog.Definition definition, PreparedTarget target) {}
 }
