@@ -1,6 +1,7 @@
 package com.natureul.cozycrazyquests.mixin;
 
 import com.natureul.cozycrazyquests.BountifulBridge;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,13 +32,14 @@ public abstract class BountyCreatorMixin {
         cir.setReturnValue(filtered);
     }
 
+    @Inject(method = "getStack", at = @At("RETURN"), remap = false, require = 0)
+    private void cozycrazyquests$stampIssuingBoard(CallbackInfoReturnable<ItemStack> cir) {
+        BountifulBridge.stampCreatorSource(this, cir.getReturnValue());
+    }
+
     /**
      * Bountiful 6.0.4 randomly creates one OR two unrelated objectives for a bounty.
-     * That is fine for generic Bountiful, but it produced nonsense such as
-     * "Wool for the Loom" + a skeleton hunt on the same notice. CozyCrazyCraft
-     * uses one coherent objective per ordinary notice. Authored multi-step
-     * contracts are created deliberately by our quest layer instead of by this
-     * random split.
+     * CozyCrazyCraft uses one coherent objective per ordinary notice.
      */
     @ModifyConstant(method = "genObjectives", constant = @Constant(intValue = 2), remap = false, require = 0)
     private int cozycrazyquests$ordinaryNoticesUseOneObjective(int original) {
