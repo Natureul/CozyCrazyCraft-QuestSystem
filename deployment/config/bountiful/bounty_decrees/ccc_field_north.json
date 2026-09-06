@@ -1,0 +1,9 @@
+{
+  "objectives": [
+    "ccc_field_north_objs"
+  ],
+  "rewards": [
+    "ccc_regional_field_rews"
+  ],
+  "name": "Frostmarch Field Jobs"
+}
