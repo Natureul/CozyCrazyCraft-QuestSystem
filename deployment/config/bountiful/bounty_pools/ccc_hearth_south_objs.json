@@ -1,0 +1,9 @@
+{
+  "content": {
+    "ccc_south_h1_dry_country": {"type":"item","content":"minecraft:leather","amount":{"min":6,"max":10},"unitWorth":300,"name":"Dry Country","icon":"minecraft:leather"},
+    "ccc_south_h1_flowers_savanna": {"type":"item","content":"minecraft:acacia_sapling","amount":{"min":4,"max":8},"unitWorth":450,"name":"Flowers of the Savanna","icon":"minecraft:acacia_sapling","rarity":"UNCOMMON"},
+    "ccc_south_h1_dry_road": {"type":"entity","content":"minecraft:husk","amount":{"min":3,"max":6},"unitWorth":700,"name":"Dead on the Dry Road","icon":"minecraft:iron_sword"},
+    "ccc_south_h1_caravan_rations": {"type":"item","content":"minecraft:bread","amount":{"min":10,"max":18},"unitWorth":220,"name":"Caravan Rations","icon":"minecraft:bread"},
+    "ccc_south_h1_cactus_packers": {"type":"item","content":"minecraft:cactus","amount":{"min":12,"max":24},"unitWorth":220,"name":"Cactus for the Packers","icon":"minecraft:cactus"}
+  }
+}
