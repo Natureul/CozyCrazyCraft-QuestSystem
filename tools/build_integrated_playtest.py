@@ -20,26 +20,35 @@ RUNTIME_LIBS = ROOT / "runtime" / "build" / "libs"
 BUILD = ROOT / "build"
 OUTPUT = BUILD / "CozyCrazyCraft-QuestSystem-INTEGRATED_PLAYTEST_ROOT_OVERLAY.zip"
 
-README = """CozyCrazyCraft Quest System — INTEGRATED PLAYTEST
+README = """CozyCrazyCraft Quest System — 0.2.1 INTEGRATED PLAYTEST
 
 Target: Minecraft Forge 1.20.1
 Requires your normal installed pack, including:
 - Bountiful 6.0.4
-- CozyCrazyZones (0.3.6+ API; use your newest test build)
+- CozyCrazyZones (use your newest test build)
 - Dungeons Enhanced 5.4.3
 - Domestication Innovation if you normally use it
 
-What this build is intended to test:
-1. Boardless inhabited villages gain a civic Bountiful board near their meeting point.
-2. Existing Bountiful boards prevent duplicate repair boards.
-3. New/pristine Hearthlands boards receive the decree matching their CozyCrazyZones region.
-4. Boards settle around 5–7 visible notices instead of filling the 21-slot capacity.
-5. Bounties no longer expire after acceptance.
-6. The Bountiful reputation label reads Village Trust.
-7. Objective repRequired is honored by the runtime, allowing trusted-only work.
-8. Domestication Innovation pet-shop village pieces are suppressed for newly generated villages.
-9. Trusted regional boards can issue structure Recovery Contracts.
-10. Fresh target structures contain custom glowing proof items which Bountiful consumes on turn-in.
+IMPORTANT WHEN UPGRADING
+- Remove any older mods/CozyCrazyQuests-*.jar before copying this overlay.
+- Keep your normal Bountiful, Dungeons Enhanced, CozyCrazyZones, and other pack jars.
+- This ZIP replaces the quest-system Bountiful config and installs one CozyCrazyQuests runtime jar.
+
+What 0.2.1 is intended to test:
+1. Boardless inhabited villages gain one civic Bountiful board near their meeting point.
+2. Existing Bountiful boards prevent duplicate repair boards and processed settlements persist across reloads.
+3. Auto-placed boards prefer outdoor ground beside village paths and near the meeting-point elevation instead of roof-like heightmap placements.
+4. While inside a village, a known board more than 12 blocks away gets a throttled actionbar direction/distance hint.
+5. Hearthlands boards receive the decree matching their CozyCrazyZones region.
+6. Boards settle around 5–7 underlying notices instead of filling the 21-slot capacity.
+7. Taken notices return only to the exact board that issued them.
+8. Board-hover story text begins with the same authored quest title used by the accepted paper instead of a raw target name such as Skeleton.
+9. Ordinary radiant rewards use clean emerald village payment; generic bread/cooked-beef reward rolls are removed.
+10. The board gradually rotates one slot about every 120 seconds rather than every 300 seconds.
+11. Bounties do not expire after acceptance and Bountiful still grants its small built-in completion XP.
+12. The Bountiful reputation label reads Village Trust and objective repRequired is honored.
+13. Trusted regional boards can issue the current prototype structure Recovery Contracts.
+14. Fresh target structures contain custom glowing proof items which Bountiful consumes on turn-in.
 
 Recovery Contract targets in this build:
 - Harvestwood / Trust 2: Dungeons Enhanced Stables -> Stablemaster's Seal
@@ -47,24 +56,25 @@ Recovery Contract targets in this build:
 - Greenveil / Trust 3: Dungeons Enhanced Jungle Monument treasure -> Greenveil Survey Notes
 - Frostmarch / Trust 3: Dungeons Enhanced Ice Pit armory -> Frostmarch Dispatch
 
-Important limitations of this V1:
+Important current limitations:
+- Recovery Contracts are still weighted Bountiful entries. Reaching the required Trust only makes them eligible for newly generated notices; old notices do not transform, and the contract is not yet guaranteed to occupy a featured slot. That progression layer is the next redesign.
+- Recovery jobs currently name a structure type rather than binding to one exact generated structure instance.
+- Cartographer/useful-target map binding is still a separate layer.
 - Already-generated pet shops are not removed from existing chunks.
 - Frontier/Wildlands/Dread dedicated Bountiful decrees are still being materialized; those cells currently fail safely to Local Notices.
-- Rich story-card UI is not yet implemented.
-- Recovery jobs currently name a structure type rather than binding to one exact structure instance.
-- Cartographer/useful-target map binding is still a separate layer.
-- Stock Bountiful still allows a completed contract to be redeemed at a different board; same-issuing-board return remains planned.
-- This archive is CI/build validated, but Minecraft behavior still needs your in-game smoke test.
+- This archive is CI/build validated, but the new placement/locator behavior still needs an in-game smoke test.
 
-Suggested board test:
-- Use NEW village chunks for pet-shop suppression testing.
-- Visit a village with no stock Bountiful gazebo and wait nearby for up to ~15 seconds.
-- Open the civic board and confirm 5–7 postings.
-- In Hearthlands, inspect the decree and compare it with /cozyzone debug or the zone overlay.
-- Take a bounty and confirm its paper no longer shows/counts down an expiration timer.
-- Complete several bounties at one board and watch Village Trust rise.
+Suggested 0.2.1 board test:
+- Use a village whose board you previously had trouble finding. If its saved board still exists, walk around the village and confirm the actionbar gives a direction/distance hint while you are more than 12 blocks away.
+- For placement testing, use NEW village chunks or a fresh world so a boardless village receives a new 0.2.1 placement.
+- Open a posting and confirm the left-side board hover starts with the authored title, then take it and confirm the paper uses the same title.
+- Confirm routine notice rewards no longer show bread or cooked beef.
+- Take all visible notices; after roughly two minutes, confirm a changed slot can surface fresh work rather than waiting five minutes.
+- Complete a bounty from Village A, try Village B (should reject), then return to Village A (should redeem).
 
 Suggested Recovery Contract test:
+- West/South become eligible at Village Trust 2; East/North at Village Trust 3.
+- Eligibility applies only to newly generated notices after the threshold is reached.
 - Use a fresh target structure whose loot chest has never been opened.
 - Helpful commands:
   /locate structure dungeons_enhanced:stables
@@ -73,9 +83,7 @@ Suggested Recovery Contract test:
   /locate structure dungeons_enhanced:ice_pit
 - Open the relevant chest and confirm the named glowing proof item exists.
 - Return with the accepted bounty and proof item; the proof should be consumed on successful redemption.
-- For a no-travel turn-in smoke test you can /give the proof item by its cozycrazyquests ID.
 
-Do not delete your normal Bountiful, Dungeons Enhanced, or CozyCrazyZones jars. This ZIP adds CozyCrazyQuests and replaces the quest-system Bountiful config only.
 """
 
 
