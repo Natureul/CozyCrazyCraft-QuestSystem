@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "geography_contract": "CozyCrazyZones-0.3.6",
+  "distance_metric": "horizontal_euclidean_blocks",
+  "principle": "A quest with a world target is generated only when a sensible real target exists. Never fall back to an arbitrarily distant structure just to fill a board slot.",
+  "hard_rules": {
+    "same_dimension": true,
+    "require_cozy_zones_structure_allowed": true,
+    "respect_target_radial_tier": true,
+    "respect_target_macro_region_when_regional": true,
+    "local_jobs_may_not_jump_radial_tier": true,
+    "outward_leads_max_tier_jump": 1,
+    "outward_leads_require_positive_radial_gain": true,
+    "outward_leads_min_radial_gain_blocks": 350,
+    "no_candidate_means_no_posting": true,
+    "do_not_reuse_active_assignment": true,
+    "do_not_use_wrong_region_as_fallback": true
+  },
+  "candidate_search": {
+    "max_candidate_instances": 12,
+    "positive_cache_ticks": 24000,
+    "negative_cache_ticks": 6000,
+    "recent_target_history_per_player": 8,
+    "comment": "Structure location can be expensive. Cache per settlement/board + target family + policy cell; do not run a broad locate every board refresh."
+  },
+  "scopes": {
+    "LOCAL_SITE": {
+      "description": "Ordinary board recovery/investigation site. Should feel like a trip outside town, not an expedition across the map.",
+      "HEARTHLANDS": {"min": 250, "ideal": 750, "soft_max": 1200, "hard_max": 1800},
+      "FRONTIER": {"min": 350, "ideal": 950, "soft_max": 1500, "hard_max": 2200},
+      "WILDLANDS": {"min": 450, "ideal": 1200, "soft_max": 1900, "hard_max": 2800},
+      "DREAD_REACHES": {"min": 550, "ideal": 1500, "soft_max": 2400, "hard_max": 3400}
+    },
+    "REGIONAL_EXPEDITION": {
+      "description": "Named dungeon, Great Hunt, substantial recovery, or serious regional expedition in the board's current radial tier.",
+      "HEARTHLANDS": {"min": 600, "ideal": 1200, "soft_max": 1750, "hard_max": 2300},
+      "FRONTIER": {"min": 700, "ideal": 1500, "soft_max": 2200, "hard_max": 3000},
+      "WILDLANDS": {"min": 850, "ideal": 1900, "soft_max": 2800, "hard_max": 3800},
+      "DREAD_REACHES": {"min": 1000, "ideal": 2300, "soft_max": 3400, "hard_max": 4600}
+    },
+    "OUTWARD_LEAD": {
+      "description": "A deliberate one-tier-outward clue. Rare; never presented as a local errand.",
+      "HEARTHLANDS": {"min": 900, "ideal": 1700, "soft_max": 2300, "hard_max": 3000},
+      "FRONTIER": {"min": 1100, "ideal": 2100, "soft_max": 2900, "hard_max": 3700},
+      "WILDLANDS": {"min": 1300, "ideal": 2600, "soft_max": 3600, "hard_max": 4600}
+    },
+    "LEGENDARY_DESTINATION": {
+      "description": "Explicit story/finale knowledge only. Not eligible for random repeatable board generation.",
+      "DREAD_REACHES": {"min": 1200, "ideal": 2800, "soft_max": 4200, "hard_max": 5600}
+    }
+  },
+  "selection_order": [
+    "enumerate candidate instances inside the scope hard maximum",
+    "reject candidates that CozyCrazyZones says are illegal at their actual position",
+    "reject candidates outside the quest's allowed radial tier and macro-region",
+    "reject candidates inside the scope minimum distance",
+    "reject active/recent duplicate targets when another candidate exists",
+    "for outward leads, reject targets that do not move materially farther from world spawn",
+    "score the survivors around the scope ideal distance rather than blindly choosing nearest",
+    "prefer stronger established-region placement over macro-boundary fringe when otherwise similar",
+    "prefer unexplored/unassigned targets when that information is available",
+    "if nothing survives, withhold the quest or map"
+  ],
+  "prototype_limits": {
+    "supplementaries_command_map_search_radius_chunks": 150,
+    "supplementaries_command_map_nominal_radius_blocks": 2400,
+    "supplementaries_trade_default_search_radius_chunks": 100,
+    "supplementaries_trade_default_nominal_radius_blocks": 1600,
+    "note": "These are locator search radii, not guaranteed straight-line target distances. They are useful natural caps for the low-code prototype."
+  }
+}
