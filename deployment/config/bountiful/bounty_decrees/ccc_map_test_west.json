@@ -1,0 +1,9 @@
+{
+  "objectives": [
+    "ccc_map_test_objs"
+  ],
+  "rewards": [
+    "ccc_map_west_rews"
+  ],
+  "name": "Harvestwood Map Test"
+}
