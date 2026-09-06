@@ -31,15 +31,18 @@ The core rule remains: **do not invent a complicated event system when Bountiful
 - Only CozyCrazyCraft custom pool/decree content should load after the baseline is installed
 - Initial smoke-test decree: `Local Notices`
 - Current authored quest design count: **108**
+- Current CI validates Bountiful data, regional quest catalog coverage/schema, regional board-selection policy, and story-board metadata
 
 ## Useful documents
 
 - [`QUESTS.md`](QUESTS.md) — easy human-readable quest browser
 - [`REWARDS.md`](REWARDS.md) — easy regional/tier reward browser
+- [`docs/FIRST_VILLAGE_VERTICAL_SLICE.md`](docs/FIRST_VILLAGE_VERTICAL_SLICE.md) — first playable starter→village→board→local-adventure target
+- [`docs/REWARD_SOURCE_AUDIT.md`](docs/REWARD_SOURCE_AUDIT.md) — source-checked reward IDs/mechanics and compatibility warnings
 - [`design/REGIONAL_QUEST_MATRIX.md`](design/REGIONAL_QUEST_MATRIX.md) — all quests + mechanical objective/status
 - [`design/STORY_BOARD_UI.md`](design/STORY_BOARD_UI.md) — story-first Bountiful UI plan
 - [`design/story_board_mockup.html`](design/story_board_mockup.html) — visual mockup
-- [`design/REWARD_VALIDATION_BACKLOG.md`](design/REWARD_VALIDATION_BACKLOG.md) — modded reward audit queue
+- [`design/REWARD_VALIDATION_BACKLOG.md`](design/REWARD_VALIDATION_BACKLOG.md) — broader modded reward audit queue
 - [`docs/BOUNTIFUL_6_0_4_RELIABILITY.md`](docs/BOUNTIFUL_6_0_4_RELIABILITY.md)
 - [`docs/QUEST_FRAMEWORK.md`](docs/QUEST_FRAMEWORK.md)
 - [`docs/INTEGRATION_BOUNDARY.md`](docs/INTEGRATION_BOUNDARY.md)
