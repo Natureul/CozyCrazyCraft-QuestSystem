@@ -30,3 +30,11 @@ jobs:
         run: python tools/validate_story_ui.py
       - name: Validate regional field-job story metadata
         run: python tools/validate_field_story_ui.py
+      - name: Build playtest root overlay
+        run: python tools/build_playtest_overlay.py
+      - name: Upload playtest root overlay
+        uses: actions/upload-artifact@v4
+        with:
+          name: CozyCrazyCraft-QuestSystem-PLAYTEST_ROOT_OVERLAY
+          path: build/CozyCrazyCraft-QuestSystem-PLAYTEST_ROOT_OVERLAY.zip
+          if-no-files-found: error
