@@ -11,7 +11,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 
 import java.lang.reflect.Method;
@@ -38,6 +40,8 @@ final class NamedPlaceBridge {
             Structure structure = registry.get(structureId);
             if (structure == null) return fallbackStructureName(structureId);
 
+            StructureIdentity identity = structureIdentity(level, structure, locatedPos);
+
             Class<?> profileClass = Class.forName("com.natureul.cozycrazyzones.StructureDiscoveryProfile");
             Method classify = profileClass.getMethod("classify", Registry.class, Structure.class, ResourceLocation.class);
             Object profile = classify.invoke(null, registry, structure, structureId);
@@ -45,7 +49,12 @@ final class NamedPlaceBridge {
 
             Class<?> zonesApi = Class.forName("com.natureul.cozycrazyzones.CozyZonesApi");
             Method regionalCellAt = zonesApi.getMethod("regionalCellAt", ServerLevel.class, double.class, double.class);
-            Object cell = regionalCellAt.invoke(null, level, locatedPos.getX() + 0.5D, locatedPos.getZ() + 0.5D);
+            Object cell = regionalCellAt.invoke(
+                    null,
+                    level,
+                    identity.markerPos().getX() + 0.5D,
+                    identity.markerPos().getZ() + 0.5D
+            );
             if (cell == null) return fallbackStructureName(structureId);
 
             Class<?> namesClass = Class.forName("com.natureul.cozycrazyzones.StructureNameSavedData");
@@ -65,7 +74,7 @@ final class NamedPlaceBridge {
                     cell,
                     level.getSeed(),
                     structureId,
-                    new ChunkPos(locatedPos)
+                    identity.startChunk()
             );
             if (value instanceof String name && !name.isBlank()) return name;
         } catch (Throwable error) {
@@ -96,14 +105,21 @@ final class NamedPlaceBridge {
             );
             if (result == null) return "the village";
 
-            BlockPos start = result.getFirst();
-            long dx = (long) start.getX() - origin.getX();
-            long dz = (long) start.getZ() - origin.getZ();
+            BlockPos locatedPos = result.getFirst();
+            long dx = (long) locatedPos.getX() - origin.getX();
+            long dz = (long) locatedPos.getZ() - origin.getZ();
             if (dx * dx + dz * dz > (long) maxDistanceBlocks * maxDistanceBlocks) return "the village";
+
+            StructureIdentity identity = structureIdentity(level, result.getSecond().value(), locatedPos);
 
             Class<?> zonesApi = Class.forName("com.natureul.cozycrazyzones.CozyZonesApi");
             Method macroRegionAt = zonesApi.getMethod("macroRegionAt", ServerLevel.class, double.class, double.class);
-            Object macro = macroRegionAt.invoke(null, level, start.getX() + 0.5D, start.getZ() + 0.5D);
+            Object macro = macroRegionAt.invoke(
+                    null,
+                    level,
+                    identity.markerPos().getX() + 0.5D,
+                    identity.markerPos().getZ() + 0.5D
+            );
             if (macro == null) return "the village";
 
             Class<?> namesClass = Class.forName("com.natureul.cozycrazyzones.VillageNameSavedData");
@@ -115,7 +131,7 @@ final class NamedPlaceBridge {
                     long.class,
                     ChunkPos.class
             );
-            Object value = getOrAssign.invoke(names, macro, level.getSeed(), new ChunkPos(start));
+            Object value = getOrAssign.invoke(names, macro, level.getSeed(), identity.startChunk());
             if (value instanceof String name && !name.isBlank()) return name;
         } catch (Throwable error) {
             if (!warnedVillageName) {
@@ -146,6 +162,8 @@ final class NamedPlaceBridge {
             Structure structure = registry.get(structureId);
             if (structure == null) return false;
 
+            StructureIdentity identity = structureIdentity(level, structure, locatedPos);
+
             Class<?> profileClass = Class.forName("com.natureul.cozycrazyzones.StructureDiscoveryProfile");
             Method classify = profileClass.getMethod("classify", Registry.class, Structure.class, ResourceLocation.class);
             Object profile = classify.invoke(null, registry, structure, structureId);
@@ -153,7 +171,12 @@ final class NamedPlaceBridge {
 
             Class<?> zonesApi = Class.forName("com.natureul.cozycrazyzones.CozyZonesApi");
             Method regionalCellAt = zonesApi.getMethod("regionalCellAt", ServerLevel.class, double.class, double.class);
-            Object cell = regionalCellAt.invoke(null, level, locatedPos.getX() + 0.5D, locatedPos.getZ() + 0.5D);
+            Object cell = regionalCellAt.invoke(
+                    null,
+                    level,
+                    identity.markerPos().getX() + 0.5D,
+                    identity.markerPos().getZ() + 0.5D
+            );
             if (cell == null) return false;
 
             Method categoryAccessor = profileClass.getMethod("category");
@@ -167,7 +190,7 @@ final class NamedPlaceBridge {
 
             Class<?> nameData = Class.forName("com.natureul.cozycrazyzones.StructureNameSavedData");
             Method keyFor = nameData.getMethod("keyFor", ResourceLocation.class, ChunkPos.class);
-            String discoveryKey = String.valueOf(keyFor.invoke(null, structureId, new ChunkPos(locatedPos)));
+            String discoveryKey = String.valueOf(keyFor.invoke(null, structureId, identity.startChunk()));
 
             Class<?> markerService = Class.forName("com.natureul.cozycrazyzones.AtlasDiscoveryMarkerService");
             Method enqueue = markerService.getMethod(
@@ -179,7 +202,7 @@ final class NamedPlaceBridge {
                     BlockPos.class,
                     MapDecoration.Type.class
             );
-            enqueue.invoke(null, player, discoveryKey, category, name, locatedPos, mapIcon);
+            enqueue.invoke(null, player, discoveryKey, category, name, identity.markerPos(), mapIcon);
             return true;
         } catch (Throwable error) {
             if (!warnedAtlas) {
@@ -193,6 +216,26 @@ final class NamedPlaceBridge {
         }
     }
 
+    /**
+     * Match the identity CozyCrazyZones uses when the player physically discovers a place:
+     * StructureStart chunk for the persistent name key, and bounding-box center for the Atlas pin.
+     * The locate position itself is only a navigation hint and is not guaranteed to be the start
+     * chunk for every modded structure implementation.
+     */
+    private static StructureIdentity structureIdentity(ServerLevel level, Structure structure, BlockPos locatedPos) {
+        StructureStart start = level.structureManager().getStructureAt(locatedPos, structure);
+        if (start != null && start.isValid()) {
+            BoundingBox box = start.getBoundingBox();
+            BlockPos marker = new BlockPos(
+                    (box.minX() + box.maxX()) / 2,
+                    locatedPos.getY(),
+                    (box.minZ() + box.maxZ()) / 2
+            );
+            return new StructureIdentity(start.getChunkPos(), marker);
+        }
+        return new StructureIdentity(new ChunkPos(locatedPos), locatedPos.immutable());
+    }
+
     private static String fallbackStructureName(ResourceLocation id) {
         String[] words = id.getPath().replace('/', '_').split("_");
         StringBuilder out = new StringBuilder();
@@ -203,4 +246,6 @@ final class NamedPlaceBridge {
         }
         return out.isEmpty() ? "local landmark" : out.toString();
     }
+
+    private record StructureIdentity(ChunkPos startChunk, BlockPos markerPos) {}
 }
