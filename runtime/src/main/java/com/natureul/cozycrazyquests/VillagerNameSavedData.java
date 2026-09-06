@@ -86,6 +86,11 @@ final class VillagerNameSavedData extends SavedData {
         private final List<String> coreSurnames;
         private final Set<String> usedFullNames;
 
+        VillageNames(List<String> coreSurnames, Set<String> usedFullNames) {
+            this.coreSurnames = new ArrayList<>(coreSurnames);
+            this.usedFullNames = new HashSet<>(usedFullNames);
+        }
+
         List<String> coreSurnames() {
             return coreSurnames;
         }
