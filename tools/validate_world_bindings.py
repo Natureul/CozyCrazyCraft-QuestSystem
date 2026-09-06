@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACT = ROOT / "data" / "world_bindings" / "cozy_zones_0_3_4.json"
+CONTRACT = ROOT / "data" / "world_bindings" / "cozy_zones_0_3_6.json"
 BINDINGS = ROOT / "data" / "world_bindings" / "quest_structure_bindings.json"
 CATALOG = ROOT / "data" / "quest_catalog"
 
@@ -53,19 +53,32 @@ def main() -> int:
     if not isinstance(contract, dict) or not isinstance(bindings, dict):
         return finish()
 
-    if contract.get("source", {}).get("version") != "0.3.4":
-        errors.append("World binding contract must explicitly identify CozyCrazyZones 0.3.4")
-    if bindings.get("zoning_contract") != "CozyCrazyZones-0.3.4":
-        errors.append("Quest bindings must point to CozyCrazyZones-0.3.4")
+    if contract.get("source", {}).get("version") != "0.3.6":
+        errors.append("World binding contract must explicitly identify CozyCrazyZones 0.3.6")
+    if bindings.get("zoning_contract") != "CozyCrazyZones-0.3.6":
+        errors.append("Quest bindings must point to CozyCrazyZones-0.3.6")
+
+    # The 0.3.6 starter information layer is now part of the handoff we intend
+    # to build around, not merely documentation.
+    starter = contract.get("starter_information") or {}
+    if starter.get("first_village_preferred_min") != 1050 or starter.get("first_village_preferred_max") != 1250:
+        errors.append("Unexpected 0.3.6 preferred first-village reservation range")
+    for key in ("starter_desk_map_service", "starter_atlas_service", "starter_village_route_service"):
+        if starter.get(key) is not True:
+            errors.append(f"0.3.6 starter information contract missing enabled {key}")
+
+    macro_names = contract.get("macro_regions") or {}
+    if macro_names.get("WEST") != "Harvestwood":
+        errors.append("CozyCrazyZones 0.3.6 WEST display name must be Harvestwood")
 
     explicit_rules: dict[str, dict] = {}
     for rule in contract.get("structure_rules", []):
         if not isinstance(rule, dict):
-            errors.append("cozy_zones_0_3_4.json: structure rule must be an object")
+            errors.append("cozy_zones_0_3_6.json: structure rule must be an object")
             continue
         sid = rule.get("id")
         if not isinstance(sid, str) or not sid:
-            errors.append("cozy_zones_0_3_4.json: structure rule missing id")
+            errors.append("cozy_zones_0_3_6.json: structure rule missing id")
             continue
         if sid in explicit_rules:
             errors.append(f"Duplicate structure rule: {sid}")
@@ -81,14 +94,14 @@ def main() -> int:
     prefix_rules: dict[str, dict] = {}
     for rule in contract.get("structure_prefix_rules", []):
         if not isinstance(rule, dict) or not isinstance(rule.get("prefix"), str):
-            errors.append("cozy_zones_0_3_4.json: malformed structure prefix rule")
+            errors.append("cozy_zones_0_3_6.json: malformed structure prefix rule")
             continue
         prefix_rules[rule["prefix"]] = rule
 
     natural_rules: dict[str, dict] = {}
     for rule in contract.get("natural_entity_rules", []):
         if not isinstance(rule, dict) or not isinstance(rule.get("id"), str):
-            errors.append("cozy_zones_0_3_4.json: malformed natural entity rule")
+            errors.append("cozy_zones_0_3_6.json: malformed natural entity rule")
             continue
         eid = rule["id"]
         if eid in natural_rules:
@@ -96,6 +109,11 @@ def main() -> int:
         natural_rules[eid] = rule
         if rule.get("minimum") not in TIER_INDEX:
             errors.append(f"Entity {eid}: invalid minimum tier")
+        if rule.get("minimum_influence") not in INFLUENCE:
+            errors.append(f"Entity {eid}: invalid minimum influence")
+        macros = rule.get("macro_regions")
+        if not isinstance(macros, list) or any(m not in REGIONS - {"CORE"} for m in macros):
+            errors.append(f"Entity {eid}: invalid macro_regions {macros!r}")
         if not isinstance(rule.get("daytime_candidate"), bool):
             errors.append(f"Entity {eid}: daytime_candidate must be boolean")
         if not isinstance(rule.get("enabled"), bool):
@@ -130,7 +148,6 @@ def main() -> int:
             errors.append(f"{label}: targets must be a list")
             continue
 
-        # Entity-ecology bindings intentionally do not need a structure target.
         if status == "EXPLICIT_ENTITY_RULE":
             if targets:
                 warnings.append(f"{label}: entity-ecology binding unexpectedly also has structure targets")
@@ -170,9 +187,6 @@ def main() -> int:
                 )
 
             if status.startswith("EXPLICIT") and qregion in {"NORTH", "EAST", "SOUTH", "WEST"} and not macros:
-                # This is allowed for EXPLICIT_MINIMUM_RULE only when the status is
-                # explicitly about the radial minimum; otherwise it probably should
-                # be labelled GENERIC_RULE instead.
                 if status not in {"EXPLICIT_MINIMUM_RULE", "EXPLICIT_ENTITY_RULE"}:
                     warnings.append(
                         f"{label}: status {status} claims explicit regional binding, but {target} has no macro restriction"
@@ -189,11 +203,11 @@ def main() -> int:
         if not isinstance(item.get("reason"), str) or not item.get("reason", "").strip():
             errors.append(f"blocked_or_pending {qid!r} is missing a reason")
 
-    # Known critical contract invariants from the current world design.
     critical = {
         "mowziesmobs:frostmaw_spawn": ("WILDLANDS", {"NORTH"}),
         "mowziesmobs:umvuthana_grove": ("WILDLANDS", {"SOUTH"}),
         "cataclysm:cursed_pyramid": ("DREAD_REACHES", {"SOUTH"}),
+        "betterjungletemples:jungle_temple": ("FRONTIER", {"EAST"}),
     }
     for sid, (tier, macros) in critical.items():
         rule = explicit_rules.get(sid)
@@ -202,6 +216,27 @@ def main() -> int:
             continue
         if rule.get("minimum") != tier or set(rule.get("macro_regions") or []) != macros:
             errors.append(f"Critical zoning anchor changed unexpectedly: {sid}")
+
+    # Regional field-job mob claims are now machine-checkable against the 0.3.6
+    # natural-entity contract.
+    field_claims = {
+        "alexsmobs:snow_leopard": ("FRONTIER", {"NORTH"}),
+        "mowziesmobs:foliaath": ("FRONTIER", {"EAST"}),
+        "skarrier_mobs:carniflore": ("WILDLANDS", {"EAST"}),
+        "skarrier_mobs:slither_matriarch": ("WILDLANDS", {"EAST"}),
+        "alexsmobs:rattlesnake": ("FRONTIER", {"SOUTH"}),
+        "skarrier_mobs:quake": ("FRONTIER", {"SOUTH"}),
+        "born_in_chaos_v1:spirit_guide": ("FRONTIER", {"SOUTH"}),
+        "alexsmobs:grizzly_bear": ("FRONTIER", {"NORTH", "WEST"}),
+        "born_in_chaos_v1:supreme_bonescaller": ("DREAD_REACHES", set()),
+    }
+    for eid, (tier, macros) in field_claims.items():
+        rule = natural_rules.get(eid)
+        if rule is None:
+            errors.append(f"Regional field-job ecology anchor disappeared: {eid}")
+            continue
+        if rule.get("minimum") != tier or set(rule.get("macro_regions") or []) != macros:
+            errors.append(f"Regional field-job ecology anchor changed unexpectedly: {eid}")
 
     suppression = contract.get("suppression", {})
     if "cataclysm" not in suppression.get("structure_namespaces", []):
@@ -220,7 +255,7 @@ def finish() -> int:
             print(f"ERROR: {error}")
         print(f"\nFAILED: {len(errors)} error(s), {len(warnings)} warning(s)")
         return 1
-    print(f"OK: world-binding validation passed ({len(warnings)} warning(s))")
+    print(f"OK: CozyCrazyZones 0.3.6 world-binding validation passed ({len(warnings)} warning(s))")
     return 0
 
 
