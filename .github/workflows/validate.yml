@@ -20,5 +20,7 @@ jobs:
         run: python tools/validate_quest_browser.py
       - name: Validate regional board policy
         run: python tools/validate_board_policy.py
+      - name: Validate CozyCrazyZones world bindings
+        run: python tools/validate_world_bindings.py
       - name: Validate story-board metadata
         run: python tools/validate_story_ui.py
