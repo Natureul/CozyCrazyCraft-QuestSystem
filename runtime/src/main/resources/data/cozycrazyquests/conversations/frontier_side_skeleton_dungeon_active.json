@@ -1,0 +1,1 @@
+{"title":"Arrows Below","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Eight at the dungeon. Corners are your friend until you forget there are two of them. Make the skeletons come to your line.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll control the angle.","action":{"action":"dialogue.close"}}]}]}]}
