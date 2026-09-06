@@ -2,19 +2,22 @@
 
 This file keeps the quest layer coupled to the **real** world-substrate API instead of duplicating or guessing geography.
 
-## Current handoff: CozyCrazyZones 0.3.4
+## Current handoff: CozyCrazyZones 0.3.6
 
-The previous conceptual geography placeholder is now superseded by the actual public API shipped in `CozyCrazyZones 0.3.4`.
+The quest layer now targets the actual public API shipped in `CozyCrazyZones 0.3.6`.
 
-Production quest code may now depend on these public methods:
+Production quest code may depend on these public methods:
 
 ```java
 CozyZonesApi.distanceFromSpawn(ServerLevel level, double x, double z)
 CozyZonesApi.regionAt(ServerLevel level, double x, double z)
 CozyZonesApi.regionForDistance(double distance)
 CozyZonesApi.influenceBandAt(ServerLevel level, double x, double z)
+CozyZonesApi.influenceBandForDistance(double distance)
 CozyZonesApi.regionalStrengthAt(ServerLevel level, double x, double z)
+CozyZonesApi.regionalStrengthForDistance(double distance)
 CozyZonesApi.macroRegionAt(ServerLevel level, double x, double z)
+CozyZonesApi.macroRegionForOffset(long worldSeed, double dx, double dz)
 CozyZonesApi.macroBoundaryStrengthAt(ServerLevel level, double x, double z)
 CozyZonesApi.regionalCellAt(ServerLevel level, double x, double z)
 CozyZonesApi.structureAllowed(ServerLevel level, ResourceLocation structureId, double x, double z)
@@ -35,7 +38,7 @@ MacroRegion:
   NORTH  -> Frostmarch
   EAST   -> Greenveil
   SOUTH  -> Sunscar
-  WEST   -> Harvestlands
+  WEST   -> Harvestwood
 
 RegionalInfluenceBand:
   SHARED_CORE
@@ -43,7 +46,52 @@ RegionalInfluenceBand:
   ESTABLISHED
 ```
 
-`RegionalCell` supplies all three classifications together plus distance, regional strength, and macro-boundary strength.
+`RegionalCell` supplies all three classifications together plus distance, regional strength, and macro-boundary strength. It also exposes `ecologyDisplayName()` and `cellDisplayName()` for presentation.
+
+## Default geography in 0.3.6
+
+Do not hard-code these values in quest runtime logic; they are recorded here because they explain the intended play curve.
+
+```text
+0–700        Shared Core: ordinary starter countryside
+700–1200     Organic cardinal transition
+1200+        Cardinal ecology clearly established
+
+0–2500       Hearthlands
+2500–5500    Frontier
+5500–9000    Wildlands
+9000+        Dread Reaches
+```
+
+The macro borders are warped and blended rather than rigid compass quadrants. The default angular border blend is 11 degrees.
+
+## What 0.3.6 additionally gives the information layer
+
+This update is important because the zoning project now owns a working **starter map/Atlas vertical slice** rather than only geography classification.
+
+### First-village reservation
+
+`VillageRingPlanner` reserves a locator-compatible village candidate with this preference:
+
+```text
+preferred pass: 1050–1250 blocks
+fallback:       1000–1450 blocks
+last fallback:  1000–1650 blocks
+```
+
+Candidates are filtered for plausible village land and away from weak macro-boundary locations.
+
+That is almost exactly the desired first-act geography: the starter house sits in ordinary Shared Core countryside, and the first village lands near the point where regional identity begins to become legible.
+
+### Starter desk map
+
+`StarterDeskVillageMapService` finds the starter-house desk item frame and prepares/paints a village guide map toward the reserved first village.
+
+### Starter Atlas
+
+`StarterAtlasService` ensures the player receives the Atlas, and `StarterVillageMapService` links a guide route between the starter location and first village. The supplied root overlay also configures Map Atlases for effectively unbounded expansion (`max_map_count = 10000`), no paper/empty-map tax, and inventory activation.
+
+The quest project should **reuse this precedent** rather than invent a competing starter map implementation.
 
 ## What this unlocks now
 
@@ -57,11 +105,9 @@ The server can classify a Bountiful board from its real block position:
 cell = CozyZonesApi.regionalCellAt(level, boardX, boardZ)
 ```
 
-The quest layer should use that result to choose the board's permitted decree family. It should **not** reimplement the 700/1200/2500/5500/9000 distance logic itself.
+The quest layer should use that result to choose the board's permitted decree family. It should not reimplement the geographic math itself.
 
 ### Regional quest filtering
-
-This is no longer blocked.
 
 A candidate quest can be checked against:
 
@@ -73,29 +119,49 @@ For world content, `ZoneRuleRegistry` and the API's `structureAllowed` / `natura
 
 ### Structure and mob catalog joins
 
-This is no longer blocked at the classification level.
-
 `ZoneRuleRegistry` exposes:
 
 ```java
 structureRule(ResourceLocation)
 minimumStructureRegion(ResourceLocation)
+structureExplicitlySuppressed(ResourceLocation)
 structures()
+structurePrefixes()
 naturalEntityRule(ResourceLocation)
+naturalEntityNamespaceSuppressed(ResourceLocation)
 naturalEntities()
 ```
 
-Structure rules expose minimum region, macro-region restrictions, minimum influence band, and a note. Natural-entity rules additionally expose daytime-candidate and enabled flags.
+The 0.3.6 rules now contain stronger cardinal assignments, including Greenveil/Sunscar/Harvestwood structure families and region-specific natural mobs. Quest issuance should cross-check these rules instead of assuming that registry presence alone means a target is legal at a board's position.
 
-The 0.3.4 registry already contains concrete quest-relevant IDs including Dungeons Enhanced, Better Dungeons, Valhelsia Structures, Born in Chaos, Mowzie's Mobs, Skarrier Mobs, Myths of the Sea, and the permitted Cataclysm exception.
+## Map-system direction after 0.3.6
+
+There are now two map layers:
+
+1. **Starter navigation** — owned by CozyCrazyZones 0.3.6; already working toward the first village and Atlas.
+2. **Quest/cartographer maps** — owned by this project; should build on Minecraft/Supplementaries maps and Map Atlases rather than replacing the starter system.
+
+For a low-risk first implementation, Supplementaries exposes a server command:
+
+```text
+supplementaries structure_map <structure-or-tag> [zoom]
+```
+
+Its map command creates a real structure map/quill for the executing player and searches nearby structures. Bountiful 6.0.4 command rewards execute as the server and support `%PLAYER_NAME%`, so a reward can safely issue a map with a command shaped like:
+
+```text
+execute as %PLAYER_NAME% at @s run supplementaries structure_map betterjungletemples:jungle_temple 2
+```
+
+That is now the preferred **playtest bridge** for cartographer/map rewards because it lets us validate the gameplay loop before writing a custom structure-locator subsystem.
+
+The long-term locator can replace the selection step later when we need strict same-region/tier, unexplored-target, outward-only, or no-repeat guarantees.
 
 ## Still separate work
 
-The zoning handoff answers **where** a thing is legal. It does not by itself solve every quest mechanic.
-
 ### Useful structure targeting
 
-Still needed: a quest-side locator that finds a real generated instance under constraints such as:
+For production story contracts we still want a quest-side locator that can find a real generated instance under tighter constraints:
 
 ```text
 structure id/tag
@@ -107,11 +173,7 @@ avoid repeat targets
 outward quests must actually point outward
 ```
 
-This should consume CozyCrazyZones truth rather than duplicate it.
-
-### Regional cartographer maps
-
-Still needs the target selector plus map creation/integration.
+Supplementaries maps are an excellent prototype and may remain sufficient for many ordinary cartographer maps, but main-story targeting should eventually be deterministic enough to respect these rules.
 
 ### Same-board redemption
 
@@ -127,13 +189,13 @@ Regional boss completion, final relic requirements, Stronghold/End progression, 
 
 ### Rescue-pet ownership transfer
 
-Still requires a deterministic tested method.
+Still requires a deterministic tested method. Prefer giving taming materials/knowledge unless a one-off rescue specifically justifies direct transfer.
 
 ---
 
 # Client-facing geography
 
-CozyCrazyZones 0.3.4 already synchronizes the current radial region, macro-region, and influence band to the client through `ClientRegionState`.
+CozyCrazyZones 0.3.6 synchronizes the current radial region, macro-region, and influence band to the client through `ClientRegionState`.
 
 That is enough for the quest UI to decorate a board with contextual labels such as:
 
