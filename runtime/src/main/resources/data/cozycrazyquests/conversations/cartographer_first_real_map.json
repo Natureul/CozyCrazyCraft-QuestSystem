@@ -5,9 +5,10 @@
     {
       "dialogue_options": [
         {
-          "dialogue": "I've been correcting the local charts, but one nearby landmark still needs a proper field survey. I know where to start looking; I need someone willing to actually make the walk. If you take it, I'll mark the lead on your contract.",
+          "dialogue": "\nOne landmark near town is missing from my charts. I'll mark the lead if you'll walk it and bring back a proper survey.",
           "condition": "*",
           "closable": "always",
+          "timings": [0.32, 0.10, 0.85, 1.35],
           "replies": [
             {
               "reply": "I'll survey it.",
