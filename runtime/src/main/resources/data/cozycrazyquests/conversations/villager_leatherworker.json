@@ -1,0 +1,8 @@
+{
+  "title": "Leatherworker",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Need travel gear?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Any news?","action":{"action":"dialogue.goto(1)"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Nothing right now.","action":{"action":"dialogue.close"}}]}]},
+    {"dialogue_options":[{"dialogue":"Road gear fails before brave speeches do. I watch straps, saddles, and weather.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Good to know.","action":{"action":"dialogue.close"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}}]}]}
+  ]
+}

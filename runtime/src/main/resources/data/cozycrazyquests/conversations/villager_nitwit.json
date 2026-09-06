@@ -1,0 +1,8 @@
+{
+  "title": "Local",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"I know where almost everything is. Roughly.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Heard anything interesting?","action":{"action":"dialogue.goto(1)"}},{"reply":"Never mind.","action":{"action":"dialogue.close"}}]}]},
+    {"dialogue_options":[{"dialogue":"You want serious information? Ask someone employed. I hear the strange parts first, though.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Fair enough.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

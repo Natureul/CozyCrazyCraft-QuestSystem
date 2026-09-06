@@ -36,3 +36,10 @@ mandatory=true
 versionRange="[0.3.6,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="conversations"
+mandatory=false
+versionRange="[1.0.5,)"
+ordering="AFTER"
+side="BOTH"

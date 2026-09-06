@@ -1,0 +1,29 @@
+{
+  "title": "The First Real Map",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "You made the walk? Good. Give me the survey and I'll update the village chart.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.22, 0.06, 0.48, 0.78],
+          "replies": [
+            {
+              "reply": "The survey is finished.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},
+                {"action": "dialogue.close"}
+              ]
+            },
+            {
+              "reply": "Show me your trades first.",
+              "action": {"action": "villager.trade"}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

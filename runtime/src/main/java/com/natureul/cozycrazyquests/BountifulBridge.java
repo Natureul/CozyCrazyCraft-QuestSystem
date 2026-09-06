@@ -3,6 +3,7 @@ package com.natureul.cozycrazyquests;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -25,9 +26,12 @@ public final class BountifulBridge {
     private static Method randomUpdateMethod;
     private static Method decreeCreateMethod;
     private static Object decreeCompanion;
+    private static Method boardCompletedGetter;
+    private static Method boardCompletionUpdater;
     private static boolean warnedBoard;
     private static boolean warnedCreator;
     private static boolean warnedSource;
+    private static boolean warnedTrust;
 
     private BountifulBridge() {}
 
@@ -123,6 +127,48 @@ public final class BountifulBridge {
                 CozyCrazyQuests.LOGGER.warn("Could not read Bountiful creator reputation; trust-gated objectives will fail open", error);
             }
             return Integer.MAX_VALUE;
+        }
+    }
+
+    /**
+     * Read the same settlement-wide completion count Bountiful displays as board reputation.
+     * Villager-authored quests use this rather than inventing a second trust currency.
+     */
+    public static int boardCompletedCount(ServerLevel level, BlockPos boardPos) {
+        try {
+            BlockEntity board = level.getBlockEntity(boardPos);
+            if (board == null) return 0;
+            if (boardCompletedGetter == null || !boardCompletedGetter.getDeclaringClass().isInstance(board)) {
+                boardCompletedGetter = board.getClass().getMethod("getNumCompleted");
+                boardCompletedGetter.setAccessible(true);
+            }
+            Object value = boardCompletedGetter.invoke(board);
+            return value instanceof Number number ? number.intValue() : 0;
+        } catch (Throwable error) {
+            warnTrustOnce("Could not read Bountiful Village Trust", error);
+            return 0;
+        }
+    }
+
+    /**
+     * Count a completed authored villager quest exactly like one completed public bounty at the
+     * issuing board. Bountiful therefore remains the single Village Trust ledger.
+     */
+    public static boolean awardBoardCompletion(ServerLevel level, BlockPos boardPos, Player player) {
+        try {
+            BlockEntity board = level.getBlockEntity(boardPos);
+            if (board == null) return false;
+            if (boardCompletionUpdater == null || !boardCompletionUpdater.getDeclaringClass().isInstance(board)) {
+                boardCompletionUpdater = board.getClass().getMethod("updateCompletedBounties", Player.class);
+                boardCompletionUpdater.setAccessible(true);
+            }
+            boardCompletionUpdater.invoke(board, player);
+            board.setChanged();
+            level.sendBlockUpdated(boardPos, board.getBlockState(), board.getBlockState(), 3);
+            return true;
+        } catch (Throwable error) {
+            warnTrustOnce("Could not add villager quest completion to Bountiful Village Trust", error);
+            return false;
         }
     }
 
@@ -224,6 +270,13 @@ public final class BountifulBridge {
     private static void warnBoardOnce(String message, Throwable error) {
         if (!warnedBoard) {
             warnedBoard = true;
+            CozyCrazyQuests.LOGGER.warn(message, error);
+        }
+    }
+
+    private static void warnTrustOnce(String message, Throwable error) {
+        if (!warnedTrust) {
+            warnedTrust = true;
             CozyCrazyQuests.LOGGER.warn(message, error);
         }
     }
