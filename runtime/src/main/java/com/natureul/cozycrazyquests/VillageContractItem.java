@@ -15,9 +15,11 @@ import java.util.List;
 /** Physical reminder for an authored village contract. It is not a quest log, but it must be unambiguous. */
 public final class VillageContractItem extends Item {
     public static final String QUEST_ID = "ccc_quest_id";
+    public static final String VILLAGE_KEY = "ccc_village_key";
     public static final String TARGET_NAME = "ccc_target_name";
     public static final String TARGET_DISTANCE = "ccc_target_distance";
     public static final String TARGET_DIRECTION = "ccc_target_direction";
+    public static final String TARGET_APPROACH = "ccc_target_approach";
     public static final String ISSUING_VILLAGE = "ccc_issuing_village";
 
     public VillageContractItem(Properties properties) {
@@ -31,6 +33,7 @@ public final class VillageContractItem extends Item {
             String target = stack.getTag().getString(TARGET_NAME);
             int distance = stack.getTag().getInt(TARGET_DISTANCE);
             String direction = stack.getTag().getString(TARGET_DIRECTION);
+            String approach = stack.getTag().getString(TARGET_APPROACH);
             String village = stack.getTag().getString(ISSUING_VILLAGE);
             VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(questId);
 
@@ -47,6 +50,14 @@ public final class VillageContractItem extends Item {
             if (distance > 0 && !direction.isBlank()) {
                 tooltip.add(Component.literal("Location: about " + distance + " blocks " + direction)
                         .withStyle(ChatFormatting.GRAY));
+            }
+
+            if ("UNDERGROUND".equals(approach)) {
+                tooltip.add(Component.literal("Approach: below ground — search the indicated area for a cave or opening")
+                        .withStyle(ChatFormatting.YELLOW));
+            } else if ("SUBMERGED".equals(approach)) {
+                tooltip.add(Component.literal("Approach: below the waterline — the surface bearing is only a guide")
+                        .withStyle(ChatFormatting.YELLOW));
             }
 
             if (definition != null) {
