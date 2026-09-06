@@ -219,6 +219,14 @@ public final class VillageSocialConversationManager {
                     VillagerProfession.TOOLSMITH,
                     VillagerProfession.LEATHERWORKER
             );
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.DANGER)) {
+            wanted = List.of(
+                    VillagerProfession.WEAPONSMITH,
+                    VillagerProfession.ARMORER,
+                    VillagerProfession.FLETCHER,
+                    VillagerProfession.TOOLSMITH,
+                    VillagerProfession.CLERIC
+            );
         } else {
             wanted = List.of(VillagerProfession.CARTOGRAPHER, VillagerProfession.LIBRARIAN, VillagerProfession.MASON);
         }
