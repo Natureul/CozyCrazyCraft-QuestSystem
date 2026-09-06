@@ -1,0 +1,1 @@
+{"title":"Shots Across the Ruins","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"The ruin is the problem because of what it overlooks. Keep the fight there and make the road visible again.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll work the sightline.","action":[{"action":"dialogue.close"}]}]}]}]}

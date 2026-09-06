@@ -1,0 +1,1 @@
+{"title":"The Long Stable Road","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Check the road as much as the stable. A safe hitching post is useless if nobody reaches it.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll inspect the whole route.","action":[{"action":"dialogue.close"}]}]}]}]}

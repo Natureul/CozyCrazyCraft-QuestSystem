@@ -1,0 +1,1 @@
+{"title":"Beyond the Last Good Signpost","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Past the maintained roads, terrain matters more than straight lines. Use the landmark and your own eyes together.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll verify it properly.","action":[{"action":"dialogue.close"}]}]}]}]}

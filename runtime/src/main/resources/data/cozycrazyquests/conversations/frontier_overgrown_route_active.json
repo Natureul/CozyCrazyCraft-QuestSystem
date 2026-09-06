@@ -1,0 +1,1 @@
+{"title":"The Green Road Closed","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Fight at the old stone. Don't flatten the jungle trying to make yourself a battlefield.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll keep the damage local.","action":[{"action":"dialogue.close"}]}]}]}]}

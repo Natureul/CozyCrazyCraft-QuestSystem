@@ -1,0 +1,1 @@
+{"title":"The Road Around the Dead","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Clear what is making the route unsafe. The contract does not care how much treasure might be under the sand.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'm there for the road.","action":[{"action":"dialogue.close"}]}]}]}]}
