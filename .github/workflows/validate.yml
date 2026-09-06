@@ -18,8 +18,10 @@ jobs:
         run: python tools/validate_quest_catalog.py
       - name: Validate repeatable regional expansion
         run: python tools/validate_repeatable_expansion.py
-      - name: Validate human-readable quest browser
+      - name: Validate human-readable authored quest browser
         run: python tools/validate_quest_browser.py
+      - name: Validate human-readable field-job browser
+        run: python tools/validate_field_job_browser.py
       - name: Validate regional board policy
         run: python tools/validate_board_policy.py
       - name: Validate CozyCrazyZones world bindings
