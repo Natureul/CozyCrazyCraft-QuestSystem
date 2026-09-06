@@ -23,9 +23,11 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(BountySourceTooltip::onTooltip);
         MinecraftForge.EVENT_BUS.addListener(BountyRedemptionGuard::onRightClickBlock);
 
-        // Run before Conversations' normal-priority EntityInteract listener so the dialogue attached
-        // to a vanilla villager can be selected from the current village/player quest state.
+        // Authored quest state wins first. The social layer runs immediately after it and supplies a
+        // useful profession/ambient conversation only when no authored quest dialogue was selected.
+        // Both run before Conversations' normal-priority EntityInteract listener opens the screen.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageSocialConversationManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerClone);
 
