@@ -5,15 +5,15 @@
     {
       "dialogue_options": [
         {
-          "dialogue": "\nBack already? If you've seen the place yourself, I'll add it to the village chart and settle the commission.",
+          "dialogue": "You made the walk? Good. Give me the survey and I'll update the village chart.",
           "condition": "*",
           "closable": "always",
-          "timings": [0.32, 0.10, 0.85, 1.35],
+          "timings": [0.22, 0.06, 0.48, 0.78],
           "replies": [
             {
               "reply": "The survey is finished.",
               "action": [
-                {"action": "give.item(1,cozycrazyquests:conversation_token,{ccc_action:\"turnin\"})"},
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},
                 {"action": "dialogue.close"}
               ]
             },
