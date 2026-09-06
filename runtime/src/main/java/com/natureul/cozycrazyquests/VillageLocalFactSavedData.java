@@ -40,16 +40,47 @@ final class VillageLocalFactSavedData extends SavedData {
             String displayName,
             long gameTime
     ) {
-        String factId = structureFactId(structureId, target);
+        return remember(
+                village.key(),
+                structureFactId(structureId, target),
+                FactKind.STRUCTURE_SURVEY,
+                structureId.toString(),
+                displayName,
+                target,
+                gameTime
+        );
+    }
+
+    Fact rememberLocalIncident(
+            VillageContext village,
+            FactKind kind,
+            String questId,
+            BlockPos target,
+            String displayName,
+            long gameTime
+    ) {
+        String factId = "quest:" + questId;
+        return remember(village.key(), factId, kind, questId, displayName, target, gameTime);
+    }
+
+    private Fact remember(
+            String villageKey,
+            String factId,
+            FactKind kind,
+            String subjectId,
+            String displayName,
+            BlockPos target,
+            long gameTime
+    ) {
         for (Fact fact : facts) {
-            if (fact.villageKey.equals(village.key()) && fact.factId.equals(factId)) return fact;
+            if (fact.villageKey.equals(villageKey) && fact.factId.equals(factId)) return fact;
         }
 
         Fact fact = new Fact(
-                village.key(),
+                villageKey,
                 factId,
-                FactKind.STRUCTURE_SURVEY,
-                structureId.toString(),
+                kind,
+                subjectId,
                 displayName,
                 target.immutable(),
                 FactState.OPEN,
