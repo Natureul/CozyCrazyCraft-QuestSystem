@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,9 @@ public final class CompactConversationScreen extends Screen {
     private static final int REPLY_GAP = 3;
     private static final int CHARS_PER_TICK = 2;
 
+    private static Field upstreamCurrentConversationField;
+    private static boolean upstreamConversationFieldUnavailable;
+
     private final Object conversation;
     private int visibleCharacters;
     private boolean closing;
@@ -44,6 +48,18 @@ public final class CompactConversationScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
+
+        // Conversations' own client sync only auto-closes its stock ConversationScreen. Because
+        // CozyCrazyCraft deliberately replaces that screen, a server-side dialogue.close used to
+        // leave this compact screen stranded even though the conversation had ended. Mirror the
+        // upstream null-state here so terminal replies such as "Never mind" and "It's handled"
+        // visibly finish the exchange.
+        if (upstreamConversationEnded()) {
+            closing = true;
+            Minecraft.getInstance().setScreen(null);
+            return;
+        }
+
         String text = dialogueText();
         if (visibleCharacters < text.length()) {
             visibleCharacters = Math.min(text.length(), visibleCharacters + CHARS_PER_TICK);
@@ -72,8 +88,6 @@ public final class CompactConversationScreen extends Screen {
         int x = (width - panelWidth) / 2;
         int y = Math.max(12, height - panelHeight - 18);
 
-        // Intentionally restrained: enough separation from the world to read clearly without the
-        // full-screen black slab of the stock Conversations UI.
         graphics.fill(x, y, x + panelWidth, y + panelHeight, 0xD914171B);
         graphics.fill(x, y, x + panelWidth, y + 1, 0xFF9A825D);
         graphics.fill(x, y + panelHeight - 1, x + panelWidth, y + panelHeight, 0xFF564B3C);
@@ -132,7 +146,6 @@ public final class CompactConversationScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // Space/Enter first finish the typewriter rather than accidentally selecting an answer.
         if ((keyCode == 32 || keyCode == 257 || keyCode == 335) && visibleCharacters < dialogueText().length()) {
             visibleCharacters = dialogueText().length();
             return true;
@@ -169,6 +182,23 @@ public final class CompactConversationScreen extends Screen {
                 new Class<?>[]{String.class, int.class, int.class, int.class},
                 id.toString(), containerIndex, optionIndex, index
         );
+    }
+
+    private boolean upstreamConversationEnded() {
+        if (upstreamConversationFieldUnavailable) return false;
+        try {
+            if (upstreamCurrentConversationField == null) {
+                Class<?> api = Class.forName("com.lazrproductions.conversations.api.ConversationClientApi");
+                Field field = api.getDeclaredField("currentConversation");
+                field.setAccessible(true);
+                upstreamCurrentConversationField = field;
+            }
+            return upstreamCurrentConversationField.get(null) == null;
+        } catch (Throwable error) {
+            upstreamConversationFieldUnavailable = true;
+            CozyCrazyQuests.LOGGER.warn("Could not mirror Conversations client close state; compact dialogue auto-close disabled", error);
+            return false;
+        }
     }
 
     private String dialogueText() {
