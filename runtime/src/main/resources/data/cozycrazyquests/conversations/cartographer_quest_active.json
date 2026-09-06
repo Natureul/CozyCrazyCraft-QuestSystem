@@ -5,10 +5,10 @@
     {
       "dialogue_options": [
         {
-          "dialogue": "\nI marked the place. Reach it, look it over, then bring the survey back here.",
+          "dialogue": "I marked the place. Reach it, look it over, then bring the survey back here.",
           "condition": "*",
           "closable": "always",
-          "timings": [0.32, 0.10, 0.85, 1.35],
+          "timings": [0.22, 0.06, 0.48, 0.78],
           "replies": [
             {
               "reply": "I'll keep at it.",
