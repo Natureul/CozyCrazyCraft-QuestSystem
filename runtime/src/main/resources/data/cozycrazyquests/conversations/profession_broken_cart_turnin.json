@@ -1,0 +1,7 @@
+{
+  "title": "The Cart That Didn't Return",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"That's enough to send people back down the trail and find what can still be recovered. Take this hatchet. A road tool should spend its life on the road.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Thanks.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},{"action":"dialogue.close"}]}]}]}
+  ]
+}
