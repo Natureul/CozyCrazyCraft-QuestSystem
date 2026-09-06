@@ -1,0 +1,10 @@
+{
+  "type": "supplementaries:structure_map",
+  "item": "minecraft:emerald",
+  "structure": "dungeons_enhanced:desert_tomb",
+  "price_min": 5,
+  "price_max": 9,
+  "max_trades": 2,
+  "price_multiplier": 0.05,
+  "level": 2
+}
