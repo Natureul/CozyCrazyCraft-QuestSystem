@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "geography_contract": "CozyCrazyZones-0.3.6",
+  "principle": "Classify a pristine board once from its fixed position, select an exact CozyCrazyCraft decree, then let Bountiful own normal generation and refresh behavior.",
+  "assignments": [
+    {"influence_band":"SHARED_CORE","tier":"HEARTHLANDS","macro_region":"ANY","decree":"ccc_local_notices","status":"LIVE_DATA"},
+
+    {"influence_band":"CARDINAL_TRANSITION","tier":"HEARTHLANDS","macro_region":"NORTH","decree":"ccc_hearth_north","status":"LIVE_DATA"},
+    {"influence_band":"CARDINAL_TRANSITION","tier":"HEARTHLANDS","macro_region":"EAST","decree":"ccc_hearth_east","status":"LIVE_DATA"},
+    {"influence_band":"CARDINAL_TRANSITION","tier":"HEARTHLANDS","macro_region":"SOUTH","decree":"ccc_hearth_south","status":"LIVE_DATA"},
+    {"influence_band":"CARDINAL_TRANSITION","tier":"HEARTHLANDS","macro_region":"WEST","decree":"ccc_hearth_west","status":"LIVE_DATA"},
+
+    {"influence_band":"ESTABLISHED","tier":"HEARTHLANDS","macro_region":"NORTH","decree":"ccc_hearth_north","status":"LIVE_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"HEARTHLANDS","macro_region":"EAST","decree":"ccc_hearth_east","status":"LIVE_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"HEARTHLANDS","macro_region":"SOUTH","decree":"ccc_hearth_south","status":"LIVE_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"HEARTHLANDS","macro_region":"WEST","decree":"ccc_hearth_west","status":"LIVE_DATA"},
+
+    {"influence_band":"ESTABLISHED","tier":"FRONTIER","macro_region":"NORTH","decree":"ccc_frontier_north","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"FRONTIER","macro_region":"EAST","decree":"ccc_frontier_east","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"FRONTIER","macro_region":"SOUTH","decree":"ccc_frontier_south","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"FRONTIER","macro_region":"WEST","decree":"ccc_frontier_west","status":"PLANNED_DATA"},
+
+    {"influence_band":"ESTABLISHED","tier":"WILDLANDS","macro_region":"NORTH","decree":"ccc_wildlands_north","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"WILDLANDS","macro_region":"EAST","decree":"ccc_wildlands_east","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"WILDLANDS","macro_region":"SOUTH","decree":"ccc_wildlands_south","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"WILDLANDS","macro_region":"WEST","decree":"ccc_wildlands_west","status":"PLANNED_DATA"},
+
+    {"influence_band":"ESTABLISHED","tier":"DREAD_REACHES","macro_region":"NORTH","decree":"ccc_dread_north","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"DREAD_REACHES","macro_region":"EAST","decree":"ccc_dread_east","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"DREAD_REACHES","macro_region":"SOUTH","decree":"ccc_dread_south","status":"PLANNED_DATA"},
+    {"influence_band":"ESTABLISHED","tier":"DREAD_REACHES","macro_region":"WEST","decree":"ccc_dread_west","status":"PLANNED_DATA"}
+  ],
+  "runtime_rules": {
+    "only_stamp_pristine_boards": true,
+    "never_reclassify_populated_board_automatically": true,
+    "unknown_or_unmapped_cell_fallback": "ccc_local_notices",
+    "planned_data_must_not_be_selected_until_decree_exists": true
+  }
+}
