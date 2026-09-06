@@ -3,7 +3,8 @@
     "ccc_local_objs"
   ],
   "rewards": [
-    "ccc_local_rews"
+    "ccc_local_rews",
+    "ccc_trust_utility_rews"
   ],
   "name": "Local Notices"
 }
