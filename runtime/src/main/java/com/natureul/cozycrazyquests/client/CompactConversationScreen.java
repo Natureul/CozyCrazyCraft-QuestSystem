@@ -18,10 +18,10 @@ import java.util.List;
 /**
  * Compact reflection-only presentation for Conversations 1.0.5.
  *
- * The upstream screen hard-codes a 512-GUI-pixel panel and positions all of its reply hitboxes
- * around the same fixed geometry. That makes it consume almost the entire screen at the GUI scale
- * used by CozyCrazyCraft. Replacing the presentation at ScreenEvent.Opening lets us keep the
- * upstream conversation/state/network implementation while rendering a responsive lower-third UI.
+ * Conversations' stock client API only knows how to refresh/close its own ConversationScreen.
+ * CozyCrazyCraft replaces that presentation, so this screen mirrors the upstream currentConversation
+ * field each tick. That keeps dialogue.goto pages synchronized and lets dialogue.close actually close
+ * the compact UI instead of leaving a dead reply panel behind.
  */
 public final class CompactConversationScreen extends Screen {
     private static final int MAX_PANEL_WIDTH = 430;
@@ -35,7 +35,7 @@ public final class CompactConversationScreen extends Screen {
     private static Field upstreamCurrentConversationField;
     private static boolean upstreamConversationFieldUnavailable;
 
-    private final Object conversation;
+    private Object conversation;
     private int visibleCharacters;
     private boolean closing;
     private final List<ReplyBox> replyBoxes = new ArrayList<>();
@@ -48,17 +48,7 @@ public final class CompactConversationScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-
-        // Conversations' own client sync only auto-closes its stock ConversationScreen. Because
-        // CozyCrazyCraft deliberately replaces that screen, a server-side dialogue.close used to
-        // leave this compact screen stranded even though the conversation had ended. Mirror the
-        // upstream null-state here so terminal replies such as "Never mind" and "It's handled"
-        // visibly finish the exchange.
-        if (upstreamConversationEnded()) {
-            closing = true;
-            Minecraft.getInstance().setScreen(null);
-            return;
-        }
+        if (syncUpstreamConversation()) return;
 
         String text = dialogueText();
         if (visibleCharacters < text.length()) {
@@ -184,7 +174,10 @@ public final class CompactConversationScreen extends Screen {
         );
     }
 
-    private boolean upstreamConversationEnded() {
+    /**
+     * @return true when the upstream conversation has ended and this screen has closed itself.
+     */
+    private boolean syncUpstreamConversation() {
         if (upstreamConversationFieldUnavailable) return false;
         try {
             if (upstreamCurrentConversationField == null) {
@@ -193,10 +186,24 @@ public final class CompactConversationScreen extends Screen {
                 field.setAccessible(true);
                 upstreamCurrentConversationField = field;
             }
-            return upstreamCurrentConversationField.get(null) == null;
+
+            Object current = upstreamCurrentConversationField.get(null);
+            if (current == null) {
+                closing = true;
+                Minecraft.getInstance().setScreen(null);
+                return true;
+            }
+
+            if (current != conversation) {
+                String previousText = dialogueText();
+                conversation = current;
+                String nextText = dialogueText();
+                if (!nextText.equals(previousText)) visibleCharacters = 0;
+            }
+            return false;
         } catch (Throwable error) {
             upstreamConversationFieldUnavailable = true;
-            CozyCrazyQuests.LOGGER.warn("Could not mirror Conversations client close state; compact dialogue auto-close disabled", error);
+            CozyCrazyQuests.LOGGER.warn("Could not mirror Conversations client state; compact dialogue sync disabled", error);
             return false;
         }
     }
