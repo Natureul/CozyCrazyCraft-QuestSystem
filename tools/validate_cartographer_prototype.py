@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACK = ROOT / "prototype" / "cartographer_datapack"
 TRADES = PACK / "data" / "minecraft" / "moonlight" / "villager_trade" / "cartographer"
 CONTRACT = ROOT / "data" / "world_bindings" / "cozy_zones_0_3_6.json"
+REGIONAL_ADDITIONS = ROOT / "data" / "world_bindings" / "cozy_zones_0_3_6_regional_additions.json"
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -24,12 +25,33 @@ def load(path: Path):
         return None
 
 
+def collect_structure_rules(*documents) -> dict[str, dict]:
+    rules: dict[str, dict] = {}
+    for document in documents:
+        if not isinstance(document, dict):
+            continue
+        for rule in document.get("structure_rules", []):
+            if not isinstance(rule, dict) or not isinstance(rule.get("id"), str):
+                continue
+            rid = rule["id"]
+            prior = rules.get(rid)
+            if prior is not None and prior != rule:
+                errors.append(f"Conflicting checked-in 0.3.6 structure rule for {rid}")
+            rules[rid] = rule
+    return rules
+
+
 def main() -> int:
     meta = load(PACK / "pack.mcmeta")
     contract = load(CONTRACT)
+    additions = load(REGIONAL_ADDITIONS)
     if isinstance(meta, dict):
         if (meta.get("pack") or {}).get("pack_format") != 15:
             errors.append("cartographer prototype pack.mcmeta must use 1.20.1 pack_format 15")
+
+    for document, label in ((contract, "compact contract"), (additions, "regional additions")):
+        if isinstance(document, dict) and (document.get("source") or {}).get("version") != "0.3.6":
+            errors.append(f"{label} must identify CozyCrazyZones 0.3.6")
 
     # The namespace is not cosmetic. Moonlight derives the profession resource
     # id from the directory path; vanilla cartographer requires minecraft:cartographer.
@@ -41,11 +63,7 @@ def main() -> int:
         errors.append("Missing data/minecraft/moonlight/villager_trade/cartographer prototype directory")
         return finish()
 
-    explicit_rules = {}
-    if isinstance(contract, dict):
-        for rule in contract.get("structure_rules", []):
-            if isinstance(rule, dict) and isinstance(rule.get("id"), str):
-                explicit_rules[rule["id"]] = rule
+    explicit_rules = collect_structure_rules(contract, additions)
 
     files = sorted(TRADES.glob("*.json"))
     if not files:
@@ -66,12 +84,18 @@ def main() -> int:
         if not isinstance(target, str) or not target:
             errors.append(f"{label}: missing structure target")
         elif target not in explicit_rules:
-            errors.append(f"{label}: target {target} is not present in checked-in CozyCrazyZones 0.3.6 explicit structure rules")
+            errors.append(
+                f"{label}: target {target} is not present in the checked-in audited CozyCrazyZones 0.3.6 structure rules"
+            )
         else:
             rule = explicit_rules[target]
             macros = rule.get("macro_regions") or []
             if not macros:
                 warnings.append(f"{label}: target {target} is not macro-region restricted; static trade may leak across regions")
+            if rule.get("minimum_influence") not in {"CARDINAL_TRANSITION", "ESTABLISHED"}:
+                warnings.append(
+                    f"{label}: target {target} is not regionally established/transition-gated; prefer runtime selection for strict locality"
+                )
 
         lo = data.get("price_min")
         hi = data.get("price_max")
