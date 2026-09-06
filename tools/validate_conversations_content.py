@@ -10,6 +10,23 @@ REQUIRED = {
     "cartographer_first_real_map.json",
     "cartographer_quest_active.json",
     "cartographer_quest_turnin.json",
+    "guard_local.json",
+    "villager_armorer.json",
+    "villager_butcher.json",
+    "villager_cartographer.json",
+    "villager_child.json",
+    "villager_cleric.json",
+    "villager_farmer.json",
+    "villager_fisherman.json",
+    "villager_fletcher.json",
+    "villager_leatherworker.json",
+    "villager_librarian.json",
+    "villager_mason.json",
+    "villager_nitwit.json",
+    "villager_shepherd.json",
+    "villager_toolsmith.json",
+    "villager_unemployed.json",
+    "villager_weaponsmith.json",
 }
 
 ALLOWED_ACTION_PREFIXES = (
@@ -23,10 +40,8 @@ ALLOWED_ACTION_PREFIXES = (
     "debug(",
 )
 
-# Conversations 1.0.5 currently renders a very large fixed conversation panel and defaults to
-# unusually slow 1/2/7/14-character timing. Until the screen itself is replaced/overhauled, keep
-# individual spoken beats concise and require explicit pacing so new dialogue cannot silently
-# regress to the playtest's wall-of-text behavior.
+# The custom CozyCrazyCraft screen is substantially more compact and faster than the stock
+# Conversations 1.0.5 screen, but spoken dialogue should still be speech-sized rather than prose.
 MAX_DIALOGUE_CHARS = 220
 MAX_NORMAL_CHAR_DELAY = 0.75
 
@@ -43,6 +58,12 @@ def validate_action(action: object, source: Path) -> None:
         fail(f"{source}: action object needs non-empty 'action' string")
     if not text.startswith(ALLOWED_ACTION_PREFIXES):
         fail(f"{source}: unsupported Conversations 1.0.5 action syntax: {text}")
+
+    # Conversations 1.0.5 parses give.item as count,item_id{nbt}; a comma between the item id and
+    # opening NBT brace silently makes the registry id end in a comma. This exact bug caused the
+    # first in-game "I'll survey it" button to appear to do nothing.
+    if text.startswith("give.item(") and ",{" in text:
+        fail(f"{source}: invalid Conversations give.item syntax has comma before NBT: {text}")
 
 
 def validate_reply(reply: object, source: Path) -> None:
@@ -68,7 +89,7 @@ def validate_timings(option: dict, source: Path) -> None:
         fail(f"{source}: timings must be four non-negative numbers")
     if timings[0] > MAX_NORMAL_CHAR_DELAY:
         fail(
-            f"{source}: normal character delay {timings[0]} is too slow for the current dialogue UI "
+            f"{source}: normal character delay {timings[0]} is too slow for CozyCrazyCraft dialogue "
             f"(max {MAX_NORMAL_CHAR_DELAY})"
         )
 
@@ -101,11 +122,8 @@ def validate_file(path: Path) -> None:
             if len(dialogue) > MAX_DIALOGUE_CHARS:
                 fail(
                     f"{path}: dialogue beat is {len(dialogue)} chars; split/shorten it below "
-                    f"{MAX_DIALOGUE_CHARS} while using the stock Conversations screen"
+                    f"{MAX_DIALOGUE_CHARS}"
                 )
-            # Conversations 1.0.5 defaults a missing option condition to literal 'null', which is
-            # not an unconditional condition. Require explicit conditions so an authored line can
-            # never disappear because of that parser quirk.
             condition = option.get("condition")
             if not isinstance(condition, str) or not condition:
                 fail(f"{path}: every dialogue option must explicitly declare a condition")
