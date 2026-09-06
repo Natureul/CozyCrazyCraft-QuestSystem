@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "source": "CozyCrazyCraft Villager Quest & Reward Master Bible v0.2",
+  "status": "design_authority_data_only_until_runtime_loader_is_validated",
+  "role_vocabulary": [
+    "observe",
+    "protect_coexist",
+    "tame_breed",
+    "material",
+    "controlled_hunt",
+    "predator_hunt",
+    "elite_hunt"
+  ],
+  "rules": [
+    {
+      "Rule": "Ecology role",
+      "Implementation behavior": "Each Alex's Mobs entry carries one of: observe, protect/coexist, tame/breed, material, controlled hunt, predator hunt, elite hunt. Weight the role before selecting the exact objective.",
+      "Reason": "Prevents the ‘every animal is a murder quest’ problem."
+    },
+    {
+      "Rule": "Mob eligibility",
+      "Implementation behavior": "Quest mob must match current macro-region + minimum authored band; cross-region only when the actual local biome supports it.",
+      "Reason": "Keeps gazelles in Sunscar and Froststalkers in Frostmarch."
+    },
+    {
+      "Rule": "Spawn reality check",
+      "Implementation behavior": "If a required species does not spawn within a reasonable quest radius, do not offer the quest. Prefer recent local sightings / biome capability checks.",
+      "Reason": "Prevents impossible contracts."
+    },
+    {
+      "Rule": "Group-aware counts",
+      "Implementation behavior": "Herd/flock creatures use census or small controlled-cull counts; solitary rare creatures use 1 target; Froststalker-style packs can use natural pack-sized objectives.",
+      "Reason": "Counts feel ecological rather than arbitrary."
+    },
+    {
+      "Rule": "Peaceful target guardrail",
+      "Implementation behavior": "Routine kill pool excludes protected/peaceful-observation species unless the authored quest explicitly opts into hunting/culling.",
+      "Reason": "Lets the same gazelle support census, protection, or modest hunting without becoming spam."
+    },
+    {
+      "Rule": "Native proof items",
+      "Implementation behavior": "Prefer real Alex's Mobs drops/materials where practical. Use custom proof only when the real mob has no suitable item or when requiring the drop would create RNG frustration.",
+      "Reason": "Better mod integration and less fake quest clutter."
+    },
+    {
+      "Rule": "Unique reward ownership",
+      "Implementation behavior": "Each named reward has a home region/profession and should not appear as generic random loot elsewhere.",
+      "Reason": "Preserves regional identity."
+    },
+    {
+      "Rule": "Boomerang ownership",
+      "Implementation behavior": "Sunscar owns the boomerang identity. Greenveil may use javelins and other throwing/reach weapons, but should not casually dilute The Red Return / South boomerang identity.",
+      "Reason": "Carries forward the region correction."
+    },
+    {
+      "Rule": "Story boss separation",
+      "Implementation behavior": "Alex ecology jobs can build trust toward Frostmaw/Umvuthi/Sir Pumpkinhead/etc., but do not replace the authored boss chain.",
+      "Reason": "Keeps main quests socially meaningful."
+    },
+    {
+      "Rule": "Future boss stubs",
+      "Implementation behavior": "East Jungle Abomination and South Ancient Remnant remain future-story flags until their isolated encounters are actually ready.",
+      "Reason": "No fake/unfinishable main quest."
+    }
+  ],
+  "visibility_by_band": [
+    {
+      "Band": "Hearthlands",
+      "Suggested ecology visibility": "1 ecology quest in a 5-6 quest visible set; mostly observe/protect/odd naturalist, with occasional modest hunt.",
+      "Guardrail": "Do not make the starter area feel like a wildlife checklist."
+    },
+    {
+      "Band": "Frontier",
+      "Suggested ecology visibility": "1-2 ecology quests; introduce real predator/hazard hunts and material commissions.",
+      "Guardrail": "This is where regional fauna becomes part of expedition planning."
+    },
+    {
+      "Band": "Wildlands",
+      "Suggested ecology visibility": "1 ecology major or elite contract + optional nonlethal discovery.",
+      "Guardrail": "Strong native gear and named reward chains begin paying off."
+    },
+    {
+      "Band": "Dread Reaches",
+      "Suggested ecology visibility": "Rare elite ecology/horror/maritime contracts; mostly bespoke or trust-gated.",
+      "Guardrail": "Dread should not merely scale up counts of gazelles/raccoons."
+    }
+  ],
+  "species": [
+    {"mob":"Raccoon","registry_id":"alexsmobs:raccoon","default_habitat_clue":"forest / plains / taiga","best_cozy_region":"Shared core; West; North edge","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"observe, nuisance-proof, food recovery; occasional tame/coexistence","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Crow","registry_id":"alexsmobs:crow","default_habitat_clue":"common temperate surface","best_cozy_region":"Shared core; West","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"observe, tame/breed, recover stolen object, farm helper flavor","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Blue Jay","registry_id":"alexsmobs:blue_jay","default_habitat_clue":"temperate woodland","best_cozy_region":"Shared core; West; North edge","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"observe/feed; low-stakes naturalist work","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Hummingbird","registry_id":"alexsmobs:hummingbird","default_habitat_clue":"flower forest / meadow / jungle","best_cozy_region":"Shared core; East","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"feeder, pollination, photograph; never routine kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Sugar Glider","registry_id":"alexsmobs:sugar_glider","default_habitat_clue":"birch / old-growth birch","best_cozy_region":"Shared core; East/West","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"rescue/tame/observe; rare pet-style chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Skunk","registry_id":"alexsmobs:skunk","default_habitat_clue":"forests, non-cold/non-savanna","best_cozy_region":"West; East edge","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"relocate/nuisance route; stink-related odd jobs","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Bison","registry_id":"alexsmobs:bison","default_habitat_clue":"plains / meadow","best_cozy_region":"Shared core; West","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"herd census/protection; modest butcher cull if justified","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Gazelle","registry_id":"alexsmobs:gazelle","default_habitat_clue":"savanna / arid grassland","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"herd census, fence protection, modest hunt, horn proof","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Roadrunner","registry_id":"alexsmobs:roadrunner","default_habitat_clue":"badlands / hot dry sandy","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"race/census/feather recovery; Roadrunner Boots chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Jerboa","registry_id":"alexsmobs:jerboa","default_habitat_clue":"hot dry sandy deserts","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"observe/capture-and-release, tiny naturalist quest","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Emu","registry_id":"alexsmobs:emu","default_habitat_clue":"savanna / mesa","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"egg/feather recovery, pasture nuisance, breeding","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Kangaroo","registry_id":"alexsmobs:kangaroo","default_habitat_clue":"savanna / mesa","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"observe/breeding/boxing oddity; hide only in justified hunt","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Maned Wolf","registry_id":"alexsmobs:maned_wolf","default_habitat_clue":"savanna","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"photograph/track; predator-at-fence flavor without mass kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Rain Frog","registry_id":"alexsmobs:rain_frog","default_habitat_clue":"hot dry sandy desert","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"weather-linked discovery / ecology quest","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Triops","registry_id":"alexsmobs:triops","default_habitat_clue":"ephemeral desert-water flavor","best_cozy_region":"South","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"rain-pool collection/return; Fisherman naturalist quest","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Toucan","registry_id":"alexsmobs:toucan","default_habitat_clue":"jungle, excluding bamboo jungle","best_cozy_region":"East","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"fruit/feeding/breeding/photo; not routine kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Capuchin Monkey","registry_id":"alexsmobs:capuchin_monkey","default_habitat_clue":"jungle / mangrove-adjacent","best_cozy_region":"East","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"tame/breed/observe; recover stolen supplies","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Leafcutter Ant","registry_id":"alexsmobs:leafcutter_ant","default_habitat_clue":"jungle ecosystem","best_cozy_region":"East","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"anthill survey; crop-path management; pupa/material work","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Anteater","registry_id":"alexsmobs:anteater","default_habitat_clue":"jungle","best_cozy_region":"East","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"observe/protect anthill balance; naturalist work","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Gorilla","registry_id":"alexsmobs:gorilla","default_habitat_clue":"jungle / rainforest","best_cozy_region":"East","earliest_quest_band":"Frontier","recommended_quest_treatment":"territory survey, tame/breed chain, protect expedition; avoid generic slaughter","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Caiman","registry_id":"alexsmobs:caiman","default_habitat_clue":"warm wet river/swamp ecosystem","best_cozy_region":"East / South","earliest_quest_band":"Frontier","recommended_quest_treatment":"river predator clearance; hide/scute-style proof if available","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Crocodile","registry_id":"alexsmobs:crocodile","default_habitat_clue":"swamp / mangrove / warm rivers","best_cozy_region":"East / South","earliest_quest_band":"Frontier","recommended_quest_treatment":"dangerous water-route hunt; scute/egg/reward gear chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Shoebill","registry_id":"alexsmobs:shoebill","default_habitat_clue":"swamp","best_cozy_region":"East","earliest_quest_band":"Frontier","recommended_quest_treatment":"lure/feed/observe; Fisherman luck-flavored work","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Mudskipper","registry_id":"alexsmobs:mudskipper","default_habitat_clue":"mangrove","best_cozy_region":"East","earliest_quest_band":"Frontier","recommended_quest_treatment":"wetland survey/collection, no-kill naturalist quest","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Mantis Shrimp","registry_id":"alexsmobs:mantis_shrimp","default_habitat_clue":"hot ocean / mangrove","best_cozy_region":"East / South coast","earliest_quest_band":"Frontier","recommended_quest_treatment":"dangerous coastal collection/hunt; aquarium/sea route","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Mimic Octopus","registry_id":"alexsmobs:mimic_octopus","default_habitat_clue":"warm coastal water","best_cozy_region":"East / South coast","earliest_quest_band":"Frontier","recommended_quest_treatment":"observe disguise / recover lost tackle; rare capture-style task","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Catfish","registry_id":"alexsmobs:catfish","default_habitat_clue":"swamp / ice-free river","best_cozy_region":"East / South / West","earliest_quest_band":"Frontier","recommended_quest_treatment":"fishing commission, oversized catch, river survey","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Platypus","registry_id":"alexsmobs:platypus","default_habitat_clue":"ice-free river","best_cozy_region":"East / West","earliest_quest_band":"Frontier","recommended_quest_treatment":"dig/observe/feed; weird naturalist chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Terrapin","registry_id":"alexsmobs:terrapin","default_habitat_clue":"ice-free river","best_cozy_region":"East / West / South","earliest_quest_band":"Frontier","recommended_quest_treatment":"river census/breed; low-threat Fisherman quest","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Tiger","registry_id":"alexsmobs:tiger","default_habitat_clue":"bamboo jungle / lush special forest","best_cozy_region":"East","earliest_quest_band":"Wildlands","recommended_quest_treatment":"major predator hunt, territory-clear, rare coexistence/tame chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Anaconda","registry_id":"alexsmobs:anaconda","default_habitat_clue":"swamp / mangrove / rainforest","best_cozy_region":"East","earliest_quest_band":"Wildlands","recommended_quest_treatment":"major river/swamp hunt; expedition rescue threat","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Alligator Snapping Turtle","registry_id":"alexsmobs:alligator_snapping_turtle","default_habitat_clue":"swamp","best_cozy_region":"East / West bogs","earliest_quest_band":"Wildlands","recommended_quest_treatment":"dangerous water-edge clear; spiked-shell reward chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Komodo Dragon","registry_id":"alexsmobs:komodo_dragon","default_habitat_clue":"sparse jungle / warm dry exotic terrain","best_cozy_region":"East / South edge","earliest_quest_band":"Wildlands","recommended_quest_treatment":"elite predator hunt; spit/material proof","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Cave Centipede","registry_id":"alexsmobs:centipede_head","default_habitat_clue":"caves","best_cozy_region":"East / West / South cave routes","earliest_quest_band":"Frontier","recommended_quest_treatment":"cave clear; leg/leggings reward chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Flutter","registry_id":"alexsmobs:flutter","default_habitat_clue":"lush caves","best_cozy_region":"East","earliest_quest_band":"Frontier","recommended_quest_treatment":"lure/breed/observe; cave naturalist quest","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Rocky Roller","registry_id":"alexsmobs:rocky_roller","default_habitat_clue":"stone / dripstone caves","best_cozy_region":"South / West cave routes","earliest_quest_band":"Frontier","recommended_quest_treatment":"cave hazard clear; shell gear chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Grizzly Bear","registry_id":"alexsmobs:grizzly_bear","default_habitat_clue":"temperate/cold forest","best_cozy_region":"West / North","earliest_quest_band":"Frontier","recommended_quest_treatment":"apiary/road predator problem; track/avoid/hunt contextually","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Bald Eagle","registry_id":"alexsmobs:bald_eagle","default_habitat_clue":"hills / coniferous / grove","best_cozy_region":"North / West","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"falconry/photo/feeding chain; not routine kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Moose","registry_id":"alexsmobs:moose","default_habitat_clue":"snowy / taiga variants","best_cozy_region":"North","earliest_quest_band":"Frontier","recommended_quest_treatment":"migration/road safety; antler material; occasional cull","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Seal","registry_id":"alexsmobs:seal","default_habitat_clue":"beach / cold ocean","best_cozy_region":"North coast","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"colony census/offerings; protect from threats","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Snow Leopard","registry_id":"alexsmobs:snow_leopard","default_habitat_clue":"snowy mountain terrain","best_cozy_region":"North","earliest_quest_band":"Frontier","recommended_quest_treatment":"rare predator tracking; Wildlands major hunt if threatening roads","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Froststalker","registry_id":"alexsmobs:froststalker","default_habitat_clue":"ice spikes / frozen peaks","best_cozy_region":"North","earliest_quest_band":"Wildlands","recommended_quest_treatment":"pack hunt / major cold-route hazard; froststalker horn/helmet chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Tusklin","registry_id":"alexsmobs:tusklin","default_habitat_clue":"ice spikes / snowy plains","best_cozy_region":"North","earliest_quest_band":"Wildlands","recommended_quest_treatment":"dangerous herd/route management; tame/breed possibility","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Orca","registry_id":"alexsmobs:orca","default_habitat_clue":"cold ocean","best_cozy_region":"North coast","earliest_quest_band":"Wildlands","recommended_quest_treatment":"cold-ocean survey/escort; avoid routine kill unless authored threat","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Cachalot Whale","registry_id":"alexsmobs:cachalot_whale","default_habitat_clue":"cold/deep ocean","best_cozy_region":"North / West deep sea","earliest_quest_band":"Wildlands","recommended_quest_treatment":"rare whale event / echolocation / ambergris expedition; never kill-count filler","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Frilled Shark","registry_id":"alexsmobs:frilled_shark","default_habitat_clue":"deep ocean","best_cozy_region":"North / any deep ocean","earliest_quest_band":"Wildlands","recommended_quest_treatment":"deep-sea predator hunt / salvage escort","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Skelewag","registry_id":"alexsmobs:skelewag","default_habitat_clue":"deep ocean / shipwreck-oriented","best_cozy_region":"North / West coast","earliest_quest_band":"Wildlands","recommended_quest_treatment":"shipwreck clear / skull trophy / Dread maritime route","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Giant Squid","registry_id":"alexsmobs:giant_squid","default_habitat_clue":"deep ocean","best_cozy_region":"Any appropriate deep sea","earliest_quest_band":"Wildlands","recommended_quest_treatment":"major sea encounter / salvage obstruction; test before routine use","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Hammerhead Shark","registry_id":"alexsmobs:hammerhead_shark","default_habitat_clue":"hot ocean","best_cozy_region":"South / East coast","earliest_quest_band":"Frontier","recommended_quest_treatment":"coastal predator hunt / shark-tooth ammunition chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Flying Fish","registry_id":"alexsmobs:flying_fish","default_habitat_clue":"temperate ocean","best_cozy_region":"West / East / South coast","earliest_quest_band":"Frontier","recommended_quest_treatment":"fishing/observation; Flying Fish Boots chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Lobster","registry_id":"alexsmobs:lobster","default_habitat_clue":"coast","best_cozy_region":"Any coast","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"fishing/food/cage recovery; low-stakes coastal work","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Seagull","registry_id":"alexsmobs:seagull","default_habitat_clue":"coast","best_cozy_region":"Any coast","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"stolen-item nuisance / offerings / harbor survey","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Tasmanian Devil","registry_id":"alexsmobs:tasmanian_devil","default_habitat_clue":"temperate forest","best_cozy_region":"West","earliest_quest_band":"Frontier","recommended_quest_treatment":"howl/food interaction; scavenger problem; avoid mass kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Potoo","registry_id":"alexsmobs:potoo","default_habitat_clue":"dark forest","best_cozy_region":"West","earliest_quest_band":"Frontier","recommended_quest_treatment":"night photo/listen quest; naturalist discovery","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Banana Slug","registry_id":"alexsmobs:banana_slug","default_habitat_clue":"old-growth taiga / redwood","best_cozy_region":"West","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"collect slime/sample / photograph; perfect redwood flavor","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Murmur","registry_id":"alexsmobs:murmur","default_habitat_clue":"caves","best_cozy_region":"West / deep routes","earliest_quest_band":"Wildlands","recommended_quest_treatment":"major cave hunt / miner rescue","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Underminer","registry_id":"alexsmobs:underminer","default_habitat_clue":"underground ore routes","best_cozy_region":"Any deep mining region","earliest_quest_band":"Wildlands","recommended_quest_treatment":"follow-to-ore / recover miner kit; not necessarily kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Skreecher","registry_id":"alexsmobs:skreecher","default_habitat_clue":"deep dangerous cave biome","best_cozy_region":"West / Dread cave routes","earliest_quest_band":"Dread Reaches","recommended_quest_treatment":"elite cave clear / horror investigation","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Tarantula Hawk","registry_id":"alexsmobs:tarantula_hawk","default_habitat_clue":"hot dry desert","best_cozy_region":"South","earliest_quest_band":"Frontier","recommended_quest_treatment":"dangerous insect hunt / sting-rescue; Elytra-equivalent reward only very late","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Rattlesnake","registry_id":"alexsmobs:rattlesnake","default_habitat_clue":"badlands / hot dry sandy","best_cozy_region":"South","earliest_quest_band":"Frontier","recommended_quest_treatment":"roadside hazard hunt; rattle proof / anti-venom-themed supply","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Sunbird","registry_id":"alexsmobs:sunbird","default_habitat_clue":"mountains","best_cozy_region":"South / East mountain edge","earliest_quest_band":"Wildlands","recommended_quest_treatment":"rare summit observation / blessing-like expedition; not routine kill","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Rhinoceros","registry_id":"alexsmobs:rhinoceros","default_habitat_clue":"savanna","best_cozy_region":"South","earliest_quest_band":"Wildlands","recommended_quest_treatment":"caravan safety / herd route / rare major hunt only if explicitly dangerous","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Elephant","registry_id":"alexsmobs:elephant","default_habitat_clue":"savanna / arid grassland","best_cozy_region":"South","earliest_quest_band":"Frontier","recommended_quest_treatment":"herd tracking, tame/breed, acacia blossom, caravan interaction; never generic kill spam","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Guster","registry_id":"alexsmobs:guster","default_habitat_clue":"hot/dry/sandy and desert caves","best_cozy_region":"South","earliest_quest_band":"Frontier","recommended_quest_treatment":"hazard hunt; Guster Eye/Pocket of Sand material chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Cockroach","registry_id":"alexsmobs:cockroach","default_habitat_clue":"underground/dirty environments","best_cozy_region":"Shared / caves","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"pest clear; low-stakes Farmer/Butcher/Toolsmith filler","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Fly","registry_id":"alexsmobs:fly","default_habitat_clue":"surface ambient","best_cozy_region":"Shared","earliest_quest_band":"Hearthlands","recommended_quest_treatment":"pest/compost flavor; use sparingly","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Mungus","registry_id":"alexsmobs:mungus","default_habitat_clue":"mushroom ecosystem","best_cozy_region":"Side-route / mushroom biomes","earliest_quest_band":"Frontier","recommended_quest_treatment":"strange ecology sidequest; not cardinal mainline","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."},
+    {"mob":"Bunfungus","registry_id":"alexsmobs:bunfungus","default_habitat_clue":"mushroom ecosystem","best_cozy_region":"Side-route / mushroom biomes","earliest_quest_band":"Frontier","recommended_quest_treatment":"rare naturalist/taming chain","spawn_zoning_note":"Authored quest placement only; not a CozyCrazyZones natural-spawn restriction."}
+  ],
+  "exception_policy": {
+    "nether_and_end": "Keep dimensional / exceptional Alex's Mobs out of normal Overworld village rotation until a dedicated chapter exists.",
+    "spawn_reality": "Do not offer a species-specific quest unless current local evidence or biome/spawn capability makes the species reasonably available.",
+    "peaceful_species": "Routine kill pools must not select peaceful/protected observation species unless the authored quest explicitly opts into a justified hunt or controlled cull."
+  }
+}
