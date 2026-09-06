@@ -40,6 +40,8 @@ jobs:
         run: python tools/validate_world_bindings.py
       - name: Validate cartographer map prototype
         run: python tools/validate_cartographer_prototype.py
+      - name: Validate Conversations dialogue content
+        run: python tools/validate_conversations_content.py
       - name: Validate story-board metadata
         run: python tools/validate_story_ui.py
       - name: Validate regional field-job story metadata
