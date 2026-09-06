@@ -7,12 +7,16 @@ The goal is not to make every quest pay in stronger armor. The best regional rew
 Status language:
 
 - **Safe vanilla** — ordinary item reward is mechanically straightforward now.
+- **Source-checked** — exact item path/mechanic is supported by upstream source; still needs one full-pack Bountiful delivery/use test.
 - **Candidate** — strong design fit; exact installed registry ID / behavior still needs audit.
+- **Hold** — known compatibility/behavior concern; do not make progression depend on it yet.
 - **Curated stack** — weapon/armor reward needs exact Spartan Weaponry + Quality Equipment + enchantment stack validation.
 - **World/system reward** — map, reputation, settlement change, pet ownership, etc.; requires the corresponding integration layer.
 - **Native destination loot** — should stay in the dungeon/boss rather than become a bounty-board vending reward.
 
 > Regional association is not global exclusivity. A reward can be especially natural in one region without becoming unusable or impossible elsewhere.
+
+For the exact source findings and caution notes, see [`docs/REWARD_SOURCE_AUDIT.md`](docs/REWARD_SOURCE_AUDIT.md).
 
 ---
 
@@ -24,7 +28,7 @@ Status language:
 
 | Reward | Why it belongs here | Status |
 |---|---|---|
-| Thermometer | Teaches Cold Sweat through play instead of JEI | Candidate |
+| Thermometer (`cold_sweat:thermometer`) | Teaches Cold Sweat through play instead of JEI | Source-checked |
 | Wool / early insulation bundle | Makes first cold preparation understandable | Candidate |
 | **Trailwarden** iron spear/pike | Reach is useful against open-country and large northern threats | Curated stack |
 | Tall-quality boots | Step-height utility quietly improves snowy/hilly travel | Curated stack |
@@ -34,10 +38,10 @@ Status language:
 
 | Reward | Why it belongs here | Status |
 |---|---|---|
-| Sewing Table | Turns insulation into deliberate progression | Candidate |
+| Sewing Table (`cold_sweat:sewing_table`) | Turns insulation into deliberate progression | Source-checked |
 | Better cold-insulation materials | The environment now expects actual preparation | Candidate |
 | Horse Frost Walker | A wonderful region-specific mount upgrade | Candidate |
-| Backpack expansion token | Long expeditions justify more carrying capacity | Candidate |
+| Backpack Unlock Token (`backpacked:unlock_token`) | Long expeditions justify more carrying capacity | Source-checked |
 | Stronger hunting bow/crossbow | Fits mountain/watch contracts | Curated stack / Candidate |
 
 ## Wildlands
@@ -46,7 +50,8 @@ Status language:
 |---|---|---|
 | **White Reach** diamond pike | Signature T3 northern expedition weapon | Curated stack |
 | Serious pet/hunter enchant | Companion can develop alongside the player | Candidate |
-| Swimmer / angler utility | Frozen coast preparation before Aquamirae | Candidate |
+| Swimmer's Guide | Tempting frozen-coast utility, but an upstream Aquamirae compatibility report makes this a bad progression dependency right now | **Hold** |
+| Angler / simpler coast utility | Frozen coast preparation without making the Aquamirae path depend on Swimmer's Guide | Candidate |
 | Icebreaker / serious ship progression | Earned water traversal without skipping the whole world | World/system reward |
 | Deep-North maps/journals | Information itself becomes premium loot | World/system reward |
 
@@ -80,11 +85,11 @@ Do not dilute Cornelia by making the board pay out a whole second boss chest.
 
 | Reward | Why it belongs here | Status |
 |---|---|---|
-| Nature Rune | Strong farming/animal identity | Candidate |
+| Nature Rune (`majruszsaccessories:nature_rune`) | Strong farming/animal identity, but may skip an intended accessory-combination loop if awarded too cheaply | Source-checked; placement review |
 | Pet poison resistance | Makes bringing companions into dangerous jungle viable | Candidate |
 | Pet flute / herding utility | Animal-management progression | Candidate |
 | Farmer's Respite kettle/crop starter | Makes herbalist quests mechanically useful | Candidate |
-| Backpack expansion / gathering augment | Dense-country expeditions benefit from storage utility | Candidate |
+| Backpack Unlock Token / gathering augment | Dense-country expeditions benefit from storage utility | Source-checked token / Candidate augment |
 
 ## Wildlands
 
@@ -114,9 +119,10 @@ Primary reward should be Jungle Abomination native/adapted encounter loot once f
 
 | Reward | Why it belongs here | Status |
 |---|---|---|
-| **Acacia Blossoms** | Benchmark reward: quest exposes the elephant-taming mechanic | Candidate, high priority |
+| **Acacia Blossoms** (`alexsmobs:acacia_blossom`) | Benchmark reward: quest exposes the real Alex's Mobs elephant-taming mechanic | **Source-checked, high priority** |
 | Saddle | Natural civilization reward; supports removal of convenience saddle recipe | Safe vanilla |
-| Waterskin / cooling starter | Teaches Cold Sweat's hot-weather side | Candidate |
+| Empty Waterskin (`cold_sweat:waterskin`) | Teaches Cold Sweat's hot-weather side without guessing filled-item metadata | Source-checked |
+| Special cooled/filled Waterskin | Excellent thematic idea, but exact stack state must be captured first | Candidate / stack test |
 | Heat-insulation starter material | Early preparation before severe desert | Candidate |
 | Road javelin / spear | Open-country weapon identity | Curated stack |
 
@@ -124,12 +130,12 @@ Primary reward should be Jungle Abomination native/adapted encounter loot once f
 
 | Reward | Why it belongs here | Status |
 |---|---|---|
-| Certificate of Taming | Excellent animal-focused reward | Candidate |
-| Ancient Scarab | Archaeology quest that makes later archaeology better | Candidate, high priority |
+| Certificate of Taming (`majruszsaccessories:certificate_of_taming`) | Fits the animal theme, but an open Forge 1.20.1 bug report says it may not work | **Hold** |
+| Ancient Scarab (`majruszsaccessories:ancient_scarab`) | Archaeology quest that makes later archaeology better | Source-checked, high priority |
 | Speedy-quality boots | Open terrain makes movement speed meaningful | Curated stack |
 | Supply Cart | Uses the land instead of skipping it | Candidate, high priority |
 | Animal Cart | Regional livestock/passenger logistics | Candidate |
-| Icebox / cooling infrastructure | Settlement/base progression for serious heat | Candidate / World infrastructure |
+| Icebox (`cold_sweat:icebox`) / cooling infrastructure | Settlement/base progression for serious heat | Source-checked ID / World infrastructure |
 | Better waterskin/cooling kit | Practical desert expedition reward | Candidate |
 
 ## Wildlands
@@ -138,7 +144,7 @@ Primary reward should be Jungle Abomination native/adapted encounter loot once f
 |---|---|---|
 | **Sunspike** diamond lance | Signature T3 Sunscar weapon | Curated stack |
 | Advanced caravan/cart utility | Long-range land logistics become a regional strength | Candidate |
-| Backpack expansion / hazard-resistant augment | Deep-desert expedition utility | Candidate |
+| Backpack Unlock Token / hazard-resistant augment | Deep-desert expedition utility | Source-checked token / Candidate augment |
 | Archaeology maps/tablets | Knowledge progressively reveals the Cursed Pyramid | World/system reward |
 | Strong mount-related enchantment | Rewards using the region's travel identity | Candidate |
 
@@ -163,7 +169,7 @@ The board should not replace the pyramid's treasure ecology.
 | Reward | Why it belongs here | Status |
 |---|---|---|
 | Saddle / stable reward | Strong fit for **The Empty Stalls** and ordinary village life | Safe vanilla |
-| Tamed Potato Beetle | Memorable agricultural utility instead of raw stats | Candidate, high priority |
+| Tamed Potato Beetle (`majruszsaccessories:tamed_potato_beetle`) | Memorable agricultural utility instead of raw stats | Source-checked; effect test required |
 | Wind Chime | Home/night utility; makes a small quest feel worthwhile | Candidate |
 | **Woodman's Friend** iron battleaxe | Practical woodsman identity | Curated stack |
 | Farming supplies / food | Keeps the early West genuinely habitable and lived-in | Safe vanilla |
@@ -186,7 +192,7 @@ The board should not replace the pyramid's treasure ecology.
 | **Harvest Moon** diamond scythe | Signature T3 western weapon | Curated stack |
 | Better farming/harvest enchantment | Deepens region identity without generic damage inflation | Candidate |
 | Mansion/ruin correspondence | Information lead toward stranger western content | World/system reward |
-| Backpack expansion / survey utility | Long old-forest expeditions | Candidate |
+| Backpack Unlock Token / survey utility | Long old-forest expeditions | Source-checked token / Candidate survey utility |
 | Advanced defensive/pet reward | Fits dangerous woodland travel | Candidate |
 
 ## Dread Reaches
@@ -211,7 +217,7 @@ These are valuable precisely because they remain useful after leaving the region
 | Elephant taming access | Sunscar | Mount/companion utility anywhere |
 | Falconry/hunter utility | Frostmarch | Scouting/hunting elsewhere |
 | Farming/home rewards | Harvestlands | Improve whichever base becomes home |
-| Backpack expansion | Any expedition tier | Universal |
+| Backpack Unlock Token | Any expedition tier | Universal and explicitly intended by Backpacked as a modpack reward item |
 | Pet enchantments | Region-themed first source | Companion develops across the whole world |
 | Maps/journals | Wherever discovered | Connect regions and destinations |
 
