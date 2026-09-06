@@ -94,7 +94,25 @@ public final class VillageConversationQuestManager {
         }
 
         String targetName = NamedPlaceBridge.structureName(level, target.id(), target.pos());
-        writePending(root, level, villager, village, villageCell, definition, target, targetName, player);
+        String targetKey = targetSubjectKey(level, target.id(), target.pos());
+        VillageLocalFactSavedData.Fact fact = VillageLocalFactSavedData.get(level).rememberStructureSurvey(
+                village,
+                target.id(),
+                target.pos(),
+                targetName,
+                level.getGameTime()
+        );
+
+        // The cartographer is a KNOWN-quality source for this particular place. Hearing the proper
+        // name is itself knowledge; accepting the commission only controls the Atlas handoff.
+        PlayerKnowledgeState.advance(
+                player,
+                targetKey,
+                PlayerKnowledgeState.Knowledge.KNOWN,
+                PlayerKnowledgeState.Provenance.MAP_RECORD
+        );
+
+        writePending(root, level, villager, village, villageCell, definition, target, targetName, targetKey, fact.factId(), player);
         saveRoot(player, root);
         ConversationBridge.setDialogue(villager, OFFER_DIALOGUE);
 
@@ -126,6 +144,16 @@ public final class VillageConversationQuestManager {
         active.putBoolean("surveyed", true);
         root.put(ACTIVE, active);
         saveRoot(player, root);
+
+        String targetKey = active.getString("target_key");
+        if (targetKey.isBlank()) targetKey = legacyTargetSubjectKey(level, active, target);
+        PlayerKnowledgeState.advance(
+                player,
+                targetKey,
+                PlayerKnowledgeState.Knowledge.CONFIRMED,
+                PlayerKnowledgeState.Provenance.QUEST_PROOF
+        );
+
         String villageName = active.getString("village_name");
         if (villageName.isBlank()) villageName = "the issuing village";
         player.sendSystemMessage(
@@ -247,6 +275,19 @@ public final class VillageConversationQuestManager {
         );
         VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, villageKey);
 
+        String factId = active.getString("fact_id");
+        if (!factId.isBlank()) VillageLocalFactSavedData.get(level).resolve(villageKey, factId, level.getGameTime());
+
+        String targetKey = active.getString("target_key");
+        if (!targetKey.isBlank()) {
+            PlayerKnowledgeState.advance(
+                    player,
+                    targetKey,
+                    PlayerKnowledgeState.Knowledge.CONFIRMED,
+                    PlayerKnowledgeState.Provenance.PLAYER_REPORT
+            );
+        }
+
         boolean boardSynced = false;
         if (active.getBoolean("has_board") || active.contains("boardX")) {
             BlockPos boardPos = readPos(active, "board");
@@ -328,6 +369,8 @@ public final class VillageConversationQuestManager {
             VillageQuestCatalog.Definition definition,
             NearbyStructureResolver.ResolvedStructure target,
             String targetName,
+            String targetKey,
+            String factId,
             ServerPlayer player
     ) {
         CompoundTag pending = new CompoundTag();
@@ -347,6 +390,8 @@ public final class VillageConversationQuestManager {
         if (village.hasBoard()) putPos(pending, "board", village.boardPos());
         pending.putString("target_dimension", level.dimension().location().toString());
         pending.putString("target_structure", target.id().toString());
+        pending.putString("target_key", targetKey);
+        pending.putString("fact_id", factId);
         putPos(pending, "target", target.pos());
         pending.putInt("target_radius", definition.targetRadiusBlocks());
         pending.putString("target_name", targetName);
@@ -401,6 +446,18 @@ public final class VillageConversationQuestManager {
 
     private static String legacyCompletionKey(String questId, ServerLevel level, BlockPos boardPos) {
         return questId + "@" + level.dimension().location() + "@" + boardPos.getX() + "," + boardPos.getY() + "," + boardPos.getZ();
+    }
+
+    private static String targetSubjectKey(ServerLevel level, ResourceLocation structureId, BlockPos target) {
+        return level.dimension().location() + "|structure|" + structureId + "|"
+                + Math.floorDiv(target.getX(), 16) + "," + Math.floorDiv(target.getZ(), 16);
+    }
+
+    private static String legacyTargetSubjectKey(ServerLevel level, CompoundTag active, BlockPos target) {
+        ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
+        if (structureId != null) return targetSubjectKey(level, structureId, target);
+        return level.dimension().location() + "|place|" + active.getString("target_name") + "|"
+                + Math.floorDiv(target.getX(), 16) + "," + Math.floorDiv(target.getZ(), 16);
     }
 
     private static String legacyVillageKey(ServerLevel level, CompoundTag active, BlockPos anchor) {
