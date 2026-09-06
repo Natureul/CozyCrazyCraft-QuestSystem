@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "source": {
+    "mod": "CozyCrazyZones",
+    "version": "0.3.6",
+    "inspection": "direct bytecode inspection of user-provided Forge 1.20.1 jar",
+    "purpose": "Machine-readable regional structure rules discovered after the initial compact 0.3.6 contract was checked in. Runtime still uses live CozyZonesApi/ZoneRuleRegistry as authority."
+  },
+  "structure_rules": [
+    {"id":"beautify:botanist_house_snowy","minimum":"HEARTHLANDS","macro_regions":["NORTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Frostmarch early botanist structure"},
+    {"id":"beautify:botanist_house_taiga","minimum":"HEARTHLANDS","macro_regions":["NORTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Frostmarch taiga botanist structure"},
+    {"id":"minecraft:village_snowy","minimum":"HEARTHLANDS","macro_regions":["NORTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Frostmarch civilization"},
+    {"id":"minecraft:village_taiga","minimum":"HEARTHLANDS","macro_regions":["NORTH","WEST"],"minimum_influence":"CARDINAL_TRANSITION","note":"Shared cold/old-forest civilization"},
+    {"id":"bettermineshafts:mineshaft_spruce","minimum":"HEARTHLANDS","macro_regions":["NORTH","WEST"],"minimum_influence":"CARDINAL_TRANSITION","note":"Shared spruce-country mineshaft"},
+
+    {"id":"minecraft:ruined_portal_jungle","minimum":"HEARTHLANDS","macro_regions":["EAST"],"minimum_influence":"CARDINAL_TRANSITION","note":"Greenveil early ruin"},
+    {"id":"minecraft:ruined_portal_swamp","minimum":"HEARTHLANDS","macro_regions":["EAST"],"minimum_influence":"CARDINAL_TRANSITION","note":"Greenveil wet-country ruin"},
+    {"id":"bettermineshafts:mineshaft_jungle","minimum":"HEARTHLANDS","macro_regions":["EAST"],"minimum_influence":"CARDINAL_TRANSITION","note":"Greenveil jungle mineshaft"},
+    {"id":"bettermineshafts:mineshaft_lush","minimum":"HEARTHLANDS","macro_regions":["EAST"],"minimum_influence":"CARDINAL_TRANSITION","note":"Greenveil lush mineshaft"},
+
+    {"id":"beautify:botanist_house_desert","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar desert botanist structure"},
+    {"id":"beautify:botanist_house_savanna","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar savanna botanist structure"},
+    {"id":"valhelsia_structures:desert_house","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar early house structure"},
+    {"id":"minecraft:village_desert","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar civilization"},
+    {"id":"minecraft:village_savanna","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar civilization"},
+    {"id":"minecraft:ruined_portal_desert","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar early ruin"},
+    {"id":"bettermineshafts:mineshaft_acacia","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar acacia-country mineshaft"},
+    {"id":"bettermineshafts:mineshaft_desert","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Sunscar desert mineshaft"},
+
+    {"id":"minecraft:igloo","minimum":"FRONTIER","macro_regions":["NORTH"],"minimum_influence":"ESTABLISHED","note":"Frostmarch Frontier landmark"},
+    {"id":"bettermineshafts:mineshaft_ice","minimum":"FRONTIER","macro_regions":["NORTH"],"minimum_influence":"ESTABLISHED","note":"Frostmarch Frontier mine"},
+    {"id":"bettermineshafts:mineshaft_spruce_snowy","minimum":"FRONTIER","macro_regions":["NORTH"],"minimum_influence":"ESTABLISHED","note":"Frostmarch snowy spruce mine"},
+
+    {"id":"minecraft:jungle_pyramid","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"Greenveil Frontier archaeology"},
+    {"id":"minecraft:swamp_hut","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"Greenveil Frontier witch site"},
+    {"id":"betterwitchhuts:witch_hut","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"Greenveil Frontier enhanced witch site"},
+    {"id":"betterwitchhuts:witch_circle","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"Greenveil Frontier ritual site"},
+    {"id":"bettermineshafts:mineshaft_overgrown","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"Greenveil Frontier overgrown mine"},
+
+    {"id":"minecraft:desert_pyramid","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Sunscar Frontier archaeology"},
+    {"id":"bettermineshafts:mineshaft_mesa","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Sunscar Frontier mesa mine"},
+    {"id":"bettermineshafts:mineshaft_red_desert","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Sunscar Frontier red-desert mine"},
+    {"id":"born_in_chaos_v1:clown_caravan_savanna","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Sunscar strange-road structure"},
+    {"id":"born_in_chaos_v1:clown_caravan_taiga","minimum":"FRONTIER","macro_regions":["NORTH","WEST"],"minimum_influence":"ESTABLISHED","note":"Shared Frostmarch/Harvestwood strange-road structure"}
+  ]
+}
