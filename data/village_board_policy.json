@@ -9,6 +9,21 @@
     "existing_gazebo_satisfies_guarantee": true,
     "disable_stock_generation_before_replacement_proven": false
   },
+  "domestication_innovation_petshop": {
+    "player_preference": "remove_petshop_structures_from_villages",
+    "source_mod": "domesticationinnovation",
+    "observed_content": ["collar tags", "deed of ownership", "pet consumables", "pet enchantment items"],
+    "config_file": "config/domestication-innovation.toml",
+    "config_section": "general",
+    "config_key": "petstore_village_weight",
+    "default_weight": 17,
+    "desired_shipping_weight": 0,
+    "replacement_semantics": "suppress_petshop_generation_then_guarantee_civic_board_independently",
+    "avoid_brittle_one_to_one_jigsaw_template_swap": true,
+    "keep_domestication_innovation_pet_mechanics": true,
+    "reuse_pet_items_elsewhere_as_rewards_or_trades": true,
+    "apply_disable_only_when_village_board_guarantee_is_proven": true
+  },
   "village_detection": {
     "preferred_center_sources": ["BELL_WITH_VILLAGE_EVIDENCE", "VILLAGE_POI_ACTIVITY_CENTER", "KNOWN_VILLAGE_STRUCTURE_FALLBACK"],
     "reject_lone_bell_without_village_evidence": true,
