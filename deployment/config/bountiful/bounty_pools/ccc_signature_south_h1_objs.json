@@ -1,0 +1,13 @@
+{
+  "content": {
+    "ccc_signature_flowers_savanna": {
+      "type": "item",
+      "content": "minecraft:acacia_sapling",
+      "amount": {"min": 6, "max": 6},
+      "unitWorth": 1000,
+      "rarity": "UNCOMMON",
+      "name": "Flowers of the Savanna",
+      "icon": "minecraft:acacia_sapling"
+    }
+  }
+}
