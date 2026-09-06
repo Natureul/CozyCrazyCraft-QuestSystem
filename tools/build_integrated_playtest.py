@@ -20,7 +20,7 @@ RUNTIME_LIBS = ROOT / "runtime" / "build" / "libs"
 BUILD = ROOT / "build"
 OUTPUT = BUILD / "CozyCrazyCraft-QuestSystem-INTEGRATED_PLAYTEST_ROOT_OVERLAY.zip"
 
-README = """CozyCrazyCraft Quest System — 0.3.0 NAMED-PLACE / AUTHORED DIALOGUE PLAYTEST
+README = """CozyCrazyCraft Quest System — 0.3.1 NAMED-PLACE / AUTHORED DIALOGUE PLAYTEST
 
 Target: Minecraft Forge 1.20.1
 Requires your normal installed pack, including:
@@ -36,7 +36,7 @@ IMPORTANT WHEN UPGRADING
 - Keep your normal Bountiful, Conversations, Lazr's Lib, CozyCrazyZones, Dungeons Enhanced, and other pack jars.
 - This ZIP contains only CozyCrazyCraft-owned config/resources and one CozyCrazyQuests runtime jar.
 
-0.3.0 architecture goal
+0.3.1 architecture goal
 Bountiful remains the public civic notice board. Important profession requests and story contracts move into an authored villager layer. The first end-to-end proof is a Cartographer quest whose availability depends on a real nearby structure.
 
 IMPORTANT NAMING RULE
@@ -80,13 +80,13 @@ Existing 0.2.1 board behavior remains in this build
 - outdoor/path-biased automatic board placement and throttled in-village board locator;
 - current prototype Bountiful recovery contracts and proof loot remain for comparison, but they are now considered transitional content rather than the final story-delivery architecture.
 
-Known limitations of 0.3.0
+Known limitations of 0.3.1
 - Only the Cartographer survey lifecycle has been moved to Conversations so far. This is deliberate: validate one complete lifecycle before importing hundreds of Master Bible hooks.
 - Cartographer is NOT intended to become the universal quest funnel. The next authored layer is profession/local-knowledge routing (Farmer -> Fletcher/Guard/etc. when that person actually knows the next fact), while Cartographers mainly remain map/travel specialists and merchants.
 - Conversations' stock screen is still physically too large. We fixed pacing/copy and the current overlap cheaply, but a real screen redesign is intentionally behind the quest-state/Atlas/knowledge-network work.
 - Conversations supports per-character type sounds; a restrained custom villager/character voice treatment is possible later, but it is not part of this functional test.
 - Conversations 1.0.5 integration is reflection-based and CI can compile it without the third-party jar, but the actual UI/action handshake must be smoke-tested in the real modpack.
-- A Conversations villager carries one dialogue id at a time. 0.3.0 selects that id immediately before interaction; multiplayer simultaneous use of the exact same villager is a later hardening target.
+- A Conversations villager carries one dialogue id at a time. 0.3.1 selects that id immediately before interaction; multiplayer simultaneous use of the exact same villager is a later hardening target.
 - The survey detects arrival near the resolved structure position; it does not yet require a photograph or room-level interaction.
 - The old weighted Bountiful Recovery Contracts remain present during this transition and will later be replaced by deterministic Trust/featured contracts.
 
