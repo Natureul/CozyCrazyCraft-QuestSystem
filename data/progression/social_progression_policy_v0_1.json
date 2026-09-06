@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "authority": {
+    "progression": "CozyCrazyCraft Progression, Routing & Dialogue Bible v0.1",
+    "conversation": "CozyCrazyCraft Conversation Bible v0.1",
+    "quests_rewards": "CozyCrazyCraft Villager Quest & Reward Master Bible v0.2",
+    "names": "CozyCrazyCraft Villager Name Bible v1.0"
+  },
+  "principles": {
+    "critical_progression_owner": "village_chapter_role",
+    "exact_npc_uuid_may_be_critical": false,
+    "bountiful_role": "routine_civic_repeatables",
+    "atlas_role": "persistent_geography_not_npc_quest_log",
+    "progression_metric": "semantic_accomplishments_and_milestones",
+    "raw_quest_count_is_progression": false,
+    "minimum_critical_router_surfaces": 3,
+    "allow_sequence_breaking": true,
+    "require_recovery_routes": true
+  },
+  "radial_tiers": [
+    {"id": "HEARTHLANDS", "min_radius": 0, "max_radius": 2500, "campaign_role": "become_known", "reward_ceiling": "iron_stabilization"},
+    {"id": "FRONTIER", "min_radius": 2500, "max_radius": 5500, "campaign_role": "expedition_preparation", "reward_ceiling": "enchanted_iron_and_rare_early_diamond"},
+    {"id": "WILDLANDS", "min_radius": 5500, "max_radius": 9000, "campaign_role": "regional_threat", "reward_ceiling": "diamond_comparable_positive_quality"},
+    {"id": "DREAD_REACHES", "min_radius": 9000, "max_radius": null, "campaign_role": "legendary_final", "reward_ceiling": "exceptional_curated_signature"}
+  ],
+  "inner_hearthlands": {
+    "approx_max_radius": 700,
+    "formal_chapter_required": false,
+    "purpose": ["home", "survival", "orientation", "gentle_common_terrain"]
+  },
+  "trust": {
+    "ordered": ["STRANGER", "RECOGNIZED", "RELIABLE", "TRUSTED", "PROVEN"],
+    "derivation": {
+      "STRANGER": "no_meaningful_local_accomplishment",
+      "RECOGNIZED": "one_or_more_semantic_categories",
+      "RELIABLE": "two_or_more_semantic_categories",
+      "TRUSTED": "village_capstone_complete",
+      "PROVEN": "major_regional_milestone_complete"
+    },
+    "visible_numeric_meter_required": false
+  },
+  "zone1": {
+    "chapters": ["Z1_ARRIVAL", "Z1_BRANCHING", "Z1_CAPSTONE", "Z1_COMPLETE"],
+    "accomplishment_categories": ["COMMUNITY", "EXPLORATION", "PROFESSION", "DANGER"],
+    "capstone_gate": {
+      "all_of": ["COMMUNITY", "EXPLORATION"],
+      "one_of": ["PROFESSION", "DANGER"],
+      "raw_repeatable_count_can_substitute": false
+    },
+    "entry_router_count": {"min": 3, "max": 6},
+    "starter_problem_count": {"min": 2, "max": 4},
+    "branches": [
+      {
+        "id": "community_ecology",
+        "category": "COMMUNITY",
+        "preferred_roles": ["farmer", "shepherd", "fisherman", "unemployed_citizen"],
+        "themes": ["local_life", "ecology", "livestock", "water", "household", "road_safety"]
+      },
+      {
+        "id": "practical_profession",
+        "category": "PROFESSION",
+        "preferred_roles": ["weaponsmith", "toolsmith", "armorer", "fletcher", "leatherworker", "butcher"],
+        "themes": ["field_test", "equipment", "craft", "supply_chain", "defense"]
+      },
+      {
+        "id": "discovery_investigation",
+        "category": "EXPLORATION",
+        "preferred_roles": ["cartographer", "librarian", "mason", "cleric"],
+        "themes": ["named_place", "survey", "ruin", "record", "route", "relic"]
+      }
+    ],
+    "capstone": {
+      "must_be_authored": true,
+      "must_be_local_and_meaningful": true,
+      "may_be_simple_raw_fetch": false,
+      "result": ["TRUSTED", "Z1_COMPLETE", "outward_route_available"]
+    }
+  },
+  "zone2": {
+    "chapter_role": "expedition_preparation",
+    "branches": ["PREPARATION", "EXPEDITION", "REGIONAL_PATTERN"],
+    "expected_entry": ["full_iron", "shield", "ranged_option"],
+    "expected_exit": ["strong_or_enchanted_iron", "specialized_kit", "wildlands_lead"],
+    "outward_assignment_policy": "occasional_one_tier_outward_not_constant"
+  },
+  "knowledge": {
+    "ordered": ["UNKNOWN", "RUMOR", "LEAD", "KNOWN", "CONFIRMED"],
+    "per_subject": true,
+    "precise_atlas_pin_minimum": "KNOWN",
+    "rumor_creates_precise_pin": false,
+    "provenance": ["local_observation", "profession_evidence", "village_report", "map_record", "old_record", "player_report", "world_event", "rumor_network", "quest_proof"]
+  },
+  "quest_states": ["LOCKED", "OFFERABLE", "ACTIVE", "RETURNABLE", "COMPLETE", "FAILED", "EXPIRED"],
+  "npc_roles": ["ROUTER", "GIVER", "SPECIALIST", "CONVERGENCE", "OUTWARD_ROUTER", "SUCCESSOR"],
+  "hint_pressure": ["SOFT", "NORMAL", "STRONG", "RECOVERY", "POST_COMPLETE"],
+  "world_events": ["RAID_RECENT", "HORDE_RECENT", "BLOOD_MOON_RECENT", "ROAD_DAMAGED", "NPC_DEATH", "VILLAGE_DAMAGE"],
+  "player_sequence": ["NORMAL", "TARGET_ALREADY_DISCOVERED", "TARGET_ALREADY_CLEARED", "BOSS_ALREADY_DEFEATED"],
+  "quest_pool": {
+    "starting_weights_percent": {
+      "supply_craft": 10,
+      "pure_hunt": 10,
+      "compound_local": 20,
+      "destination_survey": 20,
+      "recovery_rescue_proof": 15,
+      "major_hunt_clear": 10,
+      "profession_commission": 10,
+      "trust_legendary": 5
+    },
+    "guardrails": {
+      "max_same_core_verb_visible": 2,
+      "frontier_plus_named_destination_fraction_min": 0.5,
+      "ordinary_meaningful_kill_count_min": 3,
+      "ordinary_meaningful_kill_count_max": 10,
+      "ordinary_fetch_max_stacks": 1,
+      "first_clear_pays_better_than_repeatable": true,
+      "bosses_in_random_rotation": false
+    }
+  },
+  "profession_knowledge": {
+    "farmer": {"knows": ["fields", "crops", "weather", "pests", "nearby_roads"], "refers": ["shepherd", "butcher", "toolsmith", "cartographer"]},
+    "fisherman": {"knows": ["rivers", "coasts", "catches", "wrecks", "water_threats"], "refers": ["cartographer", "librarian", "fletcher"]},
+    "shepherd": {"knows": ["flocks", "pasture", "weather", "caravan_tracks"], "refers": ["leatherworker", "fletcher", "butcher", "guard"]},
+    "fletcher": {"knows": ["tracks", "sightlines", "ranged_threats", "hunting_routes"], "refers": ["weaponsmith", "cartographer", "guard"]},
+    "librarian": {"knows": ["records", "old_names", "patterns", "lore"], "refers": ["cartographer", "cleric", "mason"]},
+    "cartographer": {"knows": ["roads", "landmarks", "routes", "named_structures"], "refers": ["profession_specialist", "outward_settlement"], "universal_quest_funnel": false},
+    "cleric": {"knows": ["undead", "curses", "relics", "spiritual_patterns"], "refers": ["librarian", "guard", "armorer"]},
+    "armorer": {"knows": ["survivability", "armor_damage", "heavy_enemies"], "refers": ["weaponsmith", "leatherworker", "guard"]},
+    "weaponsmith": {"knows": ["weapon_trials", "armed_enemies", "recovered_arms"], "refers": ["fletcher", "armorer", "guard"]},
+    "toolsmith": {"knows": ["mines", "caves", "resource_access", "lost_tools"], "refers": ["mason", "cartographer", "librarian"]},
+    "mason": {"knows": ["ruins", "foundations", "architecture", "old_stone"], "refers": ["librarian", "toolsmith", "cartographer"]},
+    "leatherworker": {"knows": ["travel_gear", "saddles", "hides", "climate_kit"], "refers": ["shepherd", "armorer", "cartographer"]},
+    "butcher": {"knows": ["food_stores", "predators", "carcasses", "rations"], "refers": ["farmer", "shepherd", "guard"]},
+    "nitwit": {"knows": ["rumors", "accidents", "odd_observations"], "refers": ["appropriate_specialist"], "optimal_farm": false},
+    "unemployed_citizen": {"knows": ["household_problems", "gossip", "missing_people"], "refers": ["appropriate_specialist"]},
+    "guard": {"knows": ["attacks", "patrols", "roads", "casualties", "defenses"], "refers": ["fletcher", "armorer", "council", "cartographer"]}
+  },
+  "recovery_order": [
+    "original_npc",
+    "same_profession_successor",
+    "compatible_specialist",
+    "village_steward_elder_guard",
+    "public_notice_emergency_discovery",
+    "neighboring_primary_settlement"
+  ],
+  "regional_arcs": {
+    "NORTH": {"name": "Frostmarch", "wildlands_anchor": "Frostmaw", "dread_final": "Captain Cornelia", "signature_tags": ["pike", "warhammer", "heavy_crossbow", "cold_expedition", "hydrodynamic"]},
+    "EAST": {"name": "Greenveil", "wildlands_anchor": null, "dread_final": "Jungle Abomination", "dread_final_feature_flag": "JUNGLE_ABOMINATION_ENABLED", "signature_tags": ["canopy_glider", "camera", "javelin", "glaive", "mobility", "hunter", "telekinesis"]},
+    "SOUTH": {"name": "Sunscar", "wildlands_anchor": "Umvuthi", "dread_final": "Ancient Remnant", "dread_final_feature_flag": "ANCIENT_REMNANT_ENABLED", "signature_tags": ["boomerang", "javelin", "lance", "heat_expedition", "caravan"]},
+    "WEST": {"name": "Harvestwood", "wildlands_anchor": "Sir Pumpkinhead", "dread_final": "Lord Pumpkinhead", "signature_tags": ["axe", "scythe", "old_road", "anti_undead", "oldwood_bow"]}
+  },
+  "content_flags": {
+    "JUNGLE_ABOMINATION_ENABLED": false,
+    "ANCIENT_REMNANT_ENABLED": false
+  }
+}

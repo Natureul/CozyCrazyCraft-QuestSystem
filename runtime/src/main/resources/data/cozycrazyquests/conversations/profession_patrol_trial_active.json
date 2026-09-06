@@ -1,0 +1,19 @@
+{
+  "title": "A Patrol Trial",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "\nUse the trial blade if you like. The real test is clearing four hostiles from that patrol stretch.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.28, 0.08, 0.70, 1.10],
+          "replies": [
+            {"reply": "I'll finish the trial.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}

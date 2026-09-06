@@ -1,0 +1,19 @@
+{
+  "title": "The Outer Pasture",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "\nThe trouble is out by the pasture I mentioned. Clear three hostiles there; killing things elsewhere doesn't solve this.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.28, 0.08, 0.70, 1.10],
+          "replies": [
+            {"reply": "I'll keep at it.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
