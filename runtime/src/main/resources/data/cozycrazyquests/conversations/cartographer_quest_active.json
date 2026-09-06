@@ -1,0 +1,25 @@
+{
+  "title": "Survey Work",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "Still working on that survey? Your contract has the landmark and the direction I gave you. Get close enough to inspect the place, then come back to a cartographer here. There's no value in drawing a road you never walked.",
+          "condition": "*",
+          "closable": "always",
+          "replies": [
+            {
+              "reply": "I'll keep at it.",
+              "action": {"action": "dialogue.close"}
+            },
+            {
+              "reply": "Show me your trades.",
+              "action": {"action": "villager.trade"}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
