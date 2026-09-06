@@ -16,5 +16,7 @@ jobs:
         run: python tools/validate_bountiful_content.py
       - name: Validate neutral regional quest catalog
         run: python tools/validate_quest_catalog.py
+      - name: Validate regional board policy
+        run: python tools/validate_board_policy.py
       - name: Validate story-board metadata
         run: python tools/validate_story_ui.py
