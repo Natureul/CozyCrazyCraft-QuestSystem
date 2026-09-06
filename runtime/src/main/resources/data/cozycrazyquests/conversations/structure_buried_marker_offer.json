@@ -1,0 +1,26 @@
+{
+  "title": "The Buried Marker",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "There's an old desert tomb within reach of this settlement. Bring me the marked tablet from inside. I want to know who used that road before us, and why they stopped.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "I'll look for the tablet.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_accept\"})"},
+                {"action": "dialogue.close"}
+              ]
+            },
+            {"reply": "Not right now.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
