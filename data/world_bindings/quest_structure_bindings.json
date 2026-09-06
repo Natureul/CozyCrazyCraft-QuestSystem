@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "zoning_contract": "CozyCrazyZones-0.3.4",
+  "zoning_contract": "CozyCrazyZones-0.3.6",
   "principle": "A binding declares a legal target family, not a guaranteed generated instance. Runtime must locate a real sensible instance or withhold the posting.",
   "bindings": [
     {
@@ -31,7 +31,7 @@
       "targets": ["dungeons_enhanced:watch_tower", "born_in_chaos_v1:observation_tower_*"],
       "binding_status": "GENERIC_RULE",
       "proof_item": "cozycrazyquests:frostmarch_survey_tag",
-      "notes": "Target itself is generic; locator must demand a Frostmarch/transition instance near the issuing village."
+      "notes": "Target family is generic; locator must demand a real Frostmarch/transition instance near the issuing village."
     },
     {
       "quest_id": "north_h1_trappers_satchel",
@@ -41,7 +41,7 @@
       "targets": ["valhelsia_structures:tower_ruin", "dungeons_enhanced:dungeon_variant"],
       "binding_status": "GENERIC_RULE",
       "proof_item": "cozycrazyquests:trappers_satchel",
-      "notes": "No North-exclusive H1 structure rule yet; use only a real Frostmarch/transition instance."
+      "notes": "Use only a real Frostmarch/transition instance selected from a legal generic target family."
     },
     {
       "quest_id": "north_f2_missing_expedition_journal",
@@ -51,7 +51,7 @@
       "targets": ["valhelsia_structures:castle_ruin", "dungeons_enhanced:tower_of_the_undead"],
       "binding_status": "GENERIC_RULE",
       "proof_item": "cozycrazyquests:missing_north_journal",
-      "notes": "Frontier-radial targets are legal, but current 0.3.4 has no dedicated North Frontier structure family."
+      "notes": "Frontier-radial targets are legal; locator must still select an actual Frostmarch instance rather than relying on the generic structure family."
     },
     {
       "quest_id": "north_w3_sleeping_mountain",
@@ -81,7 +81,7 @@
       "targets": ["betterjungletemples:jungle_temple", "dungeons_enhanced:jungle_monument"],
       "binding_status": "EXPLICIT_RULE",
       "proof_item": "cozycrazyquests:overgrown_shrine_ledger",
-      "notes": "Both target families are EAST + FRONTIER + ESTABLISHED."
+      "notes": "Both target families are Greenveil regional destinations beginning at/after Frontier under the 0.3.6 contract."
     },
     {
       "quest_id": "east_w3_temple_eight_roots",
@@ -91,7 +91,7 @@
       "targets": ["betterjungletemples:jungle_temple", "dungeons_enhanced:jungle_monument"],
       "binding_status": "EXPLICIT_MINIMUM_RULE",
       "proof_item": "cozycrazyquests:seed_reliquary",
-      "notes": "Structure minimum is Frontier; T3 locator must specifically find an instance whose actual position classifies as Greenveil Wildlands."
+      "notes": "Some target families begin before Wildlands; T3 locator must specifically choose an instance whose actual position is Greenveil Wildlands."
     },
     {
       "quest_id": "south_h1_watering_hole_ledger",
@@ -101,7 +101,7 @@
       "targets": ["dungeons_enhanced:desert_tomb"],
       "binding_status": "EXPLICIT_RULE_STORY_REVIEW",
       "proof_item": "cozycrazyquests:watering_hole_ledger",
-      "notes": "Desert Tomb is SOUTH + Hearthlands + Cardinal Transition. If used, adjust prose so the ledger plausibly belongs at the old desert site."
+      "notes": "Desert Tomb is a Sunscar Hearthlands/transition candidate in 0.3.6. If used, keep prose plausible for an old desert stop."
     },
     {
       "quest_id": "south_f2_first_dig",
@@ -111,7 +111,7 @@
       "targets": ["betterdeserttemples:desert_temple", "dungeons_enhanced:desert_temple"],
       "binding_status": "EXPLICIT_RULE",
       "proof_item": null,
-      "notes": "Current mechanical objective is a pottery sherd; a regional map can point to either explicit SOUTH + Frontier temple family."
+      "notes": "Current mechanical objective is a pottery sherd; a regional map can point to either legal Sunscar temple family."
     },
     {
       "quest_id": "south_w3_sunbird",
@@ -141,7 +141,7 @@
       "targets": ["cataclysm:cursed_pyramid"],
       "binding_status": "EXPLICIT_RULE",
       "proof_item": null,
-      "notes": "Regional finale destination is authoritative in 0.3.4."
+      "notes": "Regional finale destination remains authoritative under the 0.3.6 contract."
     },
     {
       "quest_id": "west_h1_empty_stalls",
@@ -151,7 +151,7 @@
       "targets": ["dungeons_enhanced:stables"],
       "binding_status": "GENERIC_RULE",
       "proof_item": "cozycrazyquests:stablemasters_seal",
-      "notes": "Stables are Hearthlands+. The locator should choose a Harvestlands/transition instance for this western-flavored authored contract."
+      "notes": "Stables are Hearthlands+. The locator should choose a Harvestwood/transition instance for this western-flavored authored contract."
     },
     {
       "quest_id": "west_w3_headless_road",
@@ -171,29 +171,29 @@
       "targets": ["born_in_chaos_v1:dark_tower_*"],
       "binding_status": "EXPLICIT_PREFIX_RULE",
       "proof_item": "cozycrazyquests:last_road_plate",
-      "notes": "dark_tower_ prefix is WEST + DREAD_REACHES + ESTABLISHED. Strong pre-finale deep-West destination."
+      "notes": "dark_tower_ prefix is WEST + DREAD_REACHES + ESTABLISHED. Strong pre-finale deep-Harvestwood destination."
     }
   ],
   "blocked_or_pending": [
     {
       "quest_id": "north_d4_cornelias_wake",
-      "reason": "Aquamirae structures are loaded but current ZoneRuleRegistry does not explicitly enforce NORTH + DREAD_REACHES."
+      "reason": "Aquamirae structures are present, but the 0.3.6 zoning handoff still does not provide a clean authoritative Cornelia-containing North/Dread structure route."
     },
     {
       "quest_id": "north_d4_captain_in_ice",
-      "reason": "Captain Cornelia entity ID is known, but exact North-Dread destination/locator contract is not yet authoritative."
+      "reason": "Captain Cornelia entity ID is known, but exact North-Dread destination/locator containment is still pending."
     },
     {
       "quest_id": "east_d4_thing_beneath_canopy",
-      "reason": "Jungle Abomination import/arena is intentionally future work."
+      "reason": "Jungle Abomination import/arena is intentionally separate future work."
     },
     {
       "quest_id": "west_f2_gravekeepers_bell",
-      "reason": "Born in Chaos grave_* structures are loaded but not currently West/Frontier-bound by ZoneRuleRegistry."
+      "reason": "Do not assume every Born in Chaos grave_* structure is Harvestwood/Frontier until the zoning thread finalizes that family."
     },
     {
       "quest_id": "west_d4_old_harvest",
-      "reason": "Lord Pumpkinhead exists, but current 0.3.4 does not expose the intended final encounter/destination path."
+      "reason": "Lord Pumpkinhead exists, but the intended final encounter/destination path is not yet exposed as a clean structure target."
     }
   ]
 }
