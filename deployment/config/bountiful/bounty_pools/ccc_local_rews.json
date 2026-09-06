@@ -1,7 +1,5 @@
 {
   "content": {
-    "ccc_local_emeralds": {"type":"item","content":"minecraft:emerald","amount":{"min":2,"max":5},"unitWorth":900,"weightMult":1.4},
-    "ccc_local_bread": {"type":"item","content":"minecraft:bread","amount":{"min":6,"max":12},"unitWorth":220,"weightMult":0.9},
-    "ccc_local_food": {"type":"item","content":"minecraft:cooked_beef","amount":{"min":4,"max":8},"unitWorth":350,"weightMult":0.8}
+    "ccc_local_emeralds": {"type":"item","content":"minecraft:emerald","amount":{"min":2,"max":5},"unitWorth":900,"weightMult":1.0,"name":"Village Payment"}
   }
 }
