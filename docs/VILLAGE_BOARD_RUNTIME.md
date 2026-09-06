@@ -37,6 +37,33 @@ A Bountiful-generated gazebo already present in the village satisfies the requir
 
 ---
 
+# Domestication Innovation petshop replacement
+
+The September 6 playtest also established a pack-level preference: **the Domestication Innovation petshop buildings are not wanted as village structures.** The observed shop is the source of the Collar Tags, Deed of Ownership, pet consumables, and pet-enchantment inventory shown in the playtest screenshots.
+
+This is unusually convenient because Domestication Innovation already exposes a direct common-config control:
+
+```toml
+[general]
+petstore_village_weight = 0
+```
+
+The mod describes that value as the village pet-store spawn weight and explicitly supports `0` to disable the structure entirely. The config file is `config/domestication-innovation.toml`.
+
+The preferred CozyCrazyCraft implementation is **not** a brittle one-for-one jigsaw surgery that literally intercepts every petshop roll and swaps its NBT template. Instead:
+
+1. prove the one-civic-board-per-village runtime,
+2. set Domestication Innovation's petshop weight to zero,
+3. let the civic-board runtime independently guarantee one useful board near the settlement center.
+
+From the player's point of view this achieves the desired replacement cleanly: villages stop spending a jobsite slot on a petshop and reliably gain the quest/information structure we actually want.
+
+Removing the petshop building does **not** mean removing Domestication Innovation's pet systems. Collar Tags, ownership mechanics, pet enchantments, beds, taming utilities, and other useful content can remain. In fact, some of the petshop loot is better material for **regional rewards, occasional bounty rewards, specialist trades, or exploration loot** than for a repetitive village building. That lets pet progression survive without making every settlement feel like it has the same mod showcase shop.
+
+Do not ship the `petstore_village_weight = 0` override before the board guarantee is proven, because temporarily having neither structure would be worse than the current state.
+
+---
+
 # Detection model
 
 The runtime should work from village semantics rather than from a hardcoded list of structure templates.
@@ -121,13 +148,14 @@ Do **not** set Bountiful `boardGenFrequency` to zero until the companion guarant
 
 Rollout order:
 
-1. Keep stock Bountiful gazebo generation enabled.
+1. Keep stock Bountiful gazebo generation enabled while the replacement runtime is being proved.
 2. Add the companion detector/repairer; existing gazebos count as valid boards.
 3. Test vanilla plains/savanna/taiga/snowy/desert villages plus modded village variants used by the pack.
 4. Verify one-board behavior and safe placement.
-5. Only then consider setting `boardGenFrequency = 0` and making the companion the sole placement authority.
+5. Disable Domestication Innovation petshops with `general.petstore_village_weight = 0`.
+6. Only then consider also setting Bountiful `boardGenFrequency = 0` and making the companion the sole placement authority.
 
-There is no benefit to removing the stock fallback before its replacement is reliable.
+There is no benefit to removing either stock fallback before its replacement is reliable.
 
 ---
 
@@ -151,11 +179,13 @@ The intended runtime cost after a settlement has been processed is effectively z
 The feature is production-ready when all of these are true:
 
 1. A newly generated supported village reliably ends up with one discoverable bounty board.
-2. A stock Bountiful gazebo satisfies the guarantee without duplication.
+2. A stock Bountiful gazebo satisfies the guarantee without duplication during rollout.
 3. A boardless already-generated village can be safely repaired when encountered.
 4. A random bell outside a real village does not create a board.
 5. The board's region/tier identity comes from CozyCrazyZones rather than random decree selection.
 6. Breaking a board does not cause an immediate intrusive respawn loop.
 7. The implementation does not perform broad recurring world scans.
+8. Domestication Innovation petshops are disabled only after the civic board replacement is proven.
+9. Disabling the petshop does not disable or unnecessarily remove the mod's useful pet mechanics/items.
 
 This is a small piece of glue, but it matters enormously to the player experience: **the village quest system has to be physically findable before anything clever about quests or maps matters.**
