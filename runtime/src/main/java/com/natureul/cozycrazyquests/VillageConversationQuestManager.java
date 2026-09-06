@@ -18,12 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * First authored NPC quest lifecycle for CozyCrazyCraft.
+ * Authored villager quest lifecycle.
  *
- * Public Bountiful notices remain lightweight repeatable civic work. This manager owns deliberate
- * villager-issued contracts whose availability depends on the issuing village, profession, Trust,
- * and actual nearby world content. 0.3.0 intentionally implements one complete Cartographer loop
- * before the larger Master Bible is imported.
+ * Bountiful remains a public-notice/civic-reputation integration, but it no longer owns settlement
+ * identity. Authored quests are keyed to VillageContext so a new, boardless, destroyed-board, or
+ * not-yet-recorded village can still participate in Conversations and chapter progression.
  */
 public final class VillageConversationQuestManager {
     private static final ResourceLocation OFFER_DIALOGUE = id("cartographer_first_real_map");
@@ -37,8 +36,7 @@ public final class VillageConversationQuestManager {
 
     private static final long PENDING_LIFETIME = 2400L;
     private static final long TARGET_CACHE_LIFETIME = 6000L;
-    private static final int VILLAGE_RECORD_RADIUS = 160;
-    private static final int VILLAGE_NAME_SEARCH_RADIUS = 256;
+    private static final int VILLAGE_RETURN_RADIUS = 160;
 
     private static final Map<String, CachedTarget> TARGET_CACHE = new HashMap<>();
 
@@ -56,9 +54,7 @@ public final class VillageConversationQuestManager {
             return;
         }
 
-        VillageBoardSavedData.VillageRecord village = VillageBoardSavedData.get(level)
-                .findNearby(villager.blockPosition(), VILLAGE_RECORD_RADIUS)
-                .orElse(null);
+        VillageContext village = VillageContext.resolve(level, villager.blockPosition());
         if (village == null) {
             ConversationBridge.clearOwnDialogue(villager);
             return;
@@ -67,7 +63,7 @@ public final class VillageConversationQuestManager {
         CompoundTag root = root(player);
         CompoundTag active = root.getCompound(ACTIVE);
         if (!active.isEmpty()) {
-            if (sameIssuingVillage(active, level, village.board())) {
+            if (sameIssuingVillage(active, level, village)) {
                 boolean surveyed = active.getBoolean("surveyed");
                 ConversationBridge.setDialogue(villager, surveyed ? TURNIN_DIALOGUE : ACTIVE_DIALOGUE);
             } else {
@@ -76,14 +72,14 @@ public final class VillageConversationQuestManager {
             return;
         }
 
-        if (isCompleted(root, definition, level, village.board())) {
+        if (isCompleted(root, definition, level, village)) {
             root.remove(PENDING);
             saveRoot(player, root);
             ConversationBridge.clearOwnDialogue(villager);
             return;
         }
 
-        ZoneBridge.Cell villageCell = ZoneBridge.cellAt(level, village.center());
+        ZoneBridge.Cell villageCell = village.cell();
         if (!definition.issuingTier().equals(villageCell.tier())) {
             ConversationBridge.clearOwnDialogue(villager);
             return;
@@ -97,19 +93,14 @@ public final class VillageConversationQuestManager {
             return;
         }
 
-        // CozyCrazyZones already gives both settlements and structures persistent world-global
-        // names. Reuse those names everywhere in the quest instead of calling Pumpkin Hollow
-        // "the issuing village" or The Amber Watch "a watch tower" after the player knows better.
-        String villageName = NamedPlaceBridge.nearestVillageName(level, village.center(), VILLAGE_NAME_SEARCH_RADIUS);
         String targetName = NamedPlaceBridge.structureName(level, target.id(), target.pos());
-
-        writePending(root, level, villager, village, villageCell, definition, target, villageName, targetName);
+        writePending(root, level, villager, village, villageCell, definition, target, targetName, player);
         saveRoot(player, root);
         ConversationBridge.setDialogue(villager, OFFER_DIALOGUE);
 
         player.displayClientMessage(
-                Component.literal(villageName + " survey lead  •  " + targetName + "  •  about "
-                                + target.distanceBlocks() + " blocks " + direction(village.center(), target.pos()))
+                Component.literal(village.name() + " survey lead  •  " + targetName + "  •  about "
+                                + target.distanceBlocks() + " blocks " + direction(village.anchor(), target.pos()))
                         .withStyle(ChatFormatting.GOLD),
                 true
         );
@@ -166,7 +157,7 @@ public final class VillageConversationQuestManager {
         CompoundTag pending = root.getCompound(PENDING);
         if (pending.isEmpty()) return;
         if (!VillageQuestCatalog.FIRST_REAL_MAP.id().equals(pending.getString("quest_id"))) return;
-        if (!level.dimension().location().toString().equals(pending.getString("board_dimension"))) return;
+        if (!sameDimension(level, pending)) return;
 
         long age = level.getGameTime() - pending.getLong("created_game_time");
         if (age < 0 || age > PENDING_LIFETIME) {
@@ -224,12 +215,12 @@ public final class VillageConversationQuestManager {
         CompoundTag root = root(player);
         CompoundTag active = root.getCompound(ACTIVE);
         if (active.isEmpty() || !active.getBoolean("surveyed")) return;
-        if (!level.dimension().location().toString().equals(active.getString("board_dimension"))) return;
+        if (!sameDimension(level, active)) return;
 
-        BlockPos boardPos = readPos(active, "board");
-        long dx = (long) player.blockPosition().getX() - boardPos.getX();
-        long dz = (long) player.blockPosition().getZ() - boardPos.getZ();
-        if (dx * dx + dz * dz > (long) VILLAGE_RECORD_RADIUS * VILLAGE_RECORD_RADIUS) {
+        BlockPos villageAnchor = readPos(active, "village");
+        long dx = (long) player.blockPosition().getX() - villageAnchor.getX();
+        long dz = (long) player.blockPosition().getZ() - villageAnchor.getZ();
+        if (dx * dx + dz * dz > (long) VILLAGE_RETURN_RADIUS * VILLAGE_RETURN_RADIUS) {
             String villageName = active.getString("village_name");
             if (villageName.isBlank()) villageName = "the village that issued this survey";
             player.sendSystemMessage(Component.literal("Return to " + villageName + " before turning this survey in.")
@@ -242,8 +233,27 @@ public final class VillageConversationQuestManager {
         giveOrDrop(player, new ItemStack(Items.SPYGLASS));
         player.giveExperiencePoints(definition.experienceReward());
 
-        boolean trustAwarded = BountifulBridge.awardBoardCompletion(level, boardPos, player);
-        markCompleted(root, definition, level, boardPos);
+        String villageKey = active.getString("village_key");
+        if (villageKey.isBlank()) {
+            VillageContext recovered = VillageContext.resolve(level, villageAnchor);
+            villageKey = recovered != null ? recovered.key() : legacyVillageKey(level, active, villageAnchor);
+        }
+
+        VillageProgressState.recordAccomplishment(
+                player,
+                villageKey,
+                VillageProgressState.AccomplishmentCategory.EXPLORATION,
+                definition.id()
+        );
+        VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, villageKey);
+
+        boolean boardSynced = false;
+        if (active.getBoolean("has_board") || active.contains("boardX")) {
+            BlockPos boardPos = readPos(active, "board");
+            boardSynced = BountifulBridge.awardBoardCompletion(level, boardPos, player);
+        }
+
+        markCompleted(root, definition, level, villageKey, active);
         root.remove(ACTIVE);
         root.remove(PENDING);
         saveRoot(player, root);
@@ -255,22 +265,22 @@ public final class VillageConversationQuestManager {
                 : villageName + " records your survey.";
         player.sendSystemMessage(
                 Component.literal("Completed: " + definition.title() + ". " + records
-                                + " Payment: 5 emeralds, a spyglass, and Village Trust.")
+                                + " Payment: " + definition.emeraldReward() + " emeralds and a spyglass. "
+                                + "Standing: " + display(progress.trust()) + ".")
                         .withStyle(ChatFormatting.GREEN)
         );
-        if (!trustAwarded) {
-            player.sendSystemMessage(Component.literal("The survey completed, but Village Trust could not be synchronized with the bounty board; check the log.")
-                    .withStyle(ChatFormatting.RED));
+        if ((active.getBoolean("has_board") || active.contains("boardX")) && !boardSynced) {
+            CozyCrazyQuests.LOGGER.debug("Authored survey completed without Bountiful board synchronization for {}", villageKey);
         }
     }
 
     private static NearbyStructureResolver.ResolvedStructure resolveTarget(
             ServerLevel level,
-            VillageBoardSavedData.VillageRecord village,
+            VillageContext village,
             ZoneBridge.Cell villageCell,
             VillageQuestCatalog.Definition definition
     ) {
-        String cacheKey = level.getSeed() + ":" + level.dimension().location() + ":" + village.board().asLong();
+        String cacheKey = level.getSeed() + ":" + village.key() + ":" + definition.id();
         CachedTarget cached = TARGET_CACHE.get(cacheKey);
         if (cached != null && level.getGameTime() - cached.checkedAt() <= TARGET_CACHE_LIFETIME) {
             return cached.target();
@@ -278,7 +288,7 @@ public final class VillageConversationQuestManager {
 
         NearbyStructureResolver.ResolvedStructure found = NearbyStructureResolver.findNearest(
                 level,
-                village.center(),
+                village.anchor(),
                 definition.structureCandidates(),
                 definition.searchRadiusBlocks()
         );
@@ -313,63 +323,98 @@ public final class VillageConversationQuestManager {
             CompoundTag root,
             ServerLevel level,
             Villager villager,
-            VillageBoardSavedData.VillageRecord village,
+            VillageContext village,
             ZoneBridge.Cell villageCell,
             VillageQuestCatalog.Definition definition,
             NearbyStructureResolver.ResolvedStructure target,
-            String villageName,
-            String targetName
+            String targetName,
+            ServerPlayer player
     ) {
         CompoundTag pending = new CompoundTag();
         pending.putString("quest_id", definition.id());
         pending.putString("title", definition.title());
         pending.putString("giver_uuid", villager.getUUID().toString());
         pending.putString("giver_profession", "cartographer");
+        pending.putString("village_dimension", level.dimension().location().toString());
+        // Keep the legacy dimension key so an older 0.3.x active contract can still be consumed.
         pending.putString("board_dimension", level.dimension().location().toString());
-        putPos(pending, "board", village.board());
-        putPos(pending, "village", village.center());
-        pending.putString("village_name", villageName);
+        pending.putString("village_key", village.key());
+        putPos(pending, "village", village.anchor());
+        pending.putString("village_name", village.name());
         pending.putString("village_macro", villageCell.macro());
         pending.putString("village_tier", villageCell.tier());
+        pending.putBoolean("has_board", village.hasBoard());
+        if (village.hasBoard()) putPos(pending, "board", village.boardPos());
         pending.putString("target_dimension", level.dimension().location().toString());
         pending.putString("target_structure", target.id().toString());
         putPos(pending, "target", target.pos());
         pending.putInt("target_radius", definition.targetRadiusBlocks());
         pending.putString("target_name", targetName);
         pending.putInt("target_distance", target.distanceBlocks());
-        pending.putString("target_direction", direction(village.center(), target.pos()));
+        pending.putString("target_direction", direction(village.anchor(), target.pos()));
         pending.putLong("created_game_time", level.getGameTime());
-        pending.putInt("trust_when_offered", BountifulBridge.boardCompletedCount(level, village.board()));
+        pending.putInt("trust_when_offered", village.legacyBoardTrust(level));
+        pending.putString("semantic_trust_when_offered", VillageProgressState.snapshot(player, village.key()).trust().name());
         root.put(PENDING, pending);
     }
 
-    private static boolean sameIssuingVillage(CompoundTag active, ServerLevel level, BlockPos boardPos) {
-        return level.dimension().location().toString().equals(active.getString("board_dimension"))
-                && boardPos.equals(readPos(active, "board"));
+    private static boolean sameIssuingVillage(CompoundTag active, ServerLevel level, VillageContext village) {
+        if (!sameDimension(level, active)) return false;
+        String key = active.getString("village_key");
+        if (!key.isBlank()) return key.equals(village.key());
+        if (active.contains("boardX") && village.hasBoard()) {
+            return village.boardPos().equals(readPos(active, "board"));
+        }
+        String oldName = active.getString("village_name");
+        return !oldName.isBlank() && oldName.equals(village.name());
     }
 
     private static boolean isCompleted(
             CompoundTag root,
             VillageQuestCatalog.Definition definition,
             ServerLevel level,
-            BlockPos boardPos
+            VillageContext village
     ) {
-        return root.getCompound(COMPLETED).getBoolean(completionKey(definition.id(), level, boardPos));
+        CompoundTag completed = root.getCompound(COMPLETED);
+        if (completed.getBoolean(completionKey(definition.id(), village.key()))) return true;
+        return village.hasBoard() && completed.getBoolean(legacyCompletionKey(definition.id(), level, village.boardPos()));
     }
 
     private static void markCompleted(
             CompoundTag root,
             VillageQuestCatalog.Definition definition,
             ServerLevel level,
-            BlockPos boardPos
+            String villageKey,
+            CompoundTag active
     ) {
         CompoundTag completed = root.getCompound(COMPLETED);
-        completed.putBoolean(completionKey(definition.id(), level, boardPos), true);
+        completed.putBoolean(completionKey(definition.id(), villageKey), true);
+        if (active.contains("boardX")) {
+            completed.putBoolean(legacyCompletionKey(definition.id(), level, readPos(active, "board")), true);
+        }
         root.put(COMPLETED, completed);
     }
 
-    private static String completionKey(String questId, ServerLevel level, BlockPos boardPos) {
+    private static String completionKey(String questId, String villageKey) {
+        return questId + "@village@" + villageKey;
+    }
+
+    private static String legacyCompletionKey(String questId, ServerLevel level, BlockPos boardPos) {
         return questId + "@" + level.dimension().location() + "@" + boardPos.getX() + "," + boardPos.getY() + "," + boardPos.getZ();
+    }
+
+    private static String legacyVillageKey(ServerLevel level, CompoundTag active, BlockPos anchor) {
+        String name = active.getString("village_name");
+        if (!name.isBlank() && !"the village".equalsIgnoreCase(name)) {
+            return level.dimension().location() + "|legacy-name|" + name.toLowerCase().replace(' ', '_');
+        }
+        return level.dimension().location() + "|legacy|" + Math.floorDiv(anchor.getX(), 128) + "," + Math.floorDiv(anchor.getZ(), 128);
+    }
+
+    private static boolean sameDimension(ServerLevel level, CompoundTag tag) {
+        String expected = tag.getString("village_dimension");
+        if (expected.isBlank()) expected = tag.getString("board_dimension");
+        return level.dimension().location().toString().equals(expected);
     }
 
     private static CompoundTag root(ServerPlayer player) {
@@ -404,6 +449,11 @@ public final class VillageConversationQuestManager {
             stack.shrink(1);
             return;
         }
+    }
+
+    private static String display(VillageProgressState.Trust trust) {
+        String lower = trust.name().toLowerCase();
+        return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
     }
 
     private static String direction(BlockPos from, BlockPos to) {
