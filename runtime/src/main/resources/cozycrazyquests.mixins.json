@@ -6,7 +6,8 @@
   "refmap": "cozycrazyquests.refmap.json",
   "mixins": [
     "BoardBlockEntityMixin",
-    "BountyCreatorMixin"
+    "BountyCreatorMixin",
+    "PetshopVillageMixin"
   ],
   "client": [],
   "injectors": {
