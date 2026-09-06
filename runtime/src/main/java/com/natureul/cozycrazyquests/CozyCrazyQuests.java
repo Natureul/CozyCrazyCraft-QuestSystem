@@ -23,14 +23,19 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(BountySourceTooltip::onTooltip);
         MinecraftForge.EVENT_BUS.addListener(BountyRedemptionGuard::onRightClickBlock);
 
-        // Authored quest state wins first. The social layer runs immediately after it and supplies a
-        // useful profession/ambient conversation only when no authored quest dialogue was selected.
-        // Both run before Conversations' normal-priority EntityInteract listener opens the screen.
+        // The compact Zone-1 social lattice gets first refusal. Location-bound structure work runs
+        // immediately after it and only attaches when no higher-priority core authored dialogue is
+        // already selected. The social layer then supplies ambient profession conversation.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageStructureConversationQuestManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageSocialConversationManager::onEntityInteract);
+
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onLivingDeath);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerClone);
+        MinecraftForge.EVENT_BUS.addListener(VillageStructureConversationQuestManager::onPlayerTick);
+        MinecraftForge.EVENT_BUS.addListener(VillageStructureConversationQuestManager::onLivingDeath);
+        MinecraftForge.EVENT_BUS.addListener(VillageStructureConversationQuestManager::onPlayerClone);
         MinecraftForge.EVENT_BUS.addListener(VillageProgressState::onPlayerClone);
         MinecraftForge.EVENT_BUS.addListener(PlayerKnowledgeState::onPlayerClone);
 
