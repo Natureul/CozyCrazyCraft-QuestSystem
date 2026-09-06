@@ -1,0 +1,25 @@
+{
+  "title": "A Patrol Trial",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "\nFour down on the patrol road? That's enough. Keep the blade; you've proven it outside a workshop.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.28, 0.08, 0.70, 1.10],
+          "replies": [
+            {
+              "reply": "The road is clear.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},
+                {"action": "dialogue.close"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
