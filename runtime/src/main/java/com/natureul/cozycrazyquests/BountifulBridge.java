@@ -19,12 +19,15 @@ public final class BountifulBridge {
     private static Field decreesField;
     private static Field bountiesField;
     private static Field creatorRepField;
+    private static Field creatorWorldField;
+    private static Field creatorPosField;
     private static Method removeBountyMethod;
     private static Method randomUpdateMethod;
     private static Method decreeCreateMethod;
     private static Object decreeCompanion;
     private static boolean warnedBoard;
     private static boolean warnedCreator;
+    private static boolean warnedSource;
 
     private BountifulBridge() {}
 
@@ -76,6 +79,40 @@ public final class BountifulBridge {
             warnBoardOnce("Could not maintain CozyCrazyCraft bounty-board population", error);
         } finally {
             MAINTAINING.set(false);
+        }
+    }
+
+    /**
+     * Bountiful's creator already owns the exact world and board position used to generate a
+     * bounty. Capture those private constructor fields at the lazy stack getter and retain them as
+     * pack-owned item NBT. If reflection ever fails, the bounty simply remains legacy/untagged and
+     * redemption fails open rather than trapping the player.
+     */
+    public static void stampCreatorSource(Object creator, ItemStack stack) {
+        try {
+            if (stack == null || stack.isEmpty()) return;
+            if (creatorWorldField == null) {
+                creatorWorldField = findField(creator.getClass(), "world");
+                creatorWorldField.setAccessible(true);
+            }
+            if (creatorPosField == null) {
+                creatorPosField = findField(creator.getClass(), "pos");
+                creatorPosField.setAccessible(true);
+            }
+
+            Object world = creatorWorldField.get(creator);
+            Object pos = creatorPosField.get(creator);
+            if (world instanceof ServerLevel level && pos instanceof BlockPos boardPos) {
+                BountySource.stamp(stack, level, boardPos);
+            }
+        } catch (Throwable error) {
+            if (!warnedSource) {
+                warnedSource = true;
+                CozyCrazyQuests.LOGGER.warn(
+                        "Could not stamp bounty issuing-board source; same-board redemption will fail open for unstamped notices",
+                        error
+                );
+            }
         }
     }
 
