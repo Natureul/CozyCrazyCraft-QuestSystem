@@ -5,9 +5,10 @@
     {
       "dialogue_options": [
         {
-          "dialogue": "Still working on that survey? Your contract has the landmark and the direction I gave you. Get close enough to inspect the place, then come back to a cartographer here. There's no value in drawing a road you never walked.",
+          "dialogue": "\nI marked the place. Reach it, look it over, then bring the survey back here.",
           "condition": "*",
           "closable": "always",
+          "timings": [0.32, 0.10, 0.85, 1.35],
           "replies": [
             {
               "reply": "I'll keep at it.",
