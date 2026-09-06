@@ -26,6 +26,8 @@ jobs:
         run: python tools/validate_board_policy.py
       - name: Validate automatic board decree assignment
         run: python tools/validate_board_decree_assignment.py
+      - name: Validate village board guarantee policy
+        run: python tools/validate_village_board_policy.py
       - name: Validate target distance and selection policy
         run: python tools/validate_targeting_policy.py
       - name: Validate CozyCrazyZones world bindings
