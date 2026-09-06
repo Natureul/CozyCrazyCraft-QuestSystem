@@ -5,7 +5,8 @@
   ],
   "rewards": [
     "ccc_local_rews",
-    "ccc_regional_field_rews"
+    "ccc_regional_field_rews",
+    "ccc_trust_utility_rews"
   ],
   "name": "Harvestwood Notices"
 }
