@@ -1,0 +1,19 @@
+{
+  "title": "Local Survey",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "Take a proper look around the place. I need a report from the site, not a glimpse from the road.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {"reply": "I'll check it properly.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
