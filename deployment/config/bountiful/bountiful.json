@@ -1,8 +1,8 @@
 {
-  "boardUpdateFrequency": 45,
+  "boardUpdateFrequency": 300,
   "boardGenFrequency": 2,
   "flatBonusTimePerBounty": 0,
-  "shouldBountiesHaveTimersAndExpire": true,
+  "shouldBountiesHaveTimersAndExpire": false,
   "dataPackExclusions": [
     "bounty_pools/.+",
     "bounty_decrees/.+"
