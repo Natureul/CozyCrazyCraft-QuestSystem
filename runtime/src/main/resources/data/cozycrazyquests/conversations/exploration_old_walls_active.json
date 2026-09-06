@@ -1,0 +1,7 @@
+{
+  "title": "Old Walls, Old Names",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Don't worry about bringing back half the ruin. See the place for yourself and come tell us what still stands.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I'll take a proper look.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "title": "The Empty Stalls",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Have a proper look around the old stalls. The contract has the place and direction written down.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I know where I'm going.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}

@@ -2,7 +2,6 @@
   "title": "Village Guard",
   "starting_index": 0,
   "dialogues": [
-    {"dialogue_options":[{"dialogue":"Keeping an eye on the roads. Need something local?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Where's the notice board?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"guard_board\"})"},{"action":"dialogue.close"}]},{"reply":"Any trouble nearby?","action":{"action":"dialogue.goto(1)"}},{"reply":"Never mind.","action":{"action":"dialogue.close"}}]}]},
-    {"dialogue_options":[{"dialogue":"Nothing I can verify right now. If that changes, the watch usually hears before the rest of town.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Thanks.","action":{"action":"dialogue.close"}},{"reply":"Where's the notice board?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"guard_board\"})"},{"action":"dialogue.close"}]}]}]}
+    {"dialogue_options":[{"dialogue":"Keeping an eye on the roads. Need something local?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Anyone need help?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Where's the notice board?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"guard_board\"})"},{"action":"dialogue.close"}]},{"reply":"Never mind.","action":{"action":"dialogue.close"}}]}]}
   ]
 }
