@@ -15,6 +15,7 @@ public final class VillageContractItem extends Item {
     public static final String TARGET_NAME = "ccc_target_name";
     public static final String TARGET_DISTANCE = "ccc_target_distance";
     public static final String TARGET_DIRECTION = "ccc_target_direction";
+    public static final String ISSUING_VILLAGE = "ccc_issuing_village";
 
     public VillageContractItem(Properties properties) {
         super(properties);
@@ -26,7 +27,11 @@ public final class VillageContractItem extends Item {
             String target = stack.getTag().getString(TARGET_NAME);
             int distance = stack.getTag().getInt(TARGET_DISTANCE);
             String direction = stack.getTag().getString(TARGET_DIRECTION);
+            String village = stack.getTag().getString(ISSUING_VILLAGE);
 
+            if (!village.isBlank() && !"the village".equals(village)) {
+                tooltip.add(Component.literal("Issued in " + village).withStyle(ChatFormatting.GOLD));
+            }
             if (!target.isBlank()) {
                 tooltip.add(Component.literal("Survey: " + target).withStyle(ChatFormatting.AQUA));
             }
@@ -34,7 +39,10 @@ public final class VillageContractItem extends Item {
                 tooltip.add(Component.literal("About " + distance + " blocks " + direction)
                         .withStyle(ChatFormatting.GRAY));
             }
-            tooltip.add(Component.literal("Return to a cartographer in the issuing village")
+            String returnLine = !village.isBlank() && !"the village".equals(village)
+                    ? "Return to a cartographer in " + village
+                    : "Return to a cartographer in the issuing village";
+            tooltip.add(Component.literal(returnLine)
                     .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
         }
         super.appendHoverText(stack, level, tooltip, flag);
