@@ -1,0 +1,10 @@
+{
+  "type": "supplementaries:structure_map",
+  "item": "minecraft:emerald",
+  "structure": "betterjungletemples:jungle_temple",
+  "price_min": 9,
+  "price_max": 14,
+  "max_trades": 1,
+  "price_multiplier": 0.05,
+  "level": 3
+}
