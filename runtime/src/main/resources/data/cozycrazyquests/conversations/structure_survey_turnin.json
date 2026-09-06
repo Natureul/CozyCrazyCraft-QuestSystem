@@ -1,0 +1,25 @@
+{
+  "title": "Local Survey",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "You found it and checked the site? Good. That's one less blank place in our understanding of the roads around here.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "I saw enough to report back.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_turnin\"})"},
+                {"action": "dialogue.close"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
