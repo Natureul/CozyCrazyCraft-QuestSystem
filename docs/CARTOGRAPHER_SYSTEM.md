@@ -25,17 +25,19 @@ Supplementaries registers a data-driven villager trade type:
 supplementaries:structure_map
 ```
 
-Moonlight loads villager trade JSON from:
+Moonlight's loader reads JSON below:
 
 ```text
 data/<namespace>/moonlight/villager_trade/<profession>/<trade>.json
 ```
 
-For ordinary cartographers the path is therefore shaped like:
+There is one important namespace detail: Moonlight derives the target profession from the resource ID before the final `/`. The vanilla cartographer profession is `minecraft:cartographer`, so our ordinary cartographer trade files must live under the **minecraft namespace**, even though their filenames can be CozyCrazyCraft-specific:
 
 ```text
-data/cozycrazyquests/moonlight/villager_trade/cartographer/<trade>.json
+data/minecraft/moonlight/villager_trade/cartographer/ccc_<trade>.json
 ```
+
+Putting the same file under `data/cozycrazyquests/...` would make Moonlight look for a nonexistent `cozycrazyquests:cartographer` profession. The repository should validate this path explicitly before we ship the cartographer datapack.
 
 A structure-map trade can specify:
 
