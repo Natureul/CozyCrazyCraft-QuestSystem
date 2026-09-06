@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,12 @@ import java.util.List;
  * around the same fixed geometry. That makes it consume almost the entire screen at the GUI scale
  * used by CozyCrazyCraft. Replacing the presentation at ScreenEvent.Opening lets us keep the
  * upstream conversation/state/network implementation while rendering a responsive lower-third UI.
+ *
+ * Conversations' own client close handler only recognizes its stock ConversationScreen. Because
+ * this class replaces that screen, a server-side dialogue.close used to leave the compact panel
+ * sitting open even though the conversation was already over. After a reply is sent we therefore
+ * watch the upstream client conversation state and close this replacement screen when the server
+ * confirms that the conversation ended.
  */
 public final class CompactConversationScreen extends Screen {
     private static final int MAX_PANEL_WIDTH = 430;
@@ -31,9 +38,13 @@ public final class CompactConversationScreen extends Screen {
     private static final int REPLY_GAP = 3;
     private static final int CHARS_PER_TICK = 2;
 
+    private static final String CONVERSATION_CLIENT_API =
+            "com.lazrproductions.conversations.api.ConversationClientApi";
+
     private final Object conversation;
     private int visibleCharacters;
     private boolean closing;
+    private boolean awaitingReplySync;
     private final List<ReplyBox> replyBoxes = new ArrayList<>();
 
     public CompactConversationScreen(Object conversation) {
@@ -44,6 +55,18 @@ public final class CompactConversationScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
+
+        if (awaitingReplySync && Minecraft.getInstance().screen == this) {
+            Boolean upstreamActive = upstreamConversationActive();
+            if (Boolean.FALSE.equals(upstreamActive)) {
+                // The server already performed dialogue.close. Do not send a second stop packet
+                // from onClose(); simply retire our replacement UI.
+                closing = true;
+                Minecraft.getInstance().setScreen(null);
+                return;
+            }
+        }
+
         String text = dialogueText();
         if (visibleCharacters < text.length()) {
             visibleCharacters = Math.min(text.length(), visibleCharacters + CHARS_PER_TICK);
@@ -164,6 +187,7 @@ public final class CompactConversationScreen extends Screen {
             CozyCrazyQuests.LOGGER.warn("Could not read Conversations reply coordinates for compact UI");
             return;
         }
+        awaitingReplySync = true;
         invokeNetworking(
                 "sendPerformReplyActionPacketToServer",
                 new Class<?>[]{String.class, int.class, int.class, int.class},
@@ -200,6 +224,19 @@ public final class CompactConversationScreen extends Screen {
             }
         }
         return Component.literal("Villager");
+    }
+
+    private static Boolean upstreamConversationActive() {
+        try {
+            Class<?> api = Class.forName(CONVERSATION_CLIENT_API);
+            Field field = api.getDeclaredField("currentConversation");
+            field.setAccessible(true);
+            return field.get(null) != null;
+        } catch (Throwable error) {
+            // Unknown is deliberately different from false: reflection failure must never close a
+            // live conversation on its own.
+            return null;
+        }
     }
 
     private Component componentFromJson(String json) {
