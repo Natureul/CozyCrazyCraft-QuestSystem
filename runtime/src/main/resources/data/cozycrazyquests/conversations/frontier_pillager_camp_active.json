@@ -1,0 +1,1 @@
+{"title":"Break the Camp Before Nightfall","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Eight at the camp. Do not count strays on the road. We need the camp itself unable to control the route.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll finish it at the camp.","action":[{"action":"dialogue.close"}]}]}]}]}
