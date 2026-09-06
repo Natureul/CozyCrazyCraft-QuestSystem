@@ -1,0 +1,7 @@
+{
+  "title": "Cartographer's Lead",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"I can mark the surface position we're using for that place. If it's underground or flooded, the mark still won't show you the entrance.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Mark the area on my Atlas.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"mark_active_target\"})"},{"action":"dialogue.close"}]},{"reply":"I'll find it from the bearing.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}
