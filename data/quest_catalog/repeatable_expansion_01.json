@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "source_geography": "CozyCrazyZones 0.3.6",
+  "purpose": "Additional low-complexity regional work for board population. These are not main-story steps.",
+  "quests": [
+    {
+      "id": "north_h1_leather_for_snowline",
+      "region": "NORTH",
+      "tier": "HEARTHLANDS",
+      "title": "Leather for the Snowline",
+      "issuer": "Village Outfitter",
+      "body": "Boots, straps, and pack harness wear out quickly once the roads start freezing. The outfitter is buying sound leather before the next trail party leaves.",
+      "notice_class": "LOCAL_NOTICE",
+      "objective": {"type": "item", "content": "minecraft:leather", "min": 8, "max": 14},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 3, "max": 5},
+      "status": "READY_PRIMITIVE"
+    },
+    {
+      "id": "north_f2_cats_above_pass",
+      "region": "NORTH",
+      "tier": "FRONTIER",
+      "title": "Cats Above the Pass",
+      "issuer": "Mountain Watch",
+      "body": "Snow leopards have been stalking the high trail where pack animals cannot see them coming. The watch is paying for the immediate danger to be reduced.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "alexsmobs:snow_leopard", "min": 1, "max": 2},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 5, "max": 8},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED"
+    },
+    {
+      "id": "north_w3_bears_beyond_pines",
+      "region": "NORTH",
+      "tier": "WILDLANDS",
+      "title": "Bears Beyond the Pines",
+      "issuer": "Expedition Quartermaster",
+      "body": "A supply cache was torn open twice in one week. The tracks belong to grizzlies large enough that the quartermaster has stopped sending cooks to chase them off.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "alexsmobs:grizzly_bear", "min": 1, "max": 2},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 7, "max": 10},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED",
+      "notes": ["Grizzly is legal in both Frostmarch and Harvestwood from Frontier onward; this posting is region-flavored, not exclusive."]
+    },
+    {
+      "id": "north_d4_lanterns_for_black_ice",
+      "region": "NORTH",
+      "tier": "DREAD_REACHES",
+      "title": "Lanterns for Black Ice",
+      "issuer": "Frozen-Coast Quartermaster",
+      "body": "The last shelters before the black water are burning fuel faster than expected. Coal is worth more than coin when every light going out means another missing traveler.",
+      "notice_class": "SUPPLY_CONTRACT",
+      "objective": {"type": "item", "content": "minecraft:coal", "min": 24, "max": 40},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 8, "max": 12},
+      "status": "READY_PRIMITIVE"
+    },
+
+    {
+      "id": "east_h1_moss_for_nursery",
+      "region": "EAST",
+      "tier": "HEARTHLANDS",
+      "title": "Moss for the Nursery",
+      "issuer": "Village Naturalist",
+      "body": "The nursery is trying to keep young shade plants alive through a dry spell. Fresh moss will hold the damp better than another bucket carried by hand.",
+      "notice_class": "NATURALIST_NOTICE",
+      "objective": {"type": "item", "content": "minecraft:moss_block", "min": 8, "max": 16},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 3, "max": 5},
+      "status": "READY_PRIMITIVE"
+    },
+    {
+      "id": "east_f2_mouths_in_ferns",
+      "region": "EAST",
+      "tier": "FRONTIER",
+      "title": "Mouths in the Ferns",
+      "issuer": "Trail Warden",
+      "body": "Foliaaths have settled too close to a path used by gatherers. The warden would rather pay a hunter than wait for somebody to learn which leaves have teeth.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "mowziesmobs:foliaath", "min": 1, "max": 3},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 5, "max": 8},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED"
+    },
+    {
+      "id": "east_w3_carniflore_culling",
+      "region": "EAST",
+      "tier": "WILDLANDS",
+      "title": "The Carniflore Line",
+      "issuer": "Deep-Green Watch",
+      "body": "Carniflores are appearing along the route between two camps. Nobody is asking you to clear the jungle—only to make one narrow road survivable again.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "skarrier_mobs:carniflore", "min": 1, "max": 2},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 8, "max": 12},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED"
+    },
+    {
+      "id": "east_d4_matriarch_mangroves",
+      "region": "EAST",
+      "tier": "DREAD_REACHES",
+      "title": "The Matriarch in the Mangroves",
+      "issuer": "Blackwater Watch",
+      "body": "A slither matriarch has claimed the flooded route and smaller creatures have gathered around it. The watch wants the nest broken before the channel becomes unusable.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "skarrier_mobs:slither_matriarch", "min": 1, "max": 1},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 10, "max": 14},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED"
+    },
+
+    {
+      "id": "south_h1_cactus_for_packers",
+      "region": "SOUTH",
+      "tier": "HEARTHLANDS",
+      "title": "Cactus for the Packers",
+      "issuer": "Caravan Tanner",
+      "body": "The caravan crews use cactus where greener settlements would waste cloth and timber. The tanner is buying clean cuttings for the next batch of travel gear.",
+      "notice_class": "LOCAL_NOTICE",
+      "objective": {"type": "item", "content": "minecraft:cactus", "min": 12, "max": 24},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 3, "max": 5},
+      "status": "READY_PRIMITIVE"
+    },
+    {
+      "id": "south_f2_rattles_in_brush",
+      "region": "SOUTH",
+      "tier": "FRONTIER",
+      "title": "Rattles in the Brush",
+      "issuer": "Road Watch",
+      "body": "Rattlesnakes have moved into the scrub around a busy watering place. The road watch is paying to make the approach safer for animals and people.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "alexsmobs:rattlesnake", "min": 2, "max": 4},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 5, "max": 8},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED"
+    },
+    {
+      "id": "south_w3_quakes_on_red_road",
+      "region": "SOUTH",
+      "tier": "WILDLANDS",
+      "title": "Quakes on the Red Road",
+      "issuer": "Badlands Scout",
+      "body": "Quakes have started crossing the old red road in daylight. The scout wants the route reopened before another caravan decides the detour is safer.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "skarrier_mobs:quake", "min": 1, "max": 2},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 8, "max": 12},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED",
+      "notes": ["Quake begins in Sunscar Frontier in CZ 0.3.6 and remains a valid deeper-tier threat."]
+    },
+    {
+      "id": "south_d4_guides_in_dust",
+      "region": "SOUTH",
+      "tier": "DREAD_REACHES",
+      "title": "Guides in the Dust",
+      "issuer": "Pyramid-Road Watch",
+      "body": "Spirit Guides have been drifting onto the route after sunset, drawing travelers away from the markers. The watch wants the road quiet before the next expedition leaves.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "born_in_chaos_v1:spirit_guide", "min": 2, "max": 4},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 9, "max": 13},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED"
+    },
+
+    {
+      "id": "west_h1_apples_for_pressing",
+      "region": "WEST",
+      "tier": "HEARTHLANDS",
+      "title": "Apples for Pressing",
+      "issuer": "Orchard Keeper",
+      "body": "The early wind knocked half the orchard before the pickers were ready. Good apples are still being bought for the village presses and autumn tables.",
+      "notice_class": "FARM_NOTICE",
+      "objective": {"type": "item", "content": "minecraft:apple", "min": 8, "max": 16},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 3, "max": 5},
+      "status": "READY_PRIMITIVE"
+    },
+    {
+      "id": "west_f2_bears_at_orchard",
+      "region": "WEST",
+      "tier": "FRONTIER",
+      "title": "Bears at the Orchard",
+      "issuer": "Orchard Keeper",
+      "body": "Grizzlies have learned where the fallen fruit piles up. The keeper can tolerate a missing basket; a bear in the workers' path is another matter.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "alexsmobs:grizzly_bear", "min": 1, "max": 2},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 5, "max": 8},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED",
+      "notes": ["Grizzly is legal in both Frostmarch and Harvestwood from Frontier onward."]
+    },
+    {
+      "id": "west_w3_hounds_old_road",
+      "region": "WEST",
+      "tier": "WILDLANDS",
+      "title": "Hounds on the Old Road",
+      "issuer": "Deep-West Watch",
+      "body": "Dread hounds have started following travelers between the abandoned farms. Clear enough of the pack that the watch can use the road again.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "born_in_chaos_v1:dread_hound", "min": 3, "max": 6},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 8, "max": 12},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED",
+      "notes": ["Dread Hound is a general Frontier+ threat in CZ 0.3.6; this is a Harvestwood-flavored posting rather than an exclusive spawn claim."]
+    },
+    {
+      "id": "west_d4_bones_churchyard",
+      "region": "WEST",
+      "tier": "DREAD_REACHES",
+      "title": "Bones at the Churchyard",
+      "issuer": "Last-Road Watch",
+      "body": "A Supreme Bonescaller has been seen beyond the old graves. Nobody is asking for the churchyard back—only for the thing raising the dead around it to stop.",
+      "notice_class": "HUNT_NOTICE",
+      "objective": {"type": "entity", "content": "born_in_chaos_v1:supreme_bonescaller", "min": 1, "max": 1},
+      "reward": {"type": "item", "content": "minecraft:emerald", "min": 11, "max": 15},
+      "status": "READY_PRIMITIVE_CZ036_VERIFIED",
+      "notes": ["Supreme Bonescaller is a general Dread Reaches natural threat, not Harvestwood-exclusive."]
+    }
+  ]
+}
