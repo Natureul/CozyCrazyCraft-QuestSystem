@@ -40,6 +40,8 @@ jobs:
         run: python tools/validate_world_bindings.py
       - name: Validate Quest Bible v0.2 ecology and reward import
         run: python tools/validate_quest_bible_v0_2.py
+      - name: Validate semantic social progression policy
+        run: python tools/validate_social_progression_policy.py
       - name: Validate cartographer map prototype
         run: python tools/validate_cartographer_prototype.py
       - name: Validate Conversations dialogue content
