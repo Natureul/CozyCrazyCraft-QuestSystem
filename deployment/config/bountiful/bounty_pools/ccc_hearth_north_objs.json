@@ -5,6 +5,6 @@
     "ccc_north_h1_fish_pass": {"type":"item","content":"minecraft:salmon","amount":{"min":8,"max":14},"unitWorth":300,"weightMult":1.25,"name":"Fish for the Pass","icon":"minecraft:salmon"},
     "ccc_north_h1_webs_spruces": {"type":"entity","content":"minecraft:spider","amount":{"min":3,"max":5},"unitWorth":650,"weightMult":1.3,"name":"Webs in the Spruces","icon":"minecraft:string"},
     "ccc_north_h1_leather_snowline": {"type":"item","content":"minecraft:leather","amount":{"min":10,"max":16},"unitWorth":300,"weightMult":1.3,"name":"Leather for the Snowline","icon":"minecraft:leather"},
-    "ccc_north_h1_recover_ice_dispatch": {"type":"item","content":"cozycrazyquests:frostmarch_dispatch","amount":{"min":1,"max":1},"unitWorth":3400,"weightMult":0.5,"timeMult":1.0,"repRequired":3,"name":"Dispatch from the Ice","icon":"cozycrazyquests:frostmarch_dispatch","rarity":"UNCOMMON"}
+    "ccc_north_h1_recover_dispatch": {"type":"item","content":"cozycrazyquests:frostmarch_dispatch","amount":{"min":1,"max":1},"unitWorth":3400,"weightMult":0.5,"timeMult":1.0,"repRequired":3,"name":"Dispatch from the Ice","icon":"cozycrazyquests:frostmarch_dispatch","rarity":"UNCOMMON"}
   }
 }
