@@ -1,0 +1,26 @@
+{
+  "title": "The Empty Stalls",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "There are abandoned stables out beyond the safer fields. Find the Stablemaster's Seal inside. If it's still there, the place may be worth reclaiming instead of leaving it to rot.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "I'll search the stables.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_accept\"})"},
+                {"action": "dialogue.close"}
+              ]
+            },
+            {"reply": "Not today.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
