@@ -36,9 +36,17 @@ jobs:
         run: python tools/validate_field_story_ui.py
       - name: Build playtest root overlay
         run: python tools/build_playtest_overlay.py
+      - name: Build regional cartographer prototype
+        run: python tools/build_cartographer_prototype.py
       - name: Upload playtest root overlay
         uses: actions/upload-artifact@v4
         with:
           name: CozyCrazyCraft-QuestSystem-PLAYTEST_ROOT_OVERLAY
           path: build/CozyCrazyCraft-QuestSystem-PLAYTEST_ROOT_OVERLAY.zip
+          if-no-files-found: error
+      - name: Upload regional cartographer prototype
+        uses: actions/upload-artifact@v4
+        with:
+          name: CozyCrazyCraft-Regional-Cartographer-PROTOTYPE
+          path: build/CozyCrazyCraft-Regional-Cartographer-PROTOTYPE.zip
           if-no-files-found: error
