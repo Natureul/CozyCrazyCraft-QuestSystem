@@ -7,43 +7,92 @@
       "title": "Grain for the Storehouse",
       "issuer": "Village Storekeeper",
       "notice_class": "LOCAL_NOTICE",
-      "body": "The storehouse is buying clean wheat while there is still room in the bins."
+      "body": "The storehouse is buying clean wheat while there is still room in the bins.",
+      "regional_body": {
+        "CORE": "The storehouse is buying clean wheat while there is still room in the bins.",
+        "NORTH": "The colder road has made deliveries unreliable. The storehouse wants wheat put away before travel gets worse.",
+        "EAST": "Wet weather spoiled part of the grain stock. The storehouse is buying dry wheat before the next long rain.",
+        "SOUTH": "The last caravan arrived light. The storehouse wants grain in reserve before another dry-road delay.",
+        "WEST": "The market emptied the grain bins faster than expected. The storehouse is paying for a fresh supply."
+      }
     },
     "ccc_local_logs": {
       "title": "Timber for Repairs",
       "issuer": "Village Builder",
       "notice_class": "LOCAL_NOTICE",
-      "body": "Fences, roofs, and carts all need repairs. The builder is buying sound timber."
+      "body": "Fences, roofs, and carts all need repairs. The builder is buying sound timber.",
+      "regional_body": {
+        "CORE": "Fences, roofs, and carts all need repairs. The builder is buying sound timber.",
+        "NORTH": "Snow and wind have been hard on the outer roofs. The builder is buying sound timber for repairs.",
+        "EAST": "The damp has warped fencing and walkways again. The builder is buying straight, dry timber.",
+        "SOUTH": "Sun and dust have split several wagon frames. The builder is buying sound timber for repairs.",
+        "WEST": "Old fences and barn doors have finally given up. The builder is buying good timber before the next round of work."
+      }
     },
     "ccc_local_wool": {
       "title": "Wool for the Loom",
       "issuer": "Village Weaver",
       "notice_class": "LOCAL_NOTICE",
-      "body": "The loom-house is short on clean wool. It is ordinary work, but useful work."
+      "body": "The loom-house is short on clean wool. It is ordinary work, but useful work.",
+      "regional_body": {
+        "CORE": "The loom-house is short on clean wool. It is ordinary work, but useful work.",
+        "NORTH": "The loom-house is short on wool just as the nights are getting colder. Clean bundles are worth good coin here.",
+        "EAST": "Too much of the stored wool took on damp. The weaver is paying for clean, dry bundles.",
+        "SOUTH": "Caravan cloth wears quickly in the dry country. The weaver is buying wool for blankets, wraps, and repairs.",
+        "WEST": "The autumn market cleaned out half the loom-house. The weaver is buying wool for the next run of blankets and cloth."
+      }
     },
     "ccc_local_string": {
       "title": "Cord and Canvas",
       "issuer": "Caravan Hand",
       "notice_class": "LOCAL_NOTICE",
-      "body": "Straps, sacks, and reins all seem to need repair at once. The caravan hands are buying string."
+      "body": "Straps, sacks, and reins all seem to need repair at once. The caravan hands are buying string.",
+      "regional_body": {
+        "CORE": "Straps, sacks, and reins all seem to need repair at once. The caravan hands are buying string.",
+        "NORTH": "Pack straps have been snapping stiff in the cold. The caravan hands want spare cord before the next trip.",
+        "EAST": "Wet rope frays quickly in the green country. The caravan hands are buying dry string for repairs.",
+        "SOUTH": "Dust and long miles have worn through more straps than expected. The caravan hands need fresh cord.",
+        "WEST": "Harvest carts and grain sacks have used up the repair stock. The caravan hands are buying string."
+      }
     },
     "ccc_local_zombie": {
       "title": "Keep the Road Clear",
       "issuer": "Village Watch",
       "notice_class": "WATCH_NOTICE",
-      "body": "Travelers have been having trouble on the road after dusk. The watch is paying for help."
+      "body": "Travelers have been having trouble on the road after dusk. The watch is paying for help.",
+      "regional_body": {
+        "CORE": "Travelers have been having trouble on the road after dusk. The watch is paying for help.",
+        "NORTH": "Night patrols have been finding more trouble along the cold road. The watch wants the route safer before travelers get stranded.",
+        "EAST": "The wet roadside has become difficult after dusk. The watch is paying to make the path safer again.",
+        "SOUTH": "The open dry road has become risky after sunset. The watch is paying for help keeping it passable.",
+        "WEST": "The old road has become unreliable after dark. The watch wants travelers able to reach the village safely."
+      }
     },
     "ccc_local_skeleton": {
       "title": "Arrows in the Dark",
       "issuer": "Village Watch",
       "notice_class": "WATCH_NOTICE",
-      "body": "The watch has found too many stray arrows along the road and wants the problem reduced."
+      "body": "The watch has found too many stray arrows along the road and wants the problem reduced.",
+      "regional_body": {
+        "CORE": "The watch has found too many stray arrows along the road and wants the problem reduced.",
+        "NORTH": "Arrows keep turning up in the snowbanks beside the road. The watch wants the route safer before the next night patrol.",
+        "EAST": "The brush along the road is giving archers too much cover. The watch is paying to make the route safer.",
+        "SOUTH": "The open road offers travelers very little shelter. The watch wants the danger reduced before another caravan leaves.",
+        "WEST": "Old stone walls beside the road have made the route troublesome after dark. The watch is paying for help."
+      }
     },
     "ccc_local_spider": {
       "title": "Webs Near the Fields",
       "issuer": "Village Farmer",
       "notice_class": "WATCH_NOTICE",
-      "body": "Too many webs have appeared near the fields. The farmers are paying for help before livestock wanders into them."
+      "body": "Too many webs have appeared near the fields. The farmers are paying for help before livestock wanders into them.",
+      "regional_body": {
+        "CORE": "Too many webs have appeared near the fields. The farmers are paying for help before livestock wanders into them.",
+        "NORTH": "Webs are appearing between the spruce trunks near the grazing path. The farmers want the route usable again.",
+        "EAST": "The garden edge has been webbed over twice this week. The farmers are paying for help before more crops are lost.",
+        "SOUTH": "Webs have started appearing under the dry walls around the fields. The farmers want the pens kept clear.",
+        "WEST": "The hedges and old fence corners are filling with webs. The farmers want them cleared before livestock gets tangled."
+      }
     }
   }
 }
