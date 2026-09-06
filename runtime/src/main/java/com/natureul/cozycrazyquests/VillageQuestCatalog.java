@@ -6,11 +6,11 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 import java.util.List;
 
 /**
- * Small executable Zone 1 slice of the much larger Quest & Reward Bible.
+ * Executable Zone 1 slice of the much larger Quest & Reward Bible.
  *
- * The catalog intentionally starts with three semantically distinct branches rather than importing
- * hundreds of records before the lifecycle is stable: COMMUNITY, EXPLORATION, and PROFESSION.
- * Definitions remain first-clear per player/village; Bountiful owns the repeatable civic layer.
+ * The first chapter proves the Bible's semantic lattice: COMMUNITY + EXPLORATION + PROFESSION
+ * breadth unlocks a village-owned capstone. Definitions remain first-clear per player/village;
+ * Bountiful owns the repeatable civic layer.
  */
 final class VillageQuestCatalog {
     static final Definition SAFE_PASTURE = new Definition(
@@ -18,6 +18,7 @@ final class VillageQuestCatalog {
             "The Outer Pasture",
             List.of(VillagerProfession.SHEPHERD, VillagerProfession.FARMER, VillagerProfession.BUTCHER),
             VillageProgressState.AccomplishmentCategory.COMMUNITY,
+            false,
             ObjectiveType.LOCAL_HOSTILE_CLEAR,
             "HEARTHLANDS",
             0,
@@ -45,6 +46,7 @@ final class VillageQuestCatalog {
             "The First Real Map",
             List.of(VillagerProfession.CARTOGRAPHER),
             VillageProgressState.AccomplishmentCategory.EXPLORATION,
+            false,
             ObjectiveType.STRUCTURE_SURVEY,
             "HEARTHLANDS",
             0,
@@ -76,6 +78,7 @@ final class VillageQuestCatalog {
             "A Patrol Trial",
             List.of(VillagerProfession.WEAPONSMITH, VillagerProfession.ARMORER, VillagerProfession.FLETCHER, VillagerProfession.TOOLSMITH),
             VillageProgressState.AccomplishmentCategory.PROFESSION,
+            false,
             ObjectiveType.LOCAL_HOSTILE_CLEAR,
             "HEARTHLANDS",
             0,
@@ -98,7 +101,44 @@ final class VillageQuestCatalog {
             5
     );
 
-    static final List<Definition> ZONE_ONE = List.of(SAFE_PASTURE, FIRST_REAL_MAP, PATROL_TRIAL);
+    static final Definition REOPEN_OLD_ROAD = new Definition(
+            "hearthlands_capstone_reopen_old_road",
+            "Reopen the Old Road",
+            List.of(
+                    VillagerProfession.CARTOGRAPHER,
+                    VillagerProfession.LIBRARIAN,
+                    VillagerProfession.MASON,
+                    VillagerProfession.ARMORER,
+                    VillagerProfession.WEAPONSMITH
+            ),
+            null,
+            true,
+            ObjectiveType.LOCAL_HOSTILE_CLEAR,
+            "HEARTHLANDS",
+            0,
+            0,
+            true,
+            0,
+            96,
+            176,
+            288,
+            "the old road crossing",
+            List.of(),
+            5,
+            id("capstone_old_road_offer"),
+            id("capstone_old_road_active"),
+            id("capstone_old_road_turnin"),
+            false,
+            List.of(),
+            List.of(
+                    new RewardStack(new ResourceLocation("minecraft", "iron_ingot"), 12, null),
+                    new RewardStack(new ResourceLocation("minecraft", "shield"), 1, "Roadwarden's Shield")
+            ),
+            8,
+            8
+    );
+
+    static final List<Definition> ZONE_ONE = List.of(SAFE_PASTURE, FIRST_REAL_MAP, PATROL_TRIAL, REOPEN_OLD_ROAD);
 
     private VillageQuestCatalog() {}
 
@@ -129,6 +169,7 @@ final class VillageQuestCatalog {
             String title,
             List<VillagerProfession> giverProfessions,
             VillageProgressState.AccomplishmentCategory accomplishmentCategory,
+            boolean zoneOneCapstone,
             ObjectiveType objectiveType,
             String issuingTier,
             int targetMinTierOffset,
