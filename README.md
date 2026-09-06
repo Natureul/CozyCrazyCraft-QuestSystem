@@ -6,8 +6,9 @@ Player-facing quest, bounty, map, cartographer, reward, and information-layer de
 
 ### [📜 Browse all 108 current quests by region and tier](QUESTS.md)
 ### [🎁 Browse the regional reward ladders](REWARDS.md)
+### [🗺️ Browse quest ↔ structure bindings](STRUCTURES.md)
 
-Those are the human-readable overviews. `QUESTS.md` shows Shared Core, Frostmarch, Greenveil, Sunscar, and Harvestlands across Hearthlands → Frontier → Wildlands → Dread Reaches. `REWARDS.md` shows what each region is intended to teach/give the player at each tier.
+Those are the human-readable overviews. `QUESTS.md` shows Shared Core, Frostmarch, Greenveil, Sunscar, and Harvestlands across Hearthlands → Frontier → Wildlands → Dread Reaches. `REWARDS.md` shows what each region is intended to teach/give the player at each tier. `STRUCTURES.md` shows which adventure contracts are already backed by real CozyCrazyZones rules and which are still waiting on the world layer.
 
 For implementation detail, see [the mechanical quest matrix](design/REGIONAL_QUEST_MATRIX.md).
 
@@ -15,10 +16,10 @@ For implementation detail, see [the mechanical quest matrix](design/REGIONAL_QUE
 
 The project is intentionally split into two layers:
 
-1. **Safe content/data work** — Bountiful 6.0.4 configuration, proven objective/reward patterns, quest catalogs, story-board metadata, proof-item specifications, reward balancing, registry audits, and test plans.
+1. **Safe content/data work** — Bountiful 6.0.4 configuration, proven objective/reward patterns, quest catalogs, story-board metadata, proof-item specifications, reward balancing, registry audits, world bindings, and test plans.
 2. **World/runtime integration work** — regional board assignment, useful-structure locating, same-board redemption, proof placement, and map/story state.
 
-The world side is no longer purely hypothetical: **CozyCrazyZones 0.3.4 is the current geography contract.** The quest project should consume its region/radial classification rather than duplicate that logic. Integration is still staged so we do not build fragile hooks before the corresponding structure/map behavior is proven.
+The world side is no longer purely hypothetical: **CozyCrazyZones 0.3.4 is the current geography contract.** The quest project consumes its region/radial classification and checked-in rule audit rather than duplicating that logic. Integration is still staged so we do not build fragile hooks before the corresponding structure/map behavior is proven.
 
 The core rule remains: **do not invent a complicated event system when Bountiful can already do the job reliably.** Anything not proven reliable is marked for world integration, registry verification, reward audit, or deferral rather than silently treated as implemented.
 
@@ -31,14 +32,20 @@ The core rule remains: **do not invent a complicated event system when Bountiful
 - Only CozyCrazyCraft custom pool/decree content should load after the baseline is installed
 - Initial smoke-test decree: `Local Notices`
 - Current authored quest design count: **108**
-- Current CI validates Bountiful data, regional quest catalog coverage/schema, regional board-selection policy, and story-board metadata
+- Current CI validates Bountiful data, regional quest catalog coverage/schema, the readable quest browser, board-selection policy, CozyCrazyZones world bindings, and story-board metadata
 
 ## Useful documents
 
 - [`QUESTS.md`](QUESTS.md) — easy human-readable quest browser
 - [`REWARDS.md`](REWARDS.md) — easy regional/tier reward browser
+- [`STRUCTURES.md`](STRUCTURES.md) — readable quest-to-structure binding status
+- [`docs/COZY_ZONES_API_0_3_4.md`](docs/COZY_ZONES_API_0_3_4.md) — exact bytecode-audited public geography API
+- [`docs/ZONING_0_3_4_QUEST_GAPS.md`](docs/ZONING_0_3_4_QUEST_GAPS.md) — world-rule gaps the quest layer must not pretend are solved
+- [`data/world_bindings/cozy_zones_0_3_4.json`](data/world_bindings/cozy_zones_0_3_4.json) — machine-readable zoning rule contract
+- [`data/world_bindings/quest_structure_bindings.json`](data/world_bindings/quest_structure_bindings.json) — machine-readable authored target bindings
 - [`docs/FIRST_VILLAGE_VERTICAL_SLICE.md`](docs/FIRST_VILLAGE_VERTICAL_SLICE.md) — first playable starter→village→board→local-adventure target
 - [`docs/REWARD_SOURCE_AUDIT.md`](docs/REWARD_SOURCE_AUDIT.md) — source-checked reward IDs/mechanics and compatibility warnings
+- [`docs/REWARD_SMOKE_TEST.md`](docs/REWARD_SMOKE_TEST.md) — first in-game reward-delivery test sequence
 - [`design/REGIONAL_QUEST_MATRIX.md`](design/REGIONAL_QUEST_MATRIX.md) — all quests + mechanical objective/status
 - [`design/STORY_BOARD_UI.md`](design/STORY_BOARD_UI.md) — story-first Bountiful UI plan
 - [`design/story_board_mockup.html`](design/story_board_mockup.html) — visual mockup
@@ -60,4 +67,4 @@ So a board can be in, for example, **Frostmarch Frontier** or **Harvestlands Wil
 
 The zoning project owns the truth of **where things can exist**.
 
-This quest project owns **what local people know about them, why the player might care, and what the player receives for engaging with them**.
+This quest project owns **what local people know about those things, why the player might care, and what the player receives for engaging with them**.
