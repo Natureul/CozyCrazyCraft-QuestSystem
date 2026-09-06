@@ -23,6 +23,13 @@ ALLOWED_ACTION_PREFIXES = (
     "debug(",
 )
 
+# Conversations 1.0.5 currently renders a very large fixed conversation panel and defaults to
+# unusually slow 1/2/7/14-character timing. Until the screen itself is replaced/overhauled, keep
+# individual spoken beats concise and require explicit pacing so new dialogue cannot silently
+# regress to the playtest's wall-of-text behavior.
+MAX_DIALOGUE_CHARS = 220
+MAX_NORMAL_CHAR_DELAY = 0.75
+
 
 def fail(message: str) -> None:
     raise SystemExit(f"Conversations validation failed: {message}")
@@ -53,6 +60,19 @@ def validate_reply(reply: object, source: Path) -> None:
         fail(f"{source}: reply 'action' must be an object or non-empty array")
 
 
+def validate_timings(option: dict, source: Path) -> None:
+    timings = option.get("timings")
+    if not isinstance(timings, list) or len(timings) != 4:
+        fail(f"{source}: every dialogue option must declare exactly four timing values")
+    if not all(isinstance(value, (int, float)) and value >= 0 for value in timings):
+        fail(f"{source}: timings must be four non-negative numbers")
+    if timings[0] > MAX_NORMAL_CHAR_DELAY:
+        fail(
+            f"{source}: normal character delay {timings[0]} is too slow for the current dialogue UI "
+            f"(max {MAX_NORMAL_CHAR_DELAY})"
+        )
+
+
 def validate_file(path: Path) -> None:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -77,12 +97,19 @@ def validate_file(path: Path) -> None:
         for option in options:
             if not isinstance(option, dict) or not isinstance(option.get("dialogue"), str):
                 fail(f"{path}: each dialogue option needs a dialogue string")
+            dialogue = option["dialogue"]
+            if len(dialogue) > MAX_DIALOGUE_CHARS:
+                fail(
+                    f"{path}: dialogue beat is {len(dialogue)} chars; split/shorten it below "
+                    f"{MAX_DIALOGUE_CHARS} while using the stock Conversations screen"
+                )
             # Conversations 1.0.5 defaults a missing option condition to literal 'null', which is
             # not an unconditional condition. Require explicit conditions so an authored line can
             # never disappear because of that parser quirk.
             condition = option.get("condition")
             if not isinstance(condition, str) or not condition:
                 fail(f"{path}: every dialogue option must explicitly declare a condition")
+            validate_timings(option, path)
             replies = option.get("replies", [])
             if not isinstance(replies, list):
                 fail(f"{path}: replies must be an array")
