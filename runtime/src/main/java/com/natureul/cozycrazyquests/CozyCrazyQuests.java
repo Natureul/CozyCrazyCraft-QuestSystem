@@ -30,6 +30,7 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageSocialConversationManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerClone);
+        MinecraftForge.EVENT_BUS.addListener(VillageProgressState::onPlayerClone);
 
         LOGGER.info("CozyCrazyQuests runtime V3 loaded");
     }
