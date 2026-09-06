@@ -25,6 +25,15 @@ def load(path: Path):
         return None
 
 
+def check_short_text(label: str, value, max_len: int, required: bool = True) -> None:
+    if not isinstance(value, str) or not value.strip():
+        if required:
+            errors.append(f"{label}: expected non-empty text")
+        return
+    if len(value) > max_len:
+        warnings.append(f"{label}: may be too long for compact board UI ({len(value)} chars; target <= {max_len})")
+
+
 def main() -> int:
     pool = load(POOL)
     cards = load(CARDS)
@@ -35,6 +44,7 @@ def main() -> int:
 
     pool_entries = set((pool.get("content") or {}).keys())
     story_cards = cards.get("cards")
+    region_ids = set((profiles.get("regions") or {}).keys())
     notice_classes = set((profiles.get("notice_classes") or {}).keys())
 
     if cards.get("schema_version") != 1:
@@ -59,21 +69,31 @@ def main() -> int:
             errors.append(f"{label}: card must be an object")
             continue
 
-        for key in ("title", "issuer", "notice_class", "body"):
-            value = card.get(key)
-            if not isinstance(value, str) or not value.strip():
-                errors.append(f"{label}: missing non-empty {key!r}")
+        check_short_text(f"{label}.title", card.get("title"), 48)
+        check_short_text(f"{label}.issuer", card.get("issuer"), 36)
+        check_short_text(f"{label}.body", card.get("body"), 220)
 
         notice_class = card.get("notice_class")
-        if isinstance(notice_class, str) and notice_class not in notice_classes:
+        if not isinstance(notice_class, str) or not notice_class.strip():
+            errors.append(f"{label}: missing non-empty 'notice_class'")
+        elif notice_class not in notice_classes:
             errors.append(f"{label}: unknown notice_class {notice_class!r}")
 
-        title = card.get("title", "")
-        body = card.get("body", "")
-        if isinstance(title, str) and len(title) > 48:
-            warnings.append(f"{label}: title is long for the compact board UI ({len(title)} chars)")
-        if isinstance(body, str) and len(body) > 220:
-            warnings.append(f"{label}: body is long for the compact board UI ({len(body)} chars)")
+        regional = card.get("regional_body")
+        if regional is not None:
+            if not isinstance(regional, dict):
+                errors.append(f"{label}.regional_body must be an object when present")
+            else:
+                unknown = sorted(set(regional) - region_ids)
+                if unknown:
+                    errors.append(f"{label}.regional_body has unknown region keys: {', '.join(unknown)}")
+                missing_regions = sorted(region_ids - set(regional))
+                if missing_regions:
+                    warnings.append(
+                        f"{label}.regional_body does not cover every UI region: {', '.join(missing_regions)}; base body will be fallback"
+                    )
+                for region, text in sorted(regional.items()):
+                    check_short_text(f"{label}.regional_body.{region}", text, 220)
 
     return finish()
 
