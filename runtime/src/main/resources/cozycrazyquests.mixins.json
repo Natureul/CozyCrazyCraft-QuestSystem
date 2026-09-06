@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.natureul.cozycrazyquests.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "cozycrazyquests.refmap.json",
+  "mixins": [
+    "BoardBlockEntityMixin",
+    "BountyCreatorMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
