@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Ensure every machine-readable quest remains discoverable in the root QUESTS.md browser."""
+"""Ensure the 108 authored quests remain discoverable in QUESTS.md.
+
+Repeatable/ecology expansion files intentionally live outside this check and are
+validated against FIELD_JOBS.md separately. This keeps the authored story catalog
+and the ordinary board-population layer legible instead of conflating both counts.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "data" / "quest_catalog"
 BROWSER = ROOT / "QUESTS.md"
+AUTHORED_FILES = ["core.json", "north.json", "east.json", "south.json", "west.json"]
 
 errors: list[str] = []
 
@@ -24,7 +30,8 @@ def main() -> int:
     quest_ids: set[str] = set()
     quest_titles: list[tuple[str, str, str]] = []
 
-    for path in sorted(CATALOG.glob("*.json")):
+    for filename in AUTHORED_FILES:
+        path = CATALOG / filename
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except Exception as exc:
@@ -45,9 +52,8 @@ def main() -> int:
     missing = [(qid, title, region) for qid, title, region in quest_titles if title not in browser]
     if missing:
         for qid, title, region in missing:
-            errors.append(f"QUESTS.md missing {region} quest {qid}: {title}")
+            errors.append(f"QUESTS.md missing {region} authored quest {qid}: {title}")
 
-    # The headline count should not quietly become stale.
     expected_count = len(quest_ids)
     count_markers = [
         f"**{expected_count} quest concepts**",
@@ -55,15 +61,15 @@ def main() -> int:
         f"**{expected_count}**",
     ]
     if not any(marker in browser for marker in count_markers):
-        errors.append(f"QUESTS.md does not visibly reflect the current catalog count ({expected_count})")
+        errors.append(f"QUESTS.md does not visibly reflect the authored catalog count ({expected_count})")
 
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
-        print(f"\nFAILED: {len(errors)} quest-browser synchronization error(s)")
+        print(f"\nFAILED: {len(errors)} authored quest-browser synchronization error(s)")
         return 1
 
-    print(f"OK: QUESTS.md exposes all {expected_count} catalogued quests")
+    print(f"OK: QUESTS.md exposes all {expected_count} authored quests")
     return 0
 
 
