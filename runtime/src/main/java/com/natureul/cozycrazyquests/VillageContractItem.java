@@ -12,14 +12,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Physical reminder for an authored village contract.
- *
- * The paper is deliberately not a full quest log, but it must never lie about what the player is
- * doing. Older builds hard-coded every contract as a Cartographer survey, which made Farmer work
- * tell the player to return to a Cartographer. The tooltip is now derived from the actual semantic
- * quest definition.
- */
+/** Physical reminder for an authored village contract. It is not a quest log, but it must be unambiguous. */
 public final class VillageContractItem extends Item {
     public static final String QUEST_ID = "ccc_quest_id";
     public static final String TARGET_NAME = "ccc_target_name";
@@ -46,10 +39,7 @@ public final class VillageContractItem extends Item {
             }
 
             if (definition != null) {
-                String objective = objectiveLine(definition, target);
-                if (!objective.isBlank()) {
-                    tooltip.add(Component.literal("Objective: " + objective).withStyle(ChatFormatting.AQUA));
-                }
+                tooltip.add(Component.literal("Objective: " + objectiveLine(definition, target)).withStyle(ChatFormatting.AQUA));
             } else if (!target.isBlank()) {
                 tooltip.add(Component.literal("Objective: Visit " + target).withStyle(ChatFormatting.AQUA));
             }
@@ -60,7 +50,7 @@ public final class VillageContractItem extends Item {
             }
 
             if (definition != null) {
-                tooltip.add(Component.literal("Return: " + returnLine(definition, village))
+                tooltip.add(Component.literal("Return to: " + returnLine(definition, village))
                         .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
             } else {
                 tooltip.add(Component.literal("Return to the village that issued this work")
@@ -74,6 +64,7 @@ public final class VillageContractItem extends Item {
         String place = target == null || target.isBlank() ? definition.targetLabel() : target;
         return switch (definition.objectiveType()) {
             case STRUCTURE_SURVEY -> "Survey " + place;
+            case STRUCTURE_HOSTILE_CLEAR -> "Clear " + definition.requiredKills() + " hostiles at " + place;
             case LOCAL_HOSTILE_CLEAR -> "Clear " + definition.requiredKills() + " hostiles around " + place;
         };
     }
@@ -82,7 +73,7 @@ public final class VillageContractItem extends Item {
         String destination = village == null || village.isBlank() || "the village".equals(village)
                 ? "the issuing village"
                 : village;
-        return "to " + professionList(definition.giverProfessions()) + " in " + destination;
+        return professionList(definition.giverProfessions()) + " in " + destination;
     }
 
     private static String professionList(List<VillagerProfession> professions) {
