@@ -1,0 +1,7 @@
+{
+  "title": "The Watch Went Quiet",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Check the place itself, not just the road below it. If something has moved in, I want to know before the next patrol does.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Understood.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}
