@@ -1,0 +1,7 @@
+{
+  "title": "Village Guard",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"No specialist has brought me an urgent problem just now. The notice board may still have ordinary work posted.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Where's the notice board?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"guard_board\"})"},{"action":"dialogue.close"}]},{"reply":"That's all.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}
