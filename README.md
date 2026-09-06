@@ -5,8 +5,9 @@ Player-facing quest, bounty, map, cartographer, reward, and information-layer de
 ## Start here
 
 ### [📜 Browse all 108 current quests by region and tier](QUESTS.md)
+### [🎁 Browse the regional reward ladders](REWARDS.md)
 
-That page is the human-readable overview. It shows Shared Core, Frostmarch, Greenveil, Sunscar, and Harvestlands across Hearthlands → Frontier → Wildlands → Dread Reaches, with the current reward direction for each tier.
+Those are the human-readable overviews. `QUESTS.md` shows Shared Core, Frostmarch, Greenveil, Sunscar, and Harvestlands across Hearthlands → Frontier → Wildlands → Dread Reaches. `REWARDS.md` shows what each region is intended to teach/give the player at each tier.
 
 For implementation detail, see [the mechanical quest matrix](design/REGIONAL_QUEST_MATRIX.md).
 
@@ -34,6 +35,7 @@ The core rule remains: **do not invent a complicated event system when Bountiful
 ## Useful documents
 
 - [`QUESTS.md`](QUESTS.md) — easy human-readable quest browser
+- [`REWARDS.md`](REWARDS.md) — easy regional/tier reward browser
 - [`design/REGIONAL_QUEST_MATRIX.md`](design/REGIONAL_QUEST_MATRIX.md) — all quests + mechanical objective/status
 - [`design/STORY_BOARD_UI.md`](design/STORY_BOARD_UI.md) — story-first Bountiful UI plan
 - [`design/story_board_mockup.html`](design/story_board_mockup.html) — visual mockup
