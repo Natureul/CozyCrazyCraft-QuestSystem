@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "zoning_contract": "CozyCrazyZones-0.3.4",
+  "principle": "A binding declares a legal target family, not a guaranteed generated instance. Runtime must locate a real sensible instance or withhold the posting.",
+  "bindings": [
+    {
+      "quest_id": "core_h1_watchmans_token",
+      "quest_region": "CORE",
+      "quest_tier": "HEARTHLANDS",
+      "target_mode": "one_of",
+      "targets": ["dungeons_enhanced:watch_tower", "born_in_chaos_v1:observation_tower_*"],
+      "binding_status": "GENERIC_RULE",
+      "proof_item": "cozycrazyquests:watchmans_token",
+      "notes": "Strong first recovery-contract candidate. Transition/core locator chooses a nearby legal tower."
+    },
+    {
+      "quest_id": "core_h1_missing_courier_satchel",
+      "quest_region": "CORE",
+      "quest_tier": "HEARTHLANDS",
+      "target_mode": "one_of",
+      "targets": ["valhelsia_structures:tower_ruin", "dungeons_enhanced:dungeon_variant"],
+      "binding_status": "GENERIC_RULE",
+      "proof_item": "cozycrazyquests:courier_satchel",
+      "notes": "Keep target flexible; story is about the courier, not a specific dungeon family."
+    },
+    {
+      "quest_id": "north_h1_marker_in_snow",
+      "quest_region": "NORTH",
+      "quest_tier": "HEARTHLANDS",
+      "target_mode": "one_of_same_region",
+      "targets": ["dungeons_enhanced:watch_tower", "born_in_chaos_v1:observation_tower_*"],
+      "binding_status": "GENERIC_RULE",
+      "proof_item": "cozycrazyquests:frostmarch_survey_tag",
+      "notes": "Target itself is generic; locator must demand a Frostmarch/transition instance near the issuing village."
+    },
+    {
+      "quest_id": "north_h1_trappers_satchel",
+      "quest_region": "NORTH",
+      "quest_tier": "HEARTHLANDS",
+      "target_mode": "one_of_same_region",
+      "targets": ["valhelsia_structures:tower_ruin", "dungeons_enhanced:dungeon_variant"],
+      "binding_status": "GENERIC_RULE",
+      "proof_item": "cozycrazyquests:trappers_satchel",
+      "notes": "No North-exclusive H1 structure rule yet; use only a real Frostmarch/transition instance."
+    },
+    {
+      "quest_id": "north_f2_missing_expedition_journal",
+      "quest_region": "NORTH",
+      "quest_tier": "FRONTIER",
+      "target_mode": "one_of_same_region",
+      "targets": ["valhelsia_structures:castle_ruin", "dungeons_enhanced:tower_of_the_undead"],
+      "binding_status": "GENERIC_RULE",
+      "proof_item": "cozycrazyquests:missing_north_journal",
+      "notes": "Frontier-radial targets are legal, but current 0.3.4 has no dedicated North Frontier structure family."
+    },
+    {
+      "quest_id": "north_w3_sleeping_mountain",
+      "quest_region": "NORTH",
+      "quest_tier": "WILDLANDS",
+      "target_mode": "exact",
+      "targets": ["mowziesmobs:frostmaw_spawn"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": null,
+      "notes": "NORTH + WILDLANDS + ESTABLISHED. Quest objective remains entity kill of mowziesmobs:frostmaw."
+    },
+    {
+      "quest_id": "north_w3_last_warm_camp",
+      "quest_region": "NORTH",
+      "quest_tier": "WILDLANDS",
+      "target_mode": "exact",
+      "targets": ["dungeons_enhanced:ice_pit"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": "cozycrazyquests:stove_plate",
+      "notes": "NORTH + WILDLANDS + ESTABLISHED. Good deep-northern proof-item expedition."
+    },
+    {
+      "quest_id": "east_f2_shrine_under_vines",
+      "quest_region": "EAST",
+      "quest_tier": "FRONTIER",
+      "target_mode": "one_of",
+      "targets": ["betterjungletemples:jungle_temple", "dungeons_enhanced:jungle_monument"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": "cozycrazyquests:overgrown_shrine_ledger",
+      "notes": "Both target families are EAST + FRONTIER + ESTABLISHED."
+    },
+    {
+      "quest_id": "east_w3_temple_eight_roots",
+      "quest_region": "EAST",
+      "quest_tier": "WILDLANDS",
+      "target_mode": "one_of_outward_instance",
+      "targets": ["betterjungletemples:jungle_temple", "dungeons_enhanced:jungle_monument"],
+      "binding_status": "EXPLICIT_MINIMUM_RULE",
+      "proof_item": "cozycrazyquests:seed_reliquary",
+      "notes": "Structure minimum is Frontier; T3 locator must specifically find an instance whose actual position classifies as Greenveil Wildlands."
+    },
+    {
+      "quest_id": "south_h1_watering_hole_ledger",
+      "quest_region": "SOUTH",
+      "quest_tier": "HEARTHLANDS",
+      "target_mode": "candidate_exact",
+      "targets": ["dungeons_enhanced:desert_tomb"],
+      "binding_status": "EXPLICIT_RULE_STORY_REVIEW",
+      "proof_item": "cozycrazyquests:watering_hole_ledger",
+      "notes": "Desert Tomb is SOUTH + Hearthlands + Cardinal Transition. If used, adjust prose so the ledger plausibly belongs at the old desert site."
+    },
+    {
+      "quest_id": "south_f2_first_dig",
+      "quest_region": "SOUTH",
+      "quest_tier": "FRONTIER",
+      "target_mode": "map_context_only",
+      "targets": ["betterdeserttemples:desert_temple", "dungeons_enhanced:desert_temple"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": null,
+      "notes": "Current mechanical objective is a pottery sherd; a regional map can point to either explicit SOUTH + Frontier temple family."
+    },
+    {
+      "quest_id": "south_w3_sunbird",
+      "quest_region": "SOUTH",
+      "quest_tier": "WILDLANDS",
+      "target_mode": "exact",
+      "targets": ["mowziesmobs:umvuthana_grove"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": null,
+      "notes": "SOUTH + WILDLANDS + ESTABLISHED. Quest objective remains entity kill of mowziesmobs:umvuthi."
+    },
+    {
+      "quest_id": "south_d4_cursed_inscription",
+      "quest_region": "SOUTH",
+      "quest_tier": "DREAD_REACHES",
+      "target_mode": "exact",
+      "targets": ["cataclysm:cursed_pyramid"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": "cozycrazyquests:cursed_inscription",
+      "notes": "SOUTH + DREAD_REACHES + ESTABLISHED; explicit exception to global Cataclysm structure suppression."
+    },
+    {
+      "quest_id": "south_d4_ancient_remnant",
+      "quest_region": "SOUTH",
+      "quest_tier": "DREAD_REACHES",
+      "target_mode": "exact",
+      "targets": ["cataclysm:cursed_pyramid"],
+      "binding_status": "EXPLICIT_RULE",
+      "proof_item": null,
+      "notes": "Regional finale destination is authoritative in 0.3.4."
+    },
+    {
+      "quest_id": "west_h1_empty_stalls",
+      "quest_region": "WEST",
+      "quest_tier": "HEARTHLANDS",
+      "target_mode": "same_region_instance",
+      "targets": ["dungeons_enhanced:stables"],
+      "binding_status": "GENERIC_RULE",
+      "proof_item": "cozycrazyquests:stablemasters_seal",
+      "notes": "Stables are Hearthlands+. The locator should choose a Harvestlands/transition instance for this western-flavored authored contract."
+    },
+    {
+      "quest_id": "west_w3_headless_road",
+      "quest_region": "WEST",
+      "quest_tier": "WILDLANDS",
+      "target_mode": "entity_ecology",
+      "targets": [],
+      "binding_status": "EXPLICIT_ENTITY_RULE",
+      "proof_item": null,
+      "notes": "born_in_chaos_v1:sir_pumpkinhead is explicitly WEST + WILDLANDS + ESTABLISHED as a natural entity rule; no exact structure instance is required for Bountiful completion."
+    },
+    {
+      "quest_id": "west_d4_last_road_west",
+      "quest_region": "WEST",
+      "quest_tier": "DREAD_REACHES",
+      "target_mode": "prefix",
+      "targets": ["born_in_chaos_v1:dark_tower_*"],
+      "binding_status": "EXPLICIT_PREFIX_RULE",
+      "proof_item": "cozycrazyquests:last_road_plate",
+      "notes": "dark_tower_ prefix is WEST + DREAD_REACHES + ESTABLISHED. Strong pre-finale deep-West destination."
+    }
+  ],
+  "blocked_or_pending": [
+    {
+      "quest_id": "north_d4_cornelias_wake",
+      "reason": "Aquamirae structures are loaded but current ZoneRuleRegistry does not explicitly enforce NORTH + DREAD_REACHES."
+    },
+    {
+      "quest_id": "north_d4_captain_in_ice",
+      "reason": "Captain Cornelia entity ID is known, but exact North-Dread destination/locator contract is not yet authoritative."
+    },
+    {
+      "quest_id": "east_d4_thing_beneath_canopy",
+      "reason": "Jungle Abomination import/arena is intentionally future work."
+    },
+    {
+      "quest_id": "west_f2_gravekeepers_bell",
+      "reason": "Born in Chaos grave_* structures are loaded but not currently West/Frontier-bound by ZoneRuleRegistry."
+    },
+    {
+      "quest_id": "west_d4_old_harvest",
+      "reason": "Lord Pumpkinhead exists, but current 0.3.4 does not expose the intended final encounter/destination path."
+    }
+  ]
+}
