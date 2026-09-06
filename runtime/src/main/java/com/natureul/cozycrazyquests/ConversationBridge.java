@@ -48,16 +48,14 @@ final class ConversationBridge {
         }
     }
 
+    static boolean hasDialogue(LivingEntity entity) {
+        String id = dialogueId(entity);
+        return id != null && !id.isBlank() && !"null".equalsIgnoreCase(id);
+    }
+
     static boolean hasOwnDialogue(LivingEntity entity) {
-        resolve();
-        if (!available || !dialogueType.isInstance(entity)) return false;
-        try {
-            Object current = getDialogue.invoke(entity);
-            return current instanceof String id && id.startsWith(OWN_PREFIX);
-        } catch (Throwable error) {
-            warnOnce("Could not inspect Conversations dialogue on entity", error);
-            return false;
-        }
+        String id = dialogueId(entity);
+        return id != null && id.startsWith(OWN_PREFIX);
     }
 
     static void clearOwnDialogue(LivingEntity entity) {
@@ -70,6 +68,18 @@ final class ConversationBridge {
             }
         } catch (Throwable error) {
             warnOnce("Could not clear CozyCrazyQuests dialogue from entity", error);
+        }
+    }
+
+    private static String dialogueId(LivingEntity entity) {
+        resolve();
+        if (!available || !dialogueType.isInstance(entity)) return null;
+        try {
+            Object current = getDialogue.invoke(entity);
+            return current instanceof String id ? id : null;
+        } catch (Throwable error) {
+            warnOnce("Could not inspect Conversations dialogue on entity", error);
+            return null;
         }
     }
 
