@@ -9,8 +9,9 @@ import java.lang.reflect.Method;
  * Reflection-only bridge to Lazr Productions' Conversations mod.
  *
  * CozyCrazyQuests remains loadable without Conversations present; when it is installed, the mod's
- * LivingEntity mixin makes ordinary villagers implement ICanDialogue. We deliberately touch only
- * that small public surface instead of compiling against the third-party jar.
+ * LivingEntity mixin makes ordinary villagers (and other living entities such as Guard Villagers
+ * guards) implement ICanDialogue. We deliberately touch only that small public surface instead of
+ * compiling against the third-party jar.
  */
 final class ConversationBridge {
     private static final String INTERFACE = "com.lazrproductions.conversations.entity.base.ICanDialogue";
@@ -30,6 +31,11 @@ final class ConversationBridge {
         return available;
     }
 
+    static boolean supports(LivingEntity entity) {
+        resolve();
+        return available && dialogueType.isInstance(entity);
+    }
+
     static boolean setDialogue(LivingEntity entity, ResourceLocation dialogue) {
         resolve();
         if (!available || !dialogueType.isInstance(entity)) return false;
@@ -38,6 +44,18 @@ final class ConversationBridge {
             return true;
         } catch (Throwable error) {
             warnOnce("Could not assign Conversations dialogue", error);
+            return false;
+        }
+    }
+
+    static boolean hasOwnDialogue(LivingEntity entity) {
+        resolve();
+        if (!available || !dialogueType.isInstance(entity)) return false;
+        try {
+            Object current = getDialogue.invoke(entity);
+            return current instanceof String id && id.startsWith(OWN_PREFIX);
+        } catch (Throwable error) {
+            warnOnce("Could not inspect Conversations dialogue on entity", error);
             return false;
         }
     }
