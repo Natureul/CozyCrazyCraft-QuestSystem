@@ -1,0 +1,1 @@
+{"title":"The Watchline Below","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Keep the fight at the marked place. Trouble elsewhere is somebody else's problem.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll handle the marked site.","action":[{"action":"dialogue.close"}]}]}]}]}

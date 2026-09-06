@@ -1,0 +1,1 @@
+{"title":"Smoke Above the Old Road","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"If you see signs of recent use, remember them. Old towers collect new problems faster than legends.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll look for signs, not stories.","action":[{"action":"dialogue.close"}]}]}]}]}

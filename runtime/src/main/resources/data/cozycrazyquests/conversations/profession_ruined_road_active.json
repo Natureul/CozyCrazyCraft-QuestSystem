@@ -1,0 +1,1 @@
+{"title":"The Road Through the Ruin","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Stay with the road and tower. I don't need every monster in the county dead.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll keep to the road.","action":[{"action":"dialogue.close"}]}]}]}]}

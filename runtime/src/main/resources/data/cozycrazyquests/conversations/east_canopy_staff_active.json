@@ -1,0 +1,1 @@
+{"title":"The Path Under the Canopy","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Stay near the marked ruins. I asked for a safe route, not a hunting trip.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll stay on the route.","action":[{"action":"dialogue.close"}]}]}]}]}

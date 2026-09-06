@@ -1,0 +1,1 @@
+{"title":"Below the White Shelf","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"If the ground swallows the trail, ask around before you start digging holes at random. Old roads leave old entrances.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll keep looking.","action":[{"action":"dialogue.close"}]}]}]}]}

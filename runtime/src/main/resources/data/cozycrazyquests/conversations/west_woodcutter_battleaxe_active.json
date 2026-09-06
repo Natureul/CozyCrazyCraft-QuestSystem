@@ -1,0 +1,1 @@
+{"title":"Cut the Witchlight","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Keep close to the tower. If something flees into the forest, let the forest decide whether it comes back.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll keep the fight local.","action":[{"action":"dialogue.close"}]}]}]}]}

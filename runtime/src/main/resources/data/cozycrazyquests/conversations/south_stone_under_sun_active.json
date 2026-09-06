@@ -1,0 +1,1 @@
+{"title":"Stone Under the Sun","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Take water. A straight line across open ground can still be the wrong route if the land says otherwise.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll watch the road.","action":[{"action":"dialogue.close"}]}]}]}]}

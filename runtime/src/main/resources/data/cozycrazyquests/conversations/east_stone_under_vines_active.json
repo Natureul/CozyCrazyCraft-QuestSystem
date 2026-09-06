@@ -1,0 +1,1 @@
+{"title":"Stone Under the Vines","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Don't cut half the forest looking for it. Follow the old stone and the breaks in the canopy.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll follow the old stone.","action":[{"action":"dialogue.close"}]}]}]}]}
