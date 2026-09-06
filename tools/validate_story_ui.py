@@ -42,7 +42,8 @@ def main() -> int:
     if not all(isinstance(x, dict) for x in (pool, cards, profiles)):
         return finish()
 
-    pool_entries = set((pool.get("content") or {}).keys())
+    pool_content = pool.get("content") or {}
+    pool_entries = set(pool_content.keys())
     story_cards = cards.get("cards")
     region_ids = set((profiles.get("regions") or {}).keys())
     notice_classes = set((profiles.get("notice_classes") or {}).keys())
@@ -72,6 +73,17 @@ def main() -> int:
         check_short_text(f"{label}.title", card.get("title"), 48)
         check_short_text(f"{label}.issuer", card.get("issuer"), 36)
         check_short_text(f"{label}.body", card.get("body"), 220)
+
+        # Even before the custom story panel is coded, stock Bountiful can show
+        # the literal pool-entry name. Keep that fallback title identical to the
+        # richer story-card title so playtests never see two names for one job.
+        pool_entry = pool_content.get(entry_id)
+        if isinstance(pool_entry, dict):
+            stock_name = pool_entry.get("name")
+            if stock_name != card.get("title"):
+                errors.append(
+                    f"{label}: story title {card.get('title')!r} does not match stock Bountiful name {stock_name!r}"
+                )
 
         notice_class = card.get("notice_class")
         if not isinstance(notice_class, str) or not notice_class.strip():
