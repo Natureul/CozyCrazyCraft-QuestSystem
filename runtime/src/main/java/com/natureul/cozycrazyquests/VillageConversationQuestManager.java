@@ -38,6 +38,7 @@ public final class VillageConversationQuestManager {
     private static final long PENDING_LIFETIME = 2400L;
     private static final long TARGET_CACHE_LIFETIME = 6000L;
     private static final int VILLAGE_RECORD_RADIUS = 160;
+    private static final int VILLAGE_NAME_SEARCH_RADIUS = 256;
 
     private static final Map<String, CachedTarget> TARGET_CACHE = new HashMap<>();
 
@@ -96,12 +97,18 @@ public final class VillageConversationQuestManager {
             return;
         }
 
-        writePending(root, level, villager, village, villageCell, definition, target);
+        // CozyCrazyZones already gives both settlements and structures persistent world-global
+        // names. Reuse those names everywhere in the quest instead of calling Pumpkin Hollow
+        // "the issuing village" or The Amber Watch "a watch tower" after the player knows better.
+        String villageName = NamedPlaceBridge.nearestVillageName(level, village.center(), VILLAGE_NAME_SEARCH_RADIUS);
+        String targetName = NamedPlaceBridge.structureName(level, target.id(), target.pos());
+
+        writePending(root, level, villager, village, villageCell, definition, target, villageName, targetName);
         saveRoot(player, root);
         ConversationBridge.setDialogue(villager, OFFER_DIALOGUE);
 
         player.displayClientMessage(
-                Component.literal("Local survey lead  •  " + displayStructure(target.id()) + "  •  about "
+                Component.literal(villageName + " survey lead  •  " + targetName + "  •  about "
                                 + target.distanceBlocks() + " blocks " + direction(village.center(), target.pos()))
                         .withStyle(ChatFormatting.GOLD),
                 true
@@ -128,8 +135,11 @@ public final class VillageConversationQuestManager {
         active.putBoolean("surveyed", true);
         root.put(ACTIVE, active);
         saveRoot(player, root);
+        String villageName = active.getString("village_name");
+        if (villageName.isBlank()) villageName = "the issuing village";
         player.sendSystemMessage(
-                Component.literal("Survey complete. Return to a cartographer in the issuing village.")
+                Component.literal("Survey complete: " + active.getString("target_name")
+                                + ". Return to a cartographer in " + villageName + ".")
                         .withStyle(ChatFormatting.AQUA)
         );
     }
@@ -180,14 +190,33 @@ public final class VillageConversationQuestManager {
         contract.getOrCreateTag().putString(VillageContractItem.TARGET_NAME, active.getString("target_name"));
         contract.getOrCreateTag().putInt(VillageContractItem.TARGET_DISTANCE, active.getInt("target_distance"));
         contract.getOrCreateTag().putString(VillageContractItem.TARGET_DIRECTION, active.getString("target_direction"));
+        contract.getOrCreateTag().putString(VillageContractItem.ISSUING_VILLAGE, active.getString("village_name"));
         if (!player.addItem(contract)) player.drop(contract, false);
 
+        ResourceLocation targetId = ResourceLocation.tryParse(active.getString("target_structure"));
+        boolean atlasMarked = targetId != null && NamedPlaceBridge.revealStructureToAtlas(
+                player,
+                targetId,
+                readPos(active, "target"),
+                active.getString("target_name")
+        );
+
+        String villageName = active.getString("village_name");
+        String prefix = villageName.isBlank() || "the village".equals(villageName)
+                ? "Accepted: " + active.getString("title")
+                : villageName + " — " + active.getString("title");
         player.sendSystemMessage(
-                Component.literal("Accepted: " + active.getString("title") + " — survey "
-                                + active.getString("target_name") + ", about " + active.getInt("target_distance")
-                                + " blocks " + active.getString("target_direction") + ".")
+                Component.literal(prefix + ": survey " + active.getString("target_name") + ", about "
+                                + active.getInt("target_distance") + " blocks "
+                                + active.getString("target_direction") + ".")
                         .withStyle(ChatFormatting.GOLD)
         );
+        if (atlasMarked) {
+            player.sendSystemMessage(
+                    Component.literal("The cartographer marks " + active.getString("target_name") + " on your Atlas.")
+                            .withStyle(ChatFormatting.AQUA)
+            );
+        }
     }
 
     private static void turnInActive(ServerPlayer player) {
@@ -201,7 +230,9 @@ public final class VillageConversationQuestManager {
         long dx = (long) player.blockPosition().getX() - boardPos.getX();
         long dz = (long) player.blockPosition().getZ() - boardPos.getZ();
         if (dx * dx + dz * dz > (long) VILLAGE_RECORD_RADIUS * VILLAGE_RECORD_RADIUS) {
-            player.sendSystemMessage(Component.literal("Return to the village that issued this survey before turning it in.")
+            String villageName = active.getString("village_name");
+            if (villageName.isBlank()) villageName = "the village that issued this survey";
+            player.sendSystemMessage(Component.literal("Return to " + villageName + " before turning this survey in.")
                     .withStyle(ChatFormatting.GOLD));
             return;
         }
@@ -218,8 +249,13 @@ public final class VillageConversationQuestManager {
         saveRoot(player, root);
         removeContract(player, definition.id());
 
+        String villageName = active.getString("village_name");
+        String records = villageName.isBlank() || "the village".equals(villageName)
+                ? "The village records your survey."
+                : villageName + " records your survey.";
         player.sendSystemMessage(
-                Component.literal("Completed: " + definition.title() + ". The cartographer pays 5 emeralds, a spyglass, and records your work with the village.")
+                Component.literal("Completed: " + definition.title() + ". " + records
+                                + " Payment: 5 emeralds, a spyglass, and Village Trust.")
                         .withStyle(ChatFormatting.GREEN)
         );
         if (!trustAwarded) {
@@ -280,7 +316,9 @@ public final class VillageConversationQuestManager {
             VillageBoardSavedData.VillageRecord village,
             ZoneBridge.Cell villageCell,
             VillageQuestCatalog.Definition definition,
-            NearbyStructureResolver.ResolvedStructure target
+            NearbyStructureResolver.ResolvedStructure target,
+            String villageName,
+            String targetName
     ) {
         CompoundTag pending = new CompoundTag();
         pending.putString("quest_id", definition.id());
@@ -290,13 +328,14 @@ public final class VillageConversationQuestManager {
         pending.putString("board_dimension", level.dimension().location().toString());
         putPos(pending, "board", village.board());
         putPos(pending, "village", village.center());
+        pending.putString("village_name", villageName);
         pending.putString("village_macro", villageCell.macro());
         pending.putString("village_tier", villageCell.tier());
         pending.putString("target_dimension", level.dimension().location().toString());
         pending.putString("target_structure", target.id().toString());
         putPos(pending, "target", target.pos());
         pending.putInt("target_radius", definition.targetRadiusBlocks());
-        pending.putString("target_name", displayStructure(target.id()));
+        pending.putString("target_name", targetName);
         pending.putInt("target_distance", target.distanceBlocks());
         pending.putString("target_direction", direction(village.center(), target.pos()));
         pending.putLong("created_game_time", level.getGameTime());
@@ -365,17 +404,6 @@ public final class VillageConversationQuestManager {
             stack.shrink(1);
             return;
         }
-    }
-
-    private static String displayStructure(ResourceLocation id) {
-        String[] words = id.getPath().replace('/', '_').split("_");
-        StringBuilder out = new StringBuilder();
-        for (String word : words) {
-            if (word.isBlank()) continue;
-            if (!out.isEmpty()) out.append(' ');
-            out.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
-        }
-        return out.isEmpty() ? "local landmark" : out.toString();
     }
 
     private static String direction(BlockPos from, BlockPos to) {
