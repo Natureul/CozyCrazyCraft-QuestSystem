@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "RUNTIME_V1_IN_PROGRESS",
+  "status": "RUNTIME_V2_PLAYTEST",
   "player_facing_name": "Village Trust",
   "principle": "Helping one settlement should make that settlement trust the player enough to reveal better work, better local knowledge, and better utility rewards without turning the village into a grind hub.",
   "bountiful_6_0_4_facts": {
@@ -18,10 +18,15 @@
     "reason": "Five to seven choices reads as a real village notice board without becoming a quest-list wall."
   },
   "rotation": {
-    "board_update_frequency_seconds": 300,
-    "intent": "roughly one small board change every five real minutes; a board evolves gradually rather than visibly rerolling while the player reads it",
+    "board_update_frequency_seconds": 120,
+    "intent": "roughly one small board change every two real minutes; an exhausted player-facing board begins offering fresh work promptly without visibly full-rerolling while the player reads it",
     "accepted_bounties_expire": false,
     "abandoned_bounty_behavior": "player may discard/compost unwanted papers; later authored UI can add an explicit abandon action"
+  },
+  "radiant_reward_policy": {
+    "ordinary_public_notices": "simple village payment in emeralds; no generic bread or cooked-food lottery",
+    "experience": "Bountiful already grants a small XP bonus when a bounty is redeemed; keep this modest rather than turning routine notices into XP farming",
+    "signature_items": "reserve weapons, equipment, maps, pets, travel tools, temperature gear, enchanted/quality gear, and other memorable rewards for authored or trust-gated contracts"
   },
   "trust_stages": [
     {
@@ -29,7 +34,7 @@
       "display": "Newcomer",
       "minimum_reputation": 0,
       "approx_completed_bounties": 0,
-      "unlocks": ["ordinary local work", "regional flavor jobs", "basic supplies and currency"]
+      "unlocks": ["ordinary local work", "regional flavor jobs", "basic currency"]
     },
     {
       "id": "FAMILIAR_FACE",
