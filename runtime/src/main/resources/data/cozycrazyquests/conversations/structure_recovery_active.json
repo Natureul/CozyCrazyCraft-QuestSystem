@@ -1,0 +1,19 @@
+{
+  "title": "Recovery Work",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "Bring back the item I asked for. That's how we'll know you reached the right place and found what mattered there.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {"reply": "I'll bring it back.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
