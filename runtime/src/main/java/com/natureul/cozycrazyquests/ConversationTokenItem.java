@@ -34,8 +34,8 @@ public final class ConversationTokenItem extends Item {
                 player.getGameProfile().getName()
         );
 
-        if (!VillageSocialConversationManager.consumeConversationAction(player, action)) {
-            VillageConversationQuestManager.consumeConversationAction(player, action);
-        }
+        if (VillageSocialConversationManager.consumeConversationAction(player, action)) return;
+        if (VillageStructureConversationQuestManager.consumeConversationAction(player, action)) return;
+        VillageConversationQuestManager.consumeConversationAction(player, action);
     }
 }
