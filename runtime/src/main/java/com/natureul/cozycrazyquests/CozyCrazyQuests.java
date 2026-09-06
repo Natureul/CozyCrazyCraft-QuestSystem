@@ -36,6 +36,7 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(VillageStructureConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageStructureConversationQuestManager::onLivingDeath);
         MinecraftForge.EVENT_BUS.addListener(VillageStructureConversationQuestManager::onPlayerClone);
+        MinecraftForge.EVENT_BUS.addListener(CoreContractClarifier::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageProgressState::onPlayerClone);
         MinecraftForge.EVENT_BUS.addListener(PlayerKnowledgeState::onPlayerClone);
 
