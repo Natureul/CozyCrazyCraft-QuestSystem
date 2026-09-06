@@ -1,0 +1,25 @@
+{
+  "title": "The Outer Pasture",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "\nYou cleared the pasture? Good. The pens and fields can breathe easier tonight.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.28, 0.08, 0.70, 1.10],
+          "replies": [
+            {
+              "reply": "It's handled.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},
+                {"action": "dialogue.close"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
