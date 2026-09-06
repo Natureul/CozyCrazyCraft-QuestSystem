@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "source_pool": "ccc_local_objs",
+  "principle": "Cosmetic presentation only; Bountiful remains authoritative for objective and reward logic.",
+  "cards": {
+    "ccc_local_wheat": {
+      "title": "Grain for the Storehouse",
+      "issuer": "Village Storekeeper",
+      "notice_class": "LOCAL_NOTICE",
+      "body": "The storehouse is buying clean wheat while there is still room in the bins."
+    },
+    "ccc_local_logs": {
+      "title": "Timber for Repairs",
+      "issuer": "Village Builder",
+      "notice_class": "LOCAL_NOTICE",
+      "body": "Fences, roofs, and carts all need repairs. The builder is buying sound timber."
+    },
+    "ccc_local_wool": {
+      "title": "Wool for the Loom",
+      "issuer": "Village Weaver",
+      "notice_class": "LOCAL_NOTICE",
+      "body": "The loom-house is short on clean wool. It is ordinary work, but useful work."
+    },
+    "ccc_local_string": {
+      "title": "Cord and Canvas",
+      "issuer": "Caravan Hand",
+      "notice_class": "LOCAL_NOTICE",
+      "body": "Straps, sacks, and reins all seem to need repair at once. The caravan hands are buying string."
+    },
+    "ccc_local_zombie": {
+      "title": "Keep the Road Clear",
+      "issuer": "Village Watch",
+      "notice_class": "WATCH_NOTICE",
+      "body": "Travelers have been having trouble on the road after dusk. The watch is paying for help."
+    },
+    "ccc_local_skeleton": {
+      "title": "Arrows in the Dark",
+      "issuer": "Village Watch",
+      "notice_class": "WATCH_NOTICE",
+      "body": "The watch has found too many stray arrows along the road and wants the problem reduced."
+    },
+    "ccc_local_spider": {
+      "title": "Webs Near the Fields",
+      "issuer": "Village Farmer",
+      "notice_class": "WATCH_NOTICE",
+      "body": "Too many webs have appeared near the fields. The farmers are paying for help before livestock wanders into them."
+    }
+  }
+}
