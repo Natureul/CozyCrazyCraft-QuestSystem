@@ -31,11 +31,15 @@ public final class VillageSocialConversationManager {
 
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!(player.level() instanceof ServerLevel)) return;
+        if (!(player.level() instanceof ServerLevel level)) return;
         if (!(event.getTarget() instanceof LivingEntity target)) return;
         if (!ConversationBridge.available() || !ConversationBridge.supports(target)) return;
 
         if (target instanceof Villager villager) {
+            // Name belongs to the person, not the job. This therefore runs even when the quest
+            // manager already selected a higher-priority authored conversation.
+            VillagerNameService.ensureNamed(level, villager);
+
             // Authored quest/turn-in dialogue selected by VillageConversationQuestManager wins.
             if (ConversationBridge.hasOwnDialogue(villager)) return;
             // Respect any conversation deliberately attached by another mod/datapack.
@@ -47,6 +51,7 @@ public final class VillageSocialConversationManager {
 
         ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
         if (!GUARD_TYPE.equals(entityId)) return;
+        VillagerNameService.ensureNamed(level, target);
 
         if (!player.isShiftKeyDown()) {
             // Do not hijack Guard Villagers' normal right-click UI. If this guard was spoken to on a
