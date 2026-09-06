@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "RUNTIME_V1_IN_PROGRESS",
+  "player_facing_name": "Village Trust",
+  "principle": "Helping one settlement should make that settlement trust the player enough to reveal better work, better local knowledge, and better utility rewards without turning the village into a grind hub.",
+  "bountiful_6_0_4_facts": {
+    "trust_source": "board-local completed bounty count / Bountiful reputation",
+    "multiplayer_semantics": "shared settlement trust because Bountiful derives board level from the sum of all players' completions at that board",
+    "objective_rep_required_native_bug_or_gap": "Bountiful 6.0.4 applies repRequired to reward selection but not objective selection; CozyCrazyQuests runtime V1 filters objective entries by repRequired too",
+    "accepted_bounty_timer_policy": "disabled",
+    "reason_for_no_accepted_timer": "In 6.0.4 the timer starts when the bounty is generated on the board, not when the player takes it, so expedition jobs can arrive already partly expired. CozyCrazyCraft prefers commitment without arbitrary real-time pressure."
+  },
+  "board_population": {
+    "minimum_visible_notices": 5,
+    "preferred_visible_notices": 6,
+    "maximum_visible_notices": 7,
+    "stock_capacity": 21,
+    "reason": "Five to seven choices reads as a real village notice board without becoming a quest-list wall."
+  },
+  "rotation": {
+    "board_update_frequency_seconds": 300,
+    "intent": "roughly one small board change every five real minutes; a board evolves gradually rather than visibly rerolling while the player reads it",
+    "accepted_bounties_expire": false,
+    "abandoned_bounty_behavior": "player may discard/compost unwanted papers; later authored UI can add an explicit abandon action"
+  },
+  "trust_stages": [
+    {
+      "id": "NEWCOMER",
+      "display": "Newcomer",
+      "minimum_reputation": 0,
+      "approx_completed_bounties": 0,
+      "unlocks": ["ordinary local work", "regional flavor jobs", "basic supplies and currency"]
+    },
+    {
+      "id": "FAMILIAR_FACE",
+      "display": "Familiar Face",
+      "minimum_reputation": 1,
+      "approx_completed_bounties": 2,
+      "unlocks": ["slightly more personal village jobs", "small utility rewards"]
+    },
+    {
+      "id": "TRUSTED_HAND",
+      "display": "Trusted Hand",
+      "minimum_reputation": 2,
+      "approx_completed_bounties": 4,
+      "unlocks": ["meaningful local jobs", "saddles and similar civilization utility", "first local-adventure leads when a sane target exists"]
+    },
+    {
+      "id": "RESPECTED",
+      "display": "Respected",
+      "minimum_reputation": 3,
+      "approx_completed_bounties": 6,
+      "unlocks": ["unusual ecology jobs", "better local maps", "rarer utility rewards"]
+    },
+    {
+      "id": "VILLAGE_ALLY",
+      "display": "Village Ally",
+      "minimum_reputation": 5,
+      "approx_completed_bounties": 10,
+      "unlocks": ["signature local contracts", "important regional leads", "high-value but tier-appropriate rewards"]
+    }
+  ],
+  "anti_grind_rules": {
+    "no_main_story_gate_above_reputation": 5,
+    "do_not_require_repetitive_bulk_jobs_to_unlock_story": true,
+    "major_destination_discovery_can_bypass_trust_via_found_maps_or_journals": true,
+    "different_villages_have_independent_trust": true,
+    "deep_region_villages_may_start_with_higher_information_ceiling_but_not_free_player_trust": true
+  }
+}
