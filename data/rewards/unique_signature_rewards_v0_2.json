@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "source": "CozyCrazyCraft Villager Quest & Reward Master Bible v0.2, Section 17",
+  "status": "design_authority_data_only_until_reward_runtime_and_quality_config_are_validated",
+  "core_rule": "The player should remember I got this from that village / that road / that hunt. Emeralds are supporting currency; named or unusual items are the emotional payout.",
+  "regional_quality_vocabulary": {
+    "NORTH": {
+      "display_region": "Frostmarch",
+      "quality_language": ["Frostforged", "Surefooted", "Pass-Warden", "Winter-Hardened"],
+      "mechanical_feel": ["reach", "stability", "cold travel", "heavy ranged gear"],
+      "best_homes": ["pikes", "spears", "warhammers", "heavy crossbows", "insulated armor"]
+    },
+    "EAST": {
+      "display_region": "Greenveil",
+      "quality_language": ["Canopy-Balanced", "Trailwise", "Vine-Light", "Jungle-Honed"],
+      "mechanical_feel": ["mobility", "reach", "traversal", "scouting"],
+      "best_homes": ["glaives", "javelins", "quarterstaves", "katana/saber sidegrades", "glider/camera tools"]
+    },
+    "SOUTH": {
+      "display_region": "Sunscar",
+      "quality_language": ["Wind-Cut", "Dune-Forged", "Caravan-Made", "Sun-Hardened"],
+      "mechanical_feel": ["throwing", "mounted travel", "heat endurance"],
+      "best_homes": ["boomerang", "javelin", "lance", "saber/rapier", "travel boots", "horse gear"]
+    },
+    "WEST": {
+      "display_region": "Harvestwood",
+      "quality_language": ["Harvest-Honed", "Woodsman's", "Old-Growth", "Hearth-Forged"],
+      "mechanical_feel": ["sweep", "axes", "durability", "old-road survival"],
+      "best_homes": ["battleaxes", "tomahawks", "longswords", "scythes", "maces", "sturdy armor"]
+    }
+  },
+  "named_signature_equipment": [
+    {"name":"WHITE REACH","region":"NORTH","band":"WILDLANDS_DREAD","base_item":"Diamond Pike","quality_identity":"Sweeping quality","property_identity":"Sharpness III + Unbreaking II; optional restrained reach-compatible utility","best_award_condition":"trusted pass-defense / Froststalker-Dread commission","runtime_status":"VERIFY_ITEM_AND_QUALITY_IDS"},
+    {"name":"GREENWAKE","region":"EAST","band":"WILDLANDS_DREAD","base_item":"Diamond Glaive","quality_identity":"Sweeping or Canopy-Balanced","property_identity":"curated Sharpness + Unbreaking; avoid overstacking damage","best_award_condition":"major jungle-road / predator-chain reward","runtime_status":"VERIFY_ITEM_AND_QUALITY_IDS"},
+    {"name":"SUNSPIKE","region":"SOUTH","band":"WILDLANDS_DREAD","base_item":"Diamond Lance","quality_identity":"Keen / Caravan-Made","property_identity":"modest attack-speed/damage identity + Unbreaking; mounted/open-ground flavor","best_award_condition":"major caravan / Wildlands combat commission","runtime_status":"VERIFY_ITEM_AND_QUALITY_IDS"},
+    {"name":"HARVEST MOON","region":"WEST","band":"WILDLANDS_DREAD","base_item":"Diamond Scythe","quality_identity":"Sweeping / Harvest-Honed","property_identity":"Harvester if compatible + restrained combat enchant","best_award_condition":"Sir Pumpkinhead / Headless Road trust chain","runtime_status":"VERIFY_EXACT_SCYTHE_AND_ENCHANT_COMPATIBILITY"},
+    {"name":"THE RED RETURN","region":"SOUTH","band":"FRONTIER_WILDLANDS","base_item":"Iron -> Diamond Boomerang","quality_identity":"Wind-Cut","property_identity":"Collectorang + Propel and/or Razor's Edge by tier; Unbreaking","best_award_condition":"Sunscar route / Guster / throwing mastery chain","runtime_status":"VERIFY_SPARTAN_ITEM_AND_ENCHANT_IDS"},
+    {"name":"LAST HARVEST","region":"WEST","band":"WILDLANDS_DREAD","base_item":"Iron -> Diamond Battleaxe","quality_identity":"Harvest-Honed","property_identity":"Death Wish + Unbreaking; balance as dangerous/interesting rather than free DPS","best_award_condition":"elite old-road hunt / Dread mastery","runtime_status":"VERIFY_ITEM_ENCHANT_AND_QUALITY_IDS"},
+    {"name":"PASS-WARDEN","region":"NORTH","band":"FRONTIER_DREAD","base_item":"Heavy Crossbow","quality_identity":"Surefooted / strong-positive","property_identity":"Sharpshooter + Unbreaking; Hunter at later tier","best_award_condition":"fortress / whiteout ranged commission","runtime_status":"VERIFY_ITEM_ENCHANT_AND_QUALITY_IDS"},
+    {"name":"CANOPY GLIDER","region":"EAST","band":"FRONTIER_WILDLANDS","base_item":"Hang Glider + expedition kit","quality_identity":null,"property_identity":"non-combat utility; pair with repair/food/map supplies","best_award_condition":"rare Cartographer multi-landmark chain","runtime_status":"VERIFY_HANGGLIDER_ITEM_ID"}
+  ],
+  "special_village_rewards": [
+    {"name":"Honey Golem","region":"EAST","unlock_condition":"Complete multi-profession ecology/protection chain; deliver honey/jungle materials","rarity":"special one-time","implementation_rule":"Village gratitude/companion reward, never a common loot roll; verify installed Golem Overhaul entity and ownership behavior."},
+    {"name":"Coal Golem","region":"NORTH","unlock_condition":"Mining + cold-road defense chain","rarity":"special one-time","implementation_rule":"Practical cold/mining village gratitude reward; verify installed entity and ownership behavior."},
+    {"name":"Terracotta Golem","region":"SOUTH","unlock_condition":"Mason + caravan + desert material chain","rarity":"special one-time","implementation_rule":"Use actual installed Terracotta Golem rather than a vague Clay Golem; verify entity and ownership behavior."},
+    {"name":"Candle Golem","region":"WEST","unlock_condition":"old-road/household/cleric-light chain","rarity":"special one-time","implementation_rule":"Cozy old-forest village gratitude reward; verify installed entity and ownership behavior."},
+    {"name":"Rescued / tamed local animal","region":"REGION_SPECIFIC","unlock_condition":"nonlethal specialist chain","rarity":"rare","implementation_rule":"Only for species whose real tame/ownership interaction supports it; otherwise award supplies/reputation rather than a fake pet."},
+    {"name":"Camera","region":"ANY_CARTOGRAPHER","unlock_condition":"first substantial survey chain","rarity":"rare early utility","implementation_rule":"Later camera jobs can require photographs only if detection is technically reliable."},
+    {"name":"Hang Glider / Canopy Glider","region":"EAST_SIGNATURE_ANY_REGION_LATER","unlock_condition":"multi-landmark Cartographer chain","rarity":"Frontier prized","implementation_rule":"Greenveil is the iconic early home; other regions may award later if missed."},
+    {"name":"Map Atlas regional kit","region":"ANY","unlock_condition":"survey / route chain","rarity":"all tiers","implementation_rule":"Pair maps, compass, spyglass, food, and region-specific survival supplies."}
+  ],
+  "regional_unique_reward_catalogs": {
+    "NORTH": [
+      "WHITE REACH - diamond Pike, Sweeping, Sharpness III, Unbreaking II",
+      "PASS-WARDEN - Heavy Crossbow, Sharpshooter + Unbreaking, strong positive Quality",
+      "Froststalker Helmet - guaranteed-positive Quality on major pack hunt",
+      "Antler Headdress - moose migration/Leatherworker commission",
+      "Falconry Glove + Hood - Bald Eagle nonlethal chain",
+      "Cold Sweat expedition cache - waterskin + insulation + food + repair materials",
+      "Frost Rider horse armor - Shepherd/Cartographer pass route",
+      "Hydrodynamic javelin - cold-ocean Fisherman/Fletcher chain",
+      "Winter-Hardened shield - Magic Protection / Repulsion / Unbreaking",
+      "Surefooted alpine boots - Feather Falling + cold-travel utility",
+      "Whale Sounding Kit - Echolocator + atlas supplies + food",
+      "Shield of the Deep - Dread maritime first-clear",
+      "Coal Golem - special village chain",
+      "Ice-Road repair token - one free reforge/reroll service",
+      "Frostforged Warhammer - elite armored-threat alternative to White Reach",
+      "North Masterwork Choice - pick 1 of 3 pre-rolled positive regional items instead of blind RNG"
+    ],
+    "EAST": [
+      "GREENWAKE - diamond Glaive, Sweeping/Canopy-Balanced, curated Sharpness + Unbreaking",
+      "CANOPY GLIDER - Hang Glider + repair/food/map kit",
+      "Vine Lasso - Anaconda/jungle expedition reward",
+      "Crocodile Chestplate - river-hunter masterwork",
+      "Spiked Turtle Shell - bog/river elite reward",
+      "Cave Centipede Leggings - Toolsmith cave chain",
+      "Hummingbird Feeder - Farmer ecology reward",
+      "Honey Golem - special village chain",
+      "Jungle-Honed Javelin - Propel/Razor's Edge option; javelin fits Greenveil, boomerang does not define it",
+      "Trailwise Quarterstaff - early/Frontier traversal-fighter reward",
+      "Canopy-Balanced Katana or Saber - rare Weaponsmith alternate",
+      "Hunter Longbow - Fletcher/Cartographer wildlife-protection chain",
+      "Telekinesis Tool - Toolsmith/Librarian expedition prize",
+      "Premium Camera Jungle Kit - camera + film/materials + atlas + food",
+      "Greenveil Reforge Token - reroll a regional prized item without risking a negative Quality",
+      "Riverwarden Armor Piece - Depth Strider/Respiration/Magic Protection depending slot"
+    ],
+    "SOUTH": [
+      "SUNSPIKE - diamond Lance, Keen/Caravan-Made, restrained speed/damage identity + Unbreaking",
+      "THE RED RETURN - Boomerang, Wind-Cut, Collectorang/Propel/Razor's Edge by tier",
+      "ACACIA BLOSSOMS - Flowers of the Savanna symbolic/special reward",
+      "Roadrunner Boots - signature desert mobility reward",
+      "Outback Leggings - savanna wildlife chain",
+      "Guster Eye / Pocket of Sand trophy kit - Cartographer/Weaponsmith chain",
+      "Wind-Cut Javelin - desert ranged option",
+      "Dune-Forged Saber/Rapier - caravan scout reward",
+      "Armored Caravan horse armor - Shepherd/Armorer chain",
+      "Swiftness horse armor - long-road route reward",
+      "Cold Sweat cooling expedition cache - water + cooling + food",
+      "Crocodile Chestplate - oasis predator chain alternative",
+      "Rock Shell Chestplate - deep desert cave first-clear",
+      "Terracotta Golem - special village chain",
+      "Gold-Fuelled specialty item - rare Sunscar gold-path reward",
+      "Sunscar Masterwork Choice - choose one pre-rolled positive throwing/mounted/travel item"
+    ],
+    "WEST": [
+      "HARVEST MOON - diamond Scythe, Sweeping/Harvest-Honed, Harvester if compatible",
+      "LAST HARVEST - Battleaxe, Harvest-Honed, Death Wish + Unbreaking",
+      "Frontiersman's Cap - Fletcher/Cartographer old-road chain",
+      "Ghostly Pickaxe - Dread Toolsmith cave rescue reward",
+      "Unsettling Kimono - Dread Cleric/horror chain",
+      "Tendon Whip - elite material commission",
+      "Oldwood Longbow - Hunter + Unbreaking, forest scouting identity",
+      "Woodsman's Tomahawk - Frontier throwing/axe reward",
+      "Hearth-Forged Mace - crypt/undead alternative",
+      "Old-Growth travel boots - durability + terrain utility",
+      "Bison Fur insulation bundle - herd/cull chain",
+      "Candle Golem - special village chain",
+      "Camera for Old Ruins - Cartographer/Mason survey reward",
+      "Harvest Feast - high-saturation Farmer/Butcher festival payout after major road clear",
+      "West Reforge Token - one-time quality reroll / repair-material service",
+      "Harvestwood Masterwork Choice - choose axe/scythe/bow/armor from three positive rolls"
+    ]
+  },
+  "quality_policy": [
+    "Named signature rewards must never roll a truly bad Quality; randomness chooses which good build, not whether the quest bricks the item.",
+    "Hearthlands prized gear has a minimum neutral floor or includes a reforge-material bundle.",
+    "Frontier named gear has a neutral-to-positive floor; strong-positive is exciting rather than mandatory on every roll.",
+    "Wildlands signatures have guaranteed positive Quality; offer a reroll token when a technically positive roll conflicts badly with weapon identity.",
+    "Dread first-clears use a curated strong-positive Quality or a two/three-item choice; final commissions never use blind casino rolls.",
+    "Frostforged / Wind-Cut / Harvest-Honed and similar names are presentation aliases or semantic pools over actual Quality Equipment attributes; do not hardcode stat definitions until the live Quality config is frozen."
+  ],
+  "ownership_rules": [
+    "Sunscar owns the boomerang identity; THE RED RETURN is not a generic cross-region random reward.",
+    "Greenveil's throwing identity is javelin/reach/traversal; the Canopy Glider is its iconic early utility chain reward.",
+    "Frostmarch owns cold-road reach/heavy-ranged/insulation identities.",
+    "Harvestwood owns axes/scythes/old-road durability and forest-survival identities.",
+    "Signature items are chapter/prized rewards, not board-farm currency."
+  ]
+}
