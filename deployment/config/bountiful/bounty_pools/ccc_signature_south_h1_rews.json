@@ -1,0 +1,13 @@
+{
+  "content": {
+    "ccc_signature_acacia_blossoms": {
+      "type": "item",
+      "content": "alexsmobs:acacia_blossom",
+      "amount": {"min": 6, "max": 6},
+      "unitWorth": 1000,
+      "rarity": "UNCOMMON",
+      "name": "Elephant-Keeper's Blossoms",
+      "icon": "alexsmobs:acacia_blossom"
+    }
+  }
+}
