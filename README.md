@@ -10,6 +10,7 @@ Player-facing quest, bounty, map, cartographer, reward, and information-layer de
 ### [🗺️ See the first working map-system slice](docs/MAP_SYSTEM_VERTICAL_SLICE.md)
 ### [📐 See how quest targets are kept sane/local](docs/TARGETING_AND_DISTANCE_POLICY.md)
 ### [🧑‍🌾 See the cartographer/local-knowledge system](docs/CARTOGRAPHER_SYSTEM.md)
+### [📌 See the one-board-per-village runtime contract](docs/VILLAGE_BOARD_RUNTIME.md)
 
 Current designed content: **124 quest concepts** — 108 authored/story-capable notices plus 16 additional regional field jobs. The two layers are intentionally separate: named contracts can carry structure/story significance, while field jobs keep ordinary boards locally flavored between major discoveries.
 
@@ -20,13 +21,15 @@ For implementation detail, see [the mechanical quest matrix](design/REGIONAL_QUE
 The project is intentionally split into two layers:
 
 1. **Safe content/data work** — Bountiful 6.0.4 configuration, proven objective/reward patterns, quest catalogs, story-board metadata, proof-item specifications, reward balancing, registry audits, target-selection policy, cartographer prototypes, and test plans.
-2. **World/runtime integration work** — regional board assignment, useful-structure locating, same-board redemption, proof placement, and map/story state.
+2. **World/runtime integration work** — guaranteed village-board presence, regional board assignment, useful-structure locating, same-board redemption, proof placement, and map/story state.
 
 The world side is no longer hypothetical: **CozyCrazyZones 0.3.6 is the current geography contract.** The quest project consumes its region/radial classification rather than duplicating that logic. Version 0.3.6 also establishes a real starter information layer: it reserves the first village roughly 1,000–1,650 blocks from spawn, prepares the starter desk map, grants/links the starter Atlas, and paints a route to that first village.
 
 The core rule remains: **do not invent a complicated event system when Bountiful, Supplementaries, Map Atlases, Moonlight, or vanilla criteria can already do the job reliably.** Anything not proven reliable is marked for world integration, registry verification, reward audit, or deferral rather than silently treated as implemented.
 
 The target-selection rule is equally important: **if there is no sensible real target, do not issue the world-target quest.** A board should fall back to ordinary local work rather than send the player absurdly far away or into the wrong cardinal region.
+
+A playtest also established that stock Bountiful village worldgen is not sufficient as the final discovery layer: its gazebo is a weighted village-house-pool entry, so villages can legitimately generate with no board. Production intent is therefore **one obvious civic board per eligible inhabited village**, with an existing Bountiful gazebo satisfying the guarantee and a lightweight companion repair only when a village has none.
 
 ## Current baseline
 
@@ -44,8 +47,9 @@ The target-selection rule is equally important: **if there is no sensible real t
 - Four regional field-job playtest decrees are materialized in actual Bountiful JSON
 - Four deterministic structure-map playtest decrees use Bountiful command rewards → Supplementaries structure maps
 - A separate, non-shipping cartographer datapack prototype tests Moonlight/Supplementaries local structure-map trades
-- Machine-readable travel scopes now distinguish Local Site, Regional Expedition, Outward Lead, and Legendary Destination
-- Current CI validates Bountiful data, authored catalog coverage/schema, repeatable expansion, readable browsers, regional board policy, target-distance policy, cartographer prototype data, story metadata, and zoning/world bindings
+- Machine-readable travel scopes distinguish Local Site, Regional Expedition, Outward Lead, and Legendary Destination
+- Machine-readable village-board policy specifies one discoverable board per eligible village without broad recurring world scans
+- Current CI validates Bountiful data, authored catalog coverage/schema, repeatable expansion, readable browsers, regional board policy, village-board policy, target-distance policy, cartographer prototype data, story metadata, and zoning/world bindings
 
 ## Useful documents
 
@@ -55,6 +59,7 @@ The target-selection rule is equally important: **if there is no sensible real t
 - [`STRUCTURES.md`](STRUCTURES.md) — quest-relevant structure browser
 - [`docs/TARGETING_AND_DISTANCE_POLICY.md`](docs/TARGETING_AND_DISTANCE_POLICY.md) — how local/expedition/outward targets are selected without absurd distances
 - [`docs/CARTOGRAPHER_SYSTEM.md`](docs/CARTOGRAPHER_SYSTEM.md) — cartographer roles, map progression, regional map inventory, and runtime upgrade path
+- [`docs/VILLAGE_BOARD_RUNTIME.md`](docs/VILLAGE_BOARD_RUNTIME.md) — why stock village boards are non-guaranteed and how the companion should ensure one civic board safely
 - [`docs/MAP_SYSTEM_VERTICAL_SLICE.md`](docs/MAP_SYSTEM_VERTICAL_SLICE.md) — starter map + quest/cartographer map implementation path
 - [`docs/FIRST_VILLAGE_VERTICAL_SLICE.md`](docs/FIRST_VILLAGE_VERTICAL_SLICE.md) — first playable starter→village→board→local-adventure target
 - [`docs/REWARD_SOURCE_AUDIT.md`](docs/REWARD_SOURCE_AUDIT.md) — source-checked reward IDs/mechanics and compatibility warnings
@@ -63,6 +68,7 @@ The target-selection rule is equally important: **if there is no sensible real t
 - [`design/story_board_mockup.html`](design/story_board_mockup.html) — visual mockup
 - [`design/REWARD_VALIDATION_BACKLOG.md`](design/REWARD_VALIDATION_BACKLOG.md) — broader modded reward audit queue
 - [`data/targeting_policy.json`](data/targeting_policy.json) — machine-readable target-distance/selection contract
+- [`data/village_board_policy.json`](data/village_board_policy.json) — machine-readable village-board detection, repair, and lifecycle contract
 - [`prototype/cartographer_datapack/`](prototype/cartographer_datapack/) — isolated static cartographer trade experiment; not included in normal playtest overlay
 - [`docs/BOUNTIFUL_6_0_4_RELIABILITY.md`](docs/BOUNTIFUL_6_0_4_RELIABILITY.md)
 - [`docs/QUEST_FRAMEWORK.md`](docs/QUEST_FRAMEWORK.md)
