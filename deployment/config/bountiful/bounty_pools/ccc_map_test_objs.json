@@ -1,0 +1,15 @@
+{
+  "content": {
+    "ccc_map_test_compass": {
+      "type": "item",
+      "content": "minecraft:compass",
+      "amount": {
+        "min": 1,
+        "max": 1
+      },
+      "unitWorth": 5000,
+      "name": "Survey Compass",
+      "icon": "minecraft:compass"
+    }
+  }
+}
