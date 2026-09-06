@@ -5,9 +5,10 @@
     {
       "dialogue_options": [
         {
-          "dialogue": "You're back. Good. A useful map starts with someone willing to put boots on the road. If the landmark is properly surveyed, I'll copy your notes into the village chart and settle the commission.",
+          "dialogue": "\nBack already? If you've seen the place yourself, I'll add it to the village chart and settle the commission.",
           "condition": "*",
           "closable": "always",
+          "timings": [0.32, 0.10, 0.85, 1.35],
           "replies": [
             {
               "reply": "The survey is finished.",
