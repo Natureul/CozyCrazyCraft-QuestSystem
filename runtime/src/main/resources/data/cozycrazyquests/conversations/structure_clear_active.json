@@ -1,0 +1,19 @@
+{
+  "title": "Local Work",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "That place is still a problem. Clear the hostiles around the site, then come back and tell me it's safe.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {"reply": "I'm on it.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
