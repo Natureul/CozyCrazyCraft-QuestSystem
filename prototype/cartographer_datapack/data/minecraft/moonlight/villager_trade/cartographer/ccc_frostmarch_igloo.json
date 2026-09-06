@@ -1,0 +1,10 @@
+{
+  "type": "supplementaries:structure_map",
+  "item": "minecraft:emerald",
+  "structure": "minecraft:igloo",
+  "price_min": 7,
+  "price_max": 11,
+  "max_trades": 1,
+  "price_multiplier": 0.05,
+  "level": 3
+}
