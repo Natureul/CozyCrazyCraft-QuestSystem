@@ -1,0 +1,26 @@
+{
+  "title": "Old Stone on the Hill",
+  "starting_index": 0,
+  "dialogues": [
+    {
+      "dialogue_options": [
+        {
+          "dialogue": "There's an old tower ruin near town that keeps turning up in half-finished directions. Put eyes on the place and tell me whether it's still worth using as a landmark.",
+          "condition": "*",
+          "closable": "always",
+          "timings": [0.24, 0.07, 0.60, 0.95],
+          "replies": [
+            {
+              "reply": "I'll survey the ruin.",
+              "action": [
+                {"action": "give.item(1,cozycrazyquests:conversation_token{ccc_action:\"structure_accept\"})"},
+                {"action": "dialogue.close"}
+              ]
+            },
+            {"reply": "Maybe later.", "action": {"action": "dialogue.close"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
