@@ -17,6 +17,9 @@ public final class CozyCrazyQuests {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModItems.register(modBus);
 
+        // Pack-level structure compatibility has to run before the source mod mutates village pools.
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, BeautifyCompat::onServerAboutToStart);
+
         MinecraftForge.EVENT_BUS.addListener(VillageBoardManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(ProofLootInjector::onLootTableLoad);
         MinecraftForge.EVENT_BUS.addListener(BountyStoryTooltip::onTooltip);
