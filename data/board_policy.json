@@ -1,12 +1,15 @@
 {
   "schema_version": 1,
-  "source_of_truth": "CozyCrazyZones 0.3.4 CozyZonesApi.regionalCellAt(ServerLevel,x,z)",
+  "source_of_truth": "CozyCrazyZones 0.3.6 CozyZonesApi.regionalCellAt(ServerLevel,x,z)",
+  "targeting_policy": "data/targeting_policy.json",
   "principles": [
     "Shared Core boards stay generic; cardinal identity begins in the transition band.",
     "Established boards use both macro-region and radial tier.",
     "Repeatable postings may include a modest share of one-tier-lower work so towns still feel inhabited.",
     "Signature authored quests do not randomly pair objectives and rewards; they require narrow issuance.",
-    "Dread Reaches boards are not boss vending machines; final-location knowledge still comes from maps, journals, and proof chains."
+    "Dread Reaches boards are not boss vending machines; final-location knowledge still comes from maps, journals, and proof chains.",
+    "A structure/recovery posting exists only when a valid target is available under the targeting policy; no target means no posting.",
+    "Never substitute a wrong-region or arbitrarily distant structure merely to fill a board slot."
   ],
   "cells": {
     "SHARED_CORE": {
@@ -59,8 +62,13 @@
     "mix_guideline": {
       "mundane_repeatable": "2-3",
       "regional_repeatable": "1-2",
-      "structure_or_recovery": "0-1 when a valid nearby target exists",
+      "structure_or_recovery": "0-1 only when a valid target exists inside its travel scope",
       "signature_or_story": "0-1 and only when explicitly unlocked or issued"
-    }
+    },
+    "fallback_when_no_world_target": [
+      "regional_repeatable",
+      "mundane_repeatable",
+      "ecology_hunt_if_locally_legal"
+    ]
   }
 }
