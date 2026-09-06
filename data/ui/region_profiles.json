@@ -35,12 +35,12 @@
       "subtitle_pattern": "{tier} · Sunscar"
     },
     "WEST": {
-      "display_name": "Harvestlands",
+      "display_name": "Harvestwood",
       "accent": "#8c5c3e",
       "paper": "#ead5ad",
       "ink": "#402c22",
       "motif": "wheat/pumpkin seal kept subtle before deep tiers",
-      "subtitle_pattern": "{tier} · Harvestlands"
+      "subtitle_pattern": "{tier} · Harvestwood"
     }
   },
   "tier_labels": {
