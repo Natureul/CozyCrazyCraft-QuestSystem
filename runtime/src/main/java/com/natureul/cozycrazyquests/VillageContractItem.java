@@ -2,14 +2,24 @@ package com.natureul.cozycrazyquests;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Physical reminder for an authored village contract.
+ *
+ * The paper is deliberately not a full quest log, but it must never lie about what the player is
+ * doing. Older builds hard-coded every contract as a Cartographer survey, which made Farmer work
+ * tell the player to return to a Cartographer. The tooltip is now derived from the actual semantic
+ * quest definition.
+ */
 public final class VillageContractItem extends Item {
     public static final String QUEST_ID = "ccc_quest_id";
     public static final String TARGET_NAME = "ccc_target_name";
@@ -24,27 +34,80 @@ public final class VillageContractItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         if (stack.hasTag()) {
+            String questId = stack.getTag().getString(QUEST_ID);
             String target = stack.getTag().getString(TARGET_NAME);
             int distance = stack.getTag().getInt(TARGET_DISTANCE);
             String direction = stack.getTag().getString(TARGET_DIRECTION);
             String village = stack.getTag().getString(ISSUING_VILLAGE);
+            VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(questId);
 
             if (!village.isBlank() && !"the village".equals(village)) {
                 tooltip.add(Component.literal("Issued in " + village).withStyle(ChatFormatting.GOLD));
             }
-            if (!target.isBlank()) {
-                tooltip.add(Component.literal("Survey: " + target).withStyle(ChatFormatting.AQUA));
+
+            if (definition != null) {
+                String objective = objectiveLine(definition, target);
+                if (!objective.isBlank()) {
+                    tooltip.add(Component.literal("Objective: " + objective).withStyle(ChatFormatting.AQUA));
+                }
+            } else if (!target.isBlank()) {
+                tooltip.add(Component.literal("Objective: Visit " + target).withStyle(ChatFormatting.AQUA));
             }
+
             if (distance > 0 && !direction.isBlank()) {
-                tooltip.add(Component.literal("About " + distance + " blocks " + direction)
+                tooltip.add(Component.literal("Location: about " + distance + " blocks " + direction)
                         .withStyle(ChatFormatting.GRAY));
             }
-            String returnLine = !village.isBlank() && !"the village".equals(village)
-                    ? "Return to a cartographer in " + village
-                    : "Return to a cartographer in the issuing village";
-            tooltip.add(Component.literal(returnLine)
-                    .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+
+            if (definition != null) {
+                tooltip.add(Component.literal("Return: " + returnLine(definition, village))
+                        .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+            } else {
+                tooltip.add(Component.literal("Return to the village that issued this work")
+                        .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+            }
         }
         super.appendHoverText(stack, level, tooltip, flag);
+    }
+
+    private static String objectiveLine(VillageQuestCatalog.Definition definition, String target) {
+        String place = target == null || target.isBlank() ? definition.targetLabel() : target;
+        return switch (definition.objectiveType()) {
+            case STRUCTURE_SURVEY -> "Survey " + place;
+            case LOCAL_HOSTILE_CLEAR -> "Clear " + definition.requiredKills() + " hostiles around " + place;
+        };
+    }
+
+    private static String returnLine(VillageQuestCatalog.Definition definition, String village) {
+        String destination = village == null || village.isBlank() || "the village".equals(village)
+                ? "the issuing village"
+                : village;
+        return "to " + professionList(definition.giverProfessions()) + " in " + destination;
+    }
+
+    private static String professionList(List<VillagerProfession> professions) {
+        List<String> labels = new ArrayList<>();
+        for (VillagerProfession profession : professions) labels.add("a " + professionLabel(profession));
+        if (labels.isEmpty()) return "a village representative";
+        if (labels.size() == 1) return labels.get(0);
+        if (labels.size() == 2) return labels.get(0) + " or " + labels.get(1);
+        return String.join(", ", labels.subList(0, labels.size() - 1)) + ", or " + labels.get(labels.size() - 1);
+    }
+
+    private static String professionLabel(VillagerProfession profession) {
+        if (profession == VillagerProfession.ARMORER) return "armorer";
+        if (profession == VillagerProfession.BUTCHER) return "butcher";
+        if (profession == VillagerProfession.CARTOGRAPHER) return "cartographer";
+        if (profession == VillagerProfession.CLERIC) return "cleric";
+        if (profession == VillagerProfession.FARMER) return "farmer";
+        if (profession == VillagerProfession.FISHERMAN) return "fisherman";
+        if (profession == VillagerProfession.FLETCHER) return "fletcher";
+        if (profession == VillagerProfession.LEATHERWORKER) return "leatherworker";
+        if (profession == VillagerProfession.LIBRARIAN) return "librarian";
+        if (profession == VillagerProfession.MASON) return "mason";
+        if (profession == VillagerProfession.SHEPHERD) return "shepherd";
+        if (profession == VillagerProfession.TOOLSMITH) return "toolsmith";
+        if (profession == VillagerProfession.WEAPONSMITH) return "weaponsmith";
+        return "villager";
     }
 }
