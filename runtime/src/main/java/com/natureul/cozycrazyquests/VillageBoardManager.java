@@ -11,25 +11,27 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public final class VillageBoardManager {
     private static final int PLAYER_CHECK_INTERVAL = 200;
     private static final int MEETING_SEARCH_RADIUS = 56;
-    private static final int BOARD_SEARCH_RADIUS = 64;
-    private static final int BOARD_SEARCH_VERTICAL = 10;
+
+    // A same-settlement pair of board/meeting detections in the playtest landed about 65 blocks
+    // apart. Ninety-six blocks is deliberately wide enough to coalesce that case without turning
+    // this into a general world scan.
+    private static final int SETTLEMENT_COALESCE_RADIUS = 96;
+    private static final int BOARD_SEARCH_RADIUS = 96;
     private static final int PLACEMENT_RADIUS = 12;
     private static final long RETRY_COOLDOWN = 2400L;
 
-    private static final Set<String> SATISFIED = new HashSet<>();
     private static final Map<String, Long> RETRY_AFTER = new HashMap<>();
 
     private VillageBoardManager() {}
@@ -55,44 +57,64 @@ public final class VillageBoardManager {
         BlockPos center = meeting.get();
         if (!level.isVillage(center)) return;
 
-        String key = settlementKey(level, center);
-        if (SATISFIED.contains(key)) return;
-        if (gameTime < RETRY_AFTER.getOrDefault(key, 0L)) return;
+        VillageBoardSavedData savedData = VillageBoardSavedData.get(level);
+        if (savedData.findNearby(center, SETTLEMENT_COALESCE_RADIUS).isPresent()) return;
+
+        String retryKey = retryKey(level, center);
+        if (gameTime < RETRY_AFTER.getOrDefault(retryKey, 0L)) return;
 
         Block boardBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("bountiful", "bountyboard"));
         if (boardBlock == null || boardBlock == Blocks.AIR) {
-            RETRY_AFTER.put(key, gameTime + RETRY_COOLDOWN);
+            RETRY_AFTER.put(retryKey, gameTime + RETRY_COOLDOWN);
             return;
         }
 
         BlockPos existing = findExistingBoard(level, center, boardBlock);
         if (existing != null) {
-            SATISFIED.add(key);
-            RETRY_AFTER.remove(key);
-            CozyCrazyQuests.LOGGER.debug("Village at {} already has bounty board at {}", center, existing);
+            savedData.remember(center, existing, VillageBoardSavedData.Status.FOUND_EXISTING, gameTime);
+            RETRY_AFTER.remove(retryKey);
+            CozyCrazyQuests.LOGGER.info(
+                    "Recorded existing civic bounty board at {} for village centered near {} ({} saved settlements)",
+                    existing, center, savedData.recordCount()
+            );
             return;
         }
 
         BlockPos placed = placeCivicBoard(level, center, boardBlock);
         if (placed != null) {
-            SATISFIED.add(key);
-            RETRY_AFTER.remove(key);
-            CozyCrazyQuests.LOGGER.info("Added civic bounty board at {} for boardless village centered near {}", placed, center);
+            savedData.remember(center, placed, VillageBoardSavedData.Status.PLACED_REPAIR, gameTime);
+            RETRY_AFTER.remove(retryKey);
+            CozyCrazyQuests.LOGGER.info(
+                    "Added civic bounty board at {} for boardless village centered near {} ({} saved settlements)",
+                    placed, center, savedData.recordCount()
+            );
         } else {
-            RETRY_AFTER.put(key, gameTime + RETRY_COOLDOWN);
+            RETRY_AFTER.put(retryKey, gameTime + RETRY_COOLDOWN);
         }
     }
 
+    /**
+     * Search only block entities in chunks that are already loaded. Bountiful boards are block
+     * entities, so this is both more accurate and dramatically cheaper than touching every block
+     * in a 96-block-radius cylinder. We deliberately do not load/generate chunks for this check.
+     */
     private static BlockPos findExistingBoard(ServerLevel level, BlockPos center, Block boardBlock) {
-        int minY = Math.max(level.getMinBuildHeight(), center.getY() - BOARD_SEARCH_VERTICAL);
-        int maxY = Math.min(level.getMaxBuildHeight() - 1, center.getY() + BOARD_SEARCH_VERTICAL);
+        int minChunkX = Math.floorDiv(center.getX() - BOARD_SEARCH_RADIUS, 16);
+        int maxChunkX = Math.floorDiv(center.getX() + BOARD_SEARCH_RADIUS, 16);
+        int minChunkZ = Math.floorDiv(center.getZ() - BOARD_SEARCH_RADIUS, 16);
+        int maxChunkZ = Math.floorDiv(center.getZ() + BOARD_SEARCH_RADIUS, 16);
+        long radiusSq = (long) BOARD_SEARCH_RADIUS * BOARD_SEARCH_RADIUS;
 
-        for (int dx = -BOARD_SEARCH_RADIUS; dx <= BOARD_SEARCH_RADIUS; dx++) {
-            for (int dz = -BOARD_SEARCH_RADIUS; dz <= BOARD_SEARCH_RADIUS; dz++) {
-                if (dx * dx + dz * dz > BOARD_SEARCH_RADIUS * BOARD_SEARCH_RADIUS) continue;
-                for (int y = minY; y <= maxY; y++) {
-                    BlockPos pos = new BlockPos(center.getX() + dx, y, center.getZ() + dz);
-                    if (level.getBlockState(pos).is(boardBlock)) return pos;
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                LevelChunk chunk = level.getChunkSource().getChunkNow(chunkX, chunkZ);
+                if (chunk == null) continue;
+
+                for (BlockPos pos : chunk.getBlockEntities().keySet()) {
+                    long dx = (long) pos.getX() - center.getX();
+                    long dz = (long) pos.getZ() - center.getZ();
+                    if (dx * dx + dz * dz > radiusSq) continue;
+                    if (level.getBlockState(pos).is(boardBlock)) return pos.immutable();
                 }
             }
         }
@@ -138,11 +160,9 @@ public final class VillageBoardManager {
         return true;
     }
 
-    private static String settlementKey(ServerLevel level, BlockPos center) {
-        // Meeting POIs in the same village can move slightly as the village changes. Coarsen the
-        // key so nearby bells/meeting points converge on one runtime record instead of duplicating boards.
-        int cx = Math.floorDiv(center.getX(), 64);
-        int cz = Math.floorDiv(center.getZ(), 64);
+    private static String retryKey(ServerLevel level, BlockPos center) {
+        int cx = Math.floorDiv(center.getX(), SETTLEMENT_COALESCE_RADIUS);
+        int cz = Math.floorDiv(center.getZ(), SETTLEMENT_COALESCE_RADIUS);
         return level.dimension().location() + ":" + cx + ":" + cz;
     }
 }
