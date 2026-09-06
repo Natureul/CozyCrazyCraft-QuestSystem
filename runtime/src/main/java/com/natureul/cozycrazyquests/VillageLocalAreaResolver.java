@@ -6,6 +6,13 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 /** Resolve a repeatably named local quest area without creating a fake persistent Atlas landmark. */
 final class VillageLocalAreaResolver {
+    private static final int[][] WATER_PROBES = {
+            {8, 0}, {-8, 0}, {0, 8}, {0, -8},
+            {14, 0}, {-14, 0}, {0, 14}, {0, -14},
+            {10, 10}, {10, -10}, {-10, 10}, {-10, -10},
+            {22, 0}, {-22, 0}, {0, 22}, {0, -22}
+    };
+
     private VillageLocalAreaResolver() {}
 
     static LocalTarget find(ServerLevel level, VillageContext village, VillageQuestCatalog.Definition definition) {
@@ -13,7 +20,9 @@ final class VillageLocalAreaResolver {
         int max = Math.max(min, definition.localTargetMaxDistance());
         long hash = mix(level.getSeed(), village.key().hashCode(), definition.id().hashCode());
 
-        for (int attempt = 0; attempt < 16; attempt++) {
+        // Water-edge jobs need a few more attempts because they are intentionally withheld from dry villages.
+        int attempts = definition.localTerrain() == VillageQuestCatalog.LocalTerrain.WATER_EDGE ? 40 : 16;
+        for (int attempt = 0; attempt < attempts; attempt++) {
             int octant = Math.floorMod((int) (hash + attempt * 3L), 8);
             int span = Math.max(1, max - min + 1);
             int distance = min + Math.floorMod((int) (hash >>> (attempt % 24)), span);
@@ -24,14 +33,26 @@ final class VillageLocalAreaResolver {
             BlockPos pos = new BlockPos(x, y, z);
 
             if (!level.getWorldBorder().isWithinBounds(pos)) continue;
-            if (!level.getFluidState(pos.below()).isEmpty()) continue;
+            if (!level.getFluidState(pos.below()).isEmpty()) continue; // quest point itself must be standing ground
             ZoneBridge.Cell targetCell = ZoneBridge.cellAt(level, pos);
             if (!legalCell(village.cell(), targetCell, definition)) continue;
+            if (definition.localTerrain() == VillageQuestCatalog.LocalTerrain.WATER_EDGE && !hasWaterNear(level, pos)) continue;
 
             int actualDistance = (int) Math.round(Math.sqrt(village.anchor().distSqr(pos)));
             return new LocalTarget(pos, actualDistance, definition.targetLabel());
         }
         return null;
+    }
+
+    private static boolean hasWaterNear(ServerLevel level, BlockPos center) {
+        for (int[] probe : WATER_PROBES) {
+            int x = center.getX() + probe[0];
+            int z = center.getZ() + probe[1];
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+            BlockPos top = new BlockPos(x, Math.max(level.getMinBuildHeight(), y - 1), z);
+            if (!level.getFluidState(top).isEmpty()) return true;
+        }
+        return false;
     }
 
     private static boolean legalCell(
