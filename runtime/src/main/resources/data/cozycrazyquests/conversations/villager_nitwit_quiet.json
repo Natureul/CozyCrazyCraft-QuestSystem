@@ -1,0 +1,7 @@
+{
+  "title": "Villager",
+  "starting_index": 0,
+  "dialogues": [
+    {"dialogue_options":[{"dialogue":"Haven't got a useful name for you. If somebody's hiring, the guard or the board will hear about it before I do.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Fair enough.","action":{"action":"dialogue.close"}}]}]}
+  ]
+}
