@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "runtime_contract_not_yet_implemented",
+  "goal": "Exactly one easy-to-find civic Bountiful board per eligible inhabited village.",
+  "stock_bountiful": {
+    "current_board_gen_frequency": 2,
+    "generation_semantics": "weighted_jigsaw_house_pool_entry_not_guaranteed",
+    "supported_vanilla_pools": ["plains", "savanna", "snowy", "taiga", "desert"],
+    "existing_gazebo_satisfies_guarantee": true,
+    "disable_stock_generation_before_replacement_proven": false
+  },
+  "village_detection": {
+    "preferred_center_sources": ["BELL_WITH_VILLAGE_EVIDENCE", "VILLAGE_POI_ACTIVITY_CENTER", "KNOWN_VILLAGE_STRUCTURE_FALLBACK"],
+    "reject_lone_bell_without_village_evidence": true,
+    "existing_board_search_radius": 64,
+    "coalesce_center_radius": 64
+  },
+  "repair": {
+    "enabled": true,
+    "retroactive_for_existing_villages": true,
+    "placement_search_radius": 12,
+    "max_candidate_checks_per_attempt": 96,
+    "retry_cooldown_ticks": 24000,
+    "board_block": "bountiful:bountyboard",
+    "must_preserve_meaningful_blocks": true,
+    "forbidden_replacement_categories": ["CONTAINER", "WORKSTATION", "BED", "BELL", "DOOR", "FARM", "FLUID"],
+    "require_safe_support": true,
+    "require_interaction_clearance": true,
+    "prefer_path_or_center_visibility": true,
+    "never_force_place_if_no_safe_site": true
+  },
+  "player_modification": {
+    "immediate_respawn_after_player_break": false,
+    "state_after_recorded_board_removed": "PLAYER_MODIFIED"
+  },
+  "regional_initialization": {
+    "geography_api": "CozyZonesApi.regionalCellAt(ServerLevel,x,z)",
+    "assignment_contract": "data/board_decree_assignment.json",
+    "fallback_profile": "ccc_local_notices",
+    "random_decree_selection_is_not_production_behavior": true
+  },
+  "performance": {
+    "global_world_scans": false,
+    "per_tick_structure_queries": false,
+    "cache_processed_settlements": true,
+    "proximity_or_chunk_event_driven": true,
+    "target_steady_state_cost": "effectively_zero_after_settlement_processed"
+  },
+  "saved_record": {
+    "fields": ["dimension", "center", "board", "status", "first_seen_game_time", "last_verified_game_time", "regional_cell_snapshot"],
+    "statuses": ["FOUND_EXISTING", "PLACED_REPAIR", "DEFERRED_NO_SAFE_SITE", "PLAYER_MODIFIED"]
+  }
+}
