@@ -24,6 +24,11 @@ import java.util.Optional;
  * can still supply local knowledge, referrals, rumors, or normal profession chatter. Guards now use
  * ordinary right click; sneak-right-click is deliberately left alone for Carry On and other entity
  * interaction mods.
+ *
+ * Ordinary professional chatter is deliberately stable-but-varied: a villager's UUID chooses one of
+ * three authored voice variants for that profession. The same person therefore keeps their conversational
+ * flavor across reloads and profession interactions, while two farmers are no longer guaranteed to recite
+ * the identical opening line. This is a light personality layer, not a personality stereotype system.
  */
 public final class VillageSocialConversationManager {
     private static final int BOARD_DIRECTION_RADIUS = 192;
@@ -135,7 +140,21 @@ public final class VillageSocialConversationManager {
         else if (profession == VillagerProfession.TOOLSMITH) path = "toolsmith";
         else if (profession == VillagerProfession.WEAPONSMITH) path = "weaponsmith";
         else path = "unemployed";
-        return id("villager_" + path);
+        return ambientVariant(villager, "villager_" + path);
+    }
+
+    /**
+     * Stable per-person ambient voice. Variant 0 is the original conversation; variants 1 and 2
+     * are Bible-authored alternates. UUID hashing means the person does not change voice because the
+     * player reopened the screen or reloaded the world.
+     */
+    private static ResourceLocation ambientVariant(Villager villager, String basePath) {
+        int variant = Math.floorMod(villager.getUUID().hashCode(), 3);
+        return switch (variant) {
+            case 1 -> id(basePath + "_v2");
+            case 2 -> id(basePath + "_v3");
+            default -> id(basePath);
+        };
     }
 
     private static void routeToUsefulPerson(ServerPlayer player) {
