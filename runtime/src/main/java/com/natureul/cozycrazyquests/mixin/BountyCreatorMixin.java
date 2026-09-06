@@ -1,6 +1,7 @@
 package com.natureul.cozycrazyquests.mixin;
 
 import com.natureul.cozycrazyquests.BountifulBridge;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,6 +30,17 @@ public abstract class BountyCreatorMixin {
             }
         }
         cir.setReturnValue(filtered);
+    }
+
+    /**
+     * Kotlin's lazy `val stack` compiles to getStack(). Bountiful already holds the exact world
+     * and board position in this creator, so stamp the finished item as soon as it exists. This
+     * occurs before the board copies the bounty into player-facing inventories, keeping Bountiful's
+     * own per-player taken-mask comparison coherent.
+     */
+    @Inject(method = "getStack", at = @At("RETURN"), remap = false, require = 0)
+    private void cozycrazyquests$stampIssuingBoard(CallbackInfoReturnable<ItemStack> cir) {
+        BountifulBridge.stampCreatorSource(this, cir.getReturnValue());
     }
 
     /**
