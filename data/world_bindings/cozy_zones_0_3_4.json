@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "source": {
+    "mod": "CozyCrazyZones",
+    "version": "0.3.4",
+    "inspection": "direct bytecode inspection of user-provided Forge 1.20.1 jar"
+  },
+  "defaults": {
+    "inner_core_radius": 700,
+    "cardinal_established_radius": 1200,
+    "macro_border_blend_degrees": 11.0,
+    "frontier_radius": 2500,
+    "wildlands_radius": 5500,
+    "dread_radius": 9000,
+    "boundary_hysteresis": 48,
+    "announcement_cooldown_ticks": 200
+  },
+  "suppression": {
+    "structure_namespaces": ["cataclysm"],
+    "structure_exceptions": ["cataclysm:cursed_pyramid"],
+    "natural_entity_namespaces": ["cataclysm"]
+  },
+  "structure_rules": [
+    {"id":"dungeons_enhanced:stables","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:dungeon_variant","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:watch_tower","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:witch_tower","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:desert_tomb","minimum":"HEARTHLANDS","macro_regions":["SOUTH"],"minimum_influence":"CARDINAL_TRANSITION","note":"Small Sunscar desert-site content"},
+    {"id":"dungeons_enhanced:sunken_shrine","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"betterdungeons:spider_dungeon","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"valhelsia_structures:spawner_dungeon","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"valhelsia_structures:tower_ruin","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+
+    {"id":"dungeons_enhanced:pillager_camp","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:tall_witch_hut","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:tower_of_the_undead","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:castle","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:pirate_ship","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:desert_temple","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Strongly arid Sunscar structure"},
+    {"id":"dungeons_enhanced:jungle_monument","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"Strongly tropical Greenveil structure"},
+    {"id":"dungeons_enhanced:large_dungeon","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"betterdungeons:skeleton_dungeon","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"betterdungeons:zombie_dungeon","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"betterdeserttemples:desert_temple","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"YUNG Sunscar desert temple"},
+    {"id":"betterjungletemples:jungle_temple","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","note":"YUNG Greenveil jungle temple"},
+    {"id":"valhelsia_structures:forge","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"valhelsia_structures:castle","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"valhelsia_structures:castle_ruin","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"born_in_chaos_v1:firewell","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"born_in_chaos_v1:mound_of_hounds","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+
+    {"id":"dungeons_enhanced:deep_crypt","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:ice_pit","minimum":"WILDLANDS","macro_regions":["NORTH"],"minimum_influence":"ESTABLISHED","note":"Frostmarch cold-region dungeon"},
+    {"id":"dungeons_enhanced:monster_maze","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:elders_temple","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"dungeons_enhanced:flying_dutchman","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"mowziesmobs:wrought_chamber","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+    {"id":"mowziesmobs:frostmaw_spawn","minimum":"WILDLANDS","macro_regions":["NORTH"],"minimum_influence":"ESTABLISHED","note":"Required Frostmarch Wildlands boss"},
+    {"id":"mowziesmobs:umvuthana_grove","minimum":"WILDLANDS","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Required Sunscar Wildlands boss"},
+    {"id":"mowziesmobs:monastery","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Radial rule"},
+
+    {"id":"cataclysm:cursed_pyramid","minimum":"DREAD_REACHES","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","note":"Sunscar final: Ancient Remnant"}
+  ],
+  "structure_prefix_rules": [
+    {"prefix":"born_in_chaos_v1:observation_tower_","minimum":"HEARTHLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","note":"Observation tower family"},
+    {"prefix":"born_in_chaos_v1:dark_tower_","minimum":"DREAD_REACHES","macro_regions":["WEST"],"minimum_influence":"ESTABLISHED","note":"Amberwood Born in Chaos deep-forest tower family"}
+  ],
+  "natural_entity_rules": [
+    {"id":"mowziesmobs:foliaath","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","daytime_candidate":false,"enabled":true,"note":"Greenveil biome predator"},
+    {"id":"mowziesmobs:naga","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Coastal/stony-shore predator; remains multi-region"},
+    {"id":"skarrier_mobs:snap","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"Sunscar desert daytime predator"},
+    {"id":"skarrier_mobs:dangle","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"Greenveil bamboo-jungle daytime danger"},
+    {"id":"skarrier_mobs:slither_spawner_dummy","minimum":"FRONTIER","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"Gate NATURAL dummy; it creates Slithers as MOB_SUMMONED"},
+    {"id":"skarrier_mobs:quake","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"80 HP Sunscar desert surface daytime threat"},
+    {"id":"born_in_chaos_v1:skeleton_thrasher","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Heavy armored night escalation"},
+    {"id":"born_in_chaos_v1:zombie_bruiser","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Heavy roaming threat"},
+    {"id":"born_in_chaos_v1:bonescaller","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Caster escalation"},
+    {"id":"born_in_chaos_v1:dire_hound_leader","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Roaming pack leader"},
+    {"id":"born_in_chaos_v1:dread_hound","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Pack threat paired with Dire Hound Leader progression"},
+    {"id":"born_in_chaos_v1:door_knight","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Armored blocking melee escalation"},
+    {"id":"born_in_chaos_v1:skeleton_demoman","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Explosive skeleton escalation"},
+    {"id":"born_in_chaos_v1:spirit_guide","minimum":"FRONTIER","macro_regions":["SOUTH"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"Dry/hot roaming caster for Sunscar"},
+    {"id":"myths_of_the_sea:bunyip","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Swamp predator; remains multi-region until water ecology pass"},
+    {"id":"myths_of_the_sea:bake_kujira","minimum":"FRONTIER","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Coastal danger"},
+    {"id":"skarrier_mobs:carniflore","minimum":"WILDLANDS","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"Major Greenveil jungle predator"},
+    {"id":"skarrier_mobs:slither_matriarch","minimum":"WILDLANDS","macro_regions":["EAST"],"minimum_influence":"ESTABLISHED","daytime_candidate":true,"enabled":true,"note":"Greenveil mangrove escalation"},
+    {"id":"skarrier_mobs:wrought","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Skarrier miniboss-class natural spawn"},
+    {"id":"born_in_chaos_v1:lifestealer","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Miniboss-class natural spawn"},
+    {"id":"born_in_chaos_v1:missioner","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"NATURAL spawn only; authored appearances remain legal"},
+    {"id":"born_in_chaos_v1:nightmare_stalker","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Fast high-danger roaming predator"},
+    {"id":"born_in_chaos_v1:mother_spider","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Large spider/miniboss-class natural spawn"},
+    {"id":"born_in_chaos_v1:sir_pumpkinhead","minimum":"WILDLANDS","macro_regions":["WEST"],"minimum_influence":"ESTABLISHED","daytime_candidate":false,"enabled":true,"note":"Amberwood seasonal Wildlands boss; non-NATURAL authored appearances bypass"},
+    {"id":"born_in_chaos_v1:fallen_chaos_knight","minimum":"WILDLANDS","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":false,"note":"Disabled until Scarlet Persecutor suppression interaction is tested"},
+    {"id":"myths_of_the_sea:leviathan","minimum":"DREAD_REACHES","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Dread Reaches sea monster"},
+    {"id":"myths_of_the_sea:kraken","minimum":"DREAD_REACHES","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":true,"enabled":true,"note":"Dread Reaches sea monster"},
+    {"id":"born_in_chaos_v1:supreme_bonescaller","minimum":"DREAD_REACHES","macro_regions":[],"minimum_influence":"SHARED_CORE","daytime_candidate":false,"enabled":true,"note":"Natural roaming boss only; structure/event spawns bypass this rule"}
+  ],
+  "quest_layer_notes": [
+    "Use CozyZonesApi.regionalCellAt for board classification.",
+    "Use CozyZonesApi.structureAllowed before accepting a structure target candidate.",
+    "Use CozyZonesApi.naturalEntityAllowed before presenting a natural-mob hunt as local ecology.",
+    "The daytime_candidate flag is not a spawn guarantee.",
+    "Authored, structure, summon, command, and raid appearances may bypass natural-spawn ecology rules depending on their spawn path."
+  ]
+}
