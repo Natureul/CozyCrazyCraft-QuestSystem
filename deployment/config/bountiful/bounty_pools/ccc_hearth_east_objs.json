@@ -1,10 +1,10 @@
 {
   "content": {
-    "ccc_east_h1_herbalists_basket": {"type":"item","content":"minecraft:cocoa_beans","amount":{"min":8,"max":16},"unitWorth":220,"name":"The Herbalist's Basket","icon":"minecraft:cocoa_beans"},
-    "ccc_east_h1_bamboo_repairs": {"type":"item","content":"minecraft:bamboo","amount":{"min":16,"max":32},"unitWorth":100,"name":"Bamboo Repairs","icon":"minecraft:bamboo"},
-    "ccc_east_h1_garden_spiders": {"type":"entity","content":"minecraft:spider","amount":{"min":2,"max":4},"unitWorth":550,"name":"Something in the Garden","icon":"minecraft:string"},
-    "ccc_east_h1_melons_inn": {"type":"item","content":"minecraft:melon_slice","amount":{"min":16,"max":32},"unitWorth":80,"name":"Melons for the Inn","icon":"minecraft:melon_slice"},
-    "ccc_east_h1_moss_nursery": {"type":"item","content":"minecraft:moss_block","amount":{"min":8,"max":16},"unitWorth":250,"name":"Moss for the Nursery","icon":"minecraft:moss_block"},
-    "ccc_east_h1_recover_survey_notes": {"type":"item","content":"cozycrazyquests:greenveil_survey_notes","amount":{"min":1,"max":1},"unitWorth":3400,"weightMult":0.55,"timeMult":1.0,"repRequired":3,"name":"Notes from the Green","icon":"cozycrazyquests:greenveil_survey_notes","rarity":"RARE"}
+    "ccc_east_h1_herbalists_basket": {"type":"item","content":"minecraft:cocoa_beans","amount":{"min":12,"max":20},"unitWorth":220,"weightMult":1.45,"name":"The Herbalist's Basket","icon":"minecraft:cocoa_beans"},
+    "ccc_east_h1_bamboo_repairs": {"type":"item","content":"minecraft:bamboo","amount":{"min":24,"max":40},"unitWorth":100,"weightMult":1.4,"name":"Bamboo Repairs","icon":"minecraft:bamboo"},
+    "ccc_east_h1_garden_spiders": {"type":"entity","content":"minecraft:spider","amount":{"min":3,"max":5},"unitWorth":550,"weightMult":1.3,"name":"Something in the Garden","icon":"minecraft:string"},
+    "ccc_east_h1_melons_inn": {"type":"item","content":"minecraft:melon_slice","amount":{"min":24,"max":40},"unitWorth":80,"weightMult":1.3,"name":"Melons for the Inn","icon":"minecraft:melon_slice"},
+    "ccc_east_h1_moss_nursery": {"type":"item","content":"minecraft:moss_block","amount":{"min":12,"max":20},"unitWorth":250,"weightMult":1.4,"name":"Moss for the Nursery","icon":"minecraft:moss_block"},
+    "ccc_east_h1_recover_survey_notes": {"type":"item","content":"cozycrazyquests:greenveil_survey_notes","amount":{"min":1,"max":1},"unitWorth":3400,"weightMult":0.5,"timeMult":1.0,"repRequired":3,"name":"Notes from the Green","icon":"cozycrazyquests:greenveil_survey_notes","rarity":"UNCOMMON"}
   }
 }

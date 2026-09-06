@@ -1,3 +1,7 @@
 {
+  "block.bountiful.bountyboard": "Village Notice Board",
+  "bountiful.bounty": "Notice",
+  "bountiful.tooltip.required": "Task",
+  "bountiful.tooltip.rewards": "Payment",
   "bountiful.ui.reputation": "Village Trust"
 }

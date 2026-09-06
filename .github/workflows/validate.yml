@@ -14,6 +14,8 @@ jobs:
           python-version: '3.12'
       - name: Validate Bountiful config-pack content
         run: python tools/validate_bountiful_content.py
+      - name: Validate ordinary notice coherence
+        run: python tools/validate_notice_coherence.py
       - name: Validate neutral regional quest catalog
         run: python tools/validate_quest_catalog.py
       - name: Validate repeatable regional expansion

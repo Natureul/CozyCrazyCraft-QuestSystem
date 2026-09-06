@@ -1,12 +1,5 @@
 {
-  "objectives": [
-    "ccc_hearth_north_objs",
-    "ccc_local_objs"
-  ],
-  "rewards": [
-    "ccc_local_rews",
-    "ccc_regional_field_rews",
-    "ccc_trust_utility_rews"
-  ],
+  "objectives": ["ccc_hearth_north_objs", "ccc_local_objs"],
+  "rewards": ["ccc_local_rews"],
   "name": "Frostmarch Notices"
 }

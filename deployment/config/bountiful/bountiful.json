@@ -8,6 +8,6 @@
     "bounty_decrees/.+"
   ],
   "objectiveModifier": 0,
-  "maxNumRewards": 2,
+  "maxNumRewards": 1,
   "showCompletionToast": true
 }
