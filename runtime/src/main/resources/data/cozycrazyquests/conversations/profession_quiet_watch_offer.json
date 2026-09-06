@@ -2,6 +2,6 @@
   "title": "The Watch Went Quiet",
   "starting_index": 0,
   "dialogues": [
-    {"dialogue_options":[{"dialogue":"There's a watch site near here nobody has checked in a while. Before I call the road safe, I want eyes on it.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I'll check the watch.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"accept\"})"},{"action":"dialogue.close"}]},{"reply":"Not today.","action":{"action":"dialogue.close"}}]}]}
+    {"dialogue_options":[{"dialogue":"There's a watch site near here nobody has checked in a while. Clear four hostiles around the place and come tell me what you found.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I'll clear the watch.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"accept\"})"},{"action":"dialogue.close"}]},{"reply":"Not today.","action":{"action":"dialogue.close"}}]}]}
   ]
 }
