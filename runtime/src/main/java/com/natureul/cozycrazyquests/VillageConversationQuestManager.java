@@ -39,8 +39,6 @@ public final class VillageConversationQuestManager {
     private static final long PENDING_LIFETIME = 2400L;
     private static final long TARGET_CACHE_LIFETIME = 6000L;
     private static final int VILLAGE_RETURN_RADIUS = 160;
-    private static final int UNDERGROUND_SURVEY_RADIUS = 96;
-    private static final int UNDERGROUND_VERTICAL_TOLERANCE = 56;
 
     private static final Map<String, CachedTarget> TARGET_CACHE = new HashMap<>();
 
@@ -115,16 +113,21 @@ public final class VillageConversationQuestManager {
             if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) continue;
             if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
-            BlockPos target = readPos(active, "target");
-            int radius = active.getInt("target_radius");
             String approach = active.getString("target_approach");
-            if ("UNDERGROUND".equals(approach)) radius = Math.max(radius, UNDERGROUND_SURVEY_RADIUS);
+            ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
 
+            // Underground/submerged surveys are handled by StructureSurveyCompletionBridge using the
+            // generated structure instance (or CozyCrazyZones' matching discovery record). Never fall
+            // back to locator-Y arithmetic here: locate positions are navigation anchors, not a depth
+            // objective, and that old behavior could require the player to dig below a dungeon they had
+            // already entered.
+            if (structureId != null && ("UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach))) continue;
+
+            BlockPos target = readPos(active, "target");
+            int radius = Math.max(1, active.getInt("target_radius"));
             long dx = (long) player.blockPosition().getX() - target.getX();
             long dz = (long) player.blockPosition().getZ() - target.getZ();
             if (dx * dx + dz * dz > (long) radius * radius) continue;
-            if ("UNDERGROUND".equals(approach)
-                    && Math.abs(player.blockPosition().getY() - target.getY()) > UNDERGROUND_VERTICAL_TOLERANCE) continue;
 
             active.putBoolean("objective_complete", true);
             active.putBoolean("surveyed", true);
@@ -270,13 +273,24 @@ public final class VillageConversationQuestManager {
         if (active.isEmpty()) return false;
         ResourceLocation targetId = ResourceLocation.tryParse(active.getString("target_structure"));
         if (targetId == null) return false;
-        NamedPlaceBridge.revealStructureToAtlas(
+        boolean marked = NamedPlaceBridge.revealStructureToAtlas(
                 player,
                 targetId,
                 readPos(active, "target"),
                 active.getString("target_name")
         );
-        return true;
+        if (marked) {
+            String targetKey = active.getString("target_key");
+            if (!targetKey.isBlank()) {
+                PlayerKnowledgeState.advance(
+                        player,
+                        targetKey,
+                        PlayerKnowledgeState.Knowledge.KNOWN,
+                        PlayerKnowledgeState.Provenance.MAP_RECORD
+                );
+            }
+        }
+        return marked;
     }
 
     private static Offer selectOffer(
@@ -325,13 +339,9 @@ public final class VillageConversationQuestManager {
                     level.getGameTime()
             );
 
-            PlayerKnowledgeState.advance(
-                    player,
-                    targetKey,
-                    PlayerKnowledgeState.Knowledge.KNOWN,
-                    PlayerKnowledgeState.Provenance.MAP_RECORD
-            );
-
+            // Runtime target resolution is private implementation knowledge. Merely proving that a
+            // suitable generated structure exists does NOT mean the player already knows the place.
+            // PlayerKnowledgeState advances only when dialogue/map evidence is actually delivered.
             ApproachInfo approach = approachInfo(level, resolved.pos());
             return new PreparedTarget(
                     resolved.pos(),
@@ -394,6 +404,16 @@ public final class VillageConversationQuestManager {
         root.remove(VillageQuestState.PENDING);
         VillageQuestState.save(player, root);
 
+        String acceptedTargetKey = active.getString("target_key");
+        if (!acceptedTargetKey.isBlank()) {
+            PlayerKnowledgeState.advance(
+                    player,
+                    acceptedTargetKey,
+                    PlayerKnowledgeState.Knowledge.LEAD,
+                    PlayerKnowledgeState.Provenance.VILLAGE_REPORT
+            );
+        }
+
         ItemStack contract = new ItemStack(ModItems.VILLAGE_CONTRACT.get());
         contract.setHoverName(Component.literal(definition.title()).withStyle(ChatFormatting.GOLD));
         contract.getOrCreateTag().putString(VillageContractItem.QUEST_ID, definition.id());
@@ -416,6 +436,14 @@ public final class VillageConversationQuestManager {
                     readPos(active, "target"),
                     active.getString("target_name")
             );
+            if (atlasMarked && !acceptedTargetKey.isBlank()) {
+                PlayerKnowledgeState.advance(
+                        player,
+                        acceptedTargetKey,
+                        PlayerKnowledgeState.Knowledge.KNOWN,
+                        PlayerKnowledgeState.Provenance.MAP_RECORD
+                );
+            }
         }
 
         String prefix = active.getString("village_name");
@@ -562,6 +590,15 @@ public final class VillageConversationQuestManager {
         pending.putString("target_direction", direction(village.anchor(), target.pos()));
         pending.putString("target_approach", target.approach());
         pending.putInt("target_depth", target.depthBlocks());
+
+        if (target.structureId() != null) {
+            NamedPlaceBridge.StructureInstance instance = NamedPlaceBridge.structureInstance(level, target.structureId(), target.pos());
+            if (instance != null) {
+                pending.putInt("target_start_chunk_x", instance.startChunk().x);
+                pending.putInt("target_start_chunk_z", instance.startChunk().z);
+            }
+        }
+
         pending.putLong("created_game_time", level.getGameTime());
         pending.putInt("trust_when_offered", village.legacyBoardTrust(level));
         pending.putString("semantic_trust_when_offered", VillageProgressState.snapshot(player, village.key()).trust().name());
