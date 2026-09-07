@@ -1,0 +1,10 @@
+{
+  "content": {
+    "ccc_east_frontier_bamboo_bridge": {"type":"item","content":"minecraft:bamboo","amount":{"min":24,"max":48},"unitWorth":90,"name":"Bamboo for the Washout","icon":"minecraft:bamboo"},
+    "ccc_east_frontier_scaffold": {"type":"item","content":"minecraft:scaffolding","amount":{"min":12,"max":24},"unitWorth":180,"name":"Markers Above Floodwater","icon":"minecraft:scaffolding"},
+    "ccc_east_frontier_boats": {"type":"item","content":"minecraft:oak_boat","amount":{"min":1,"max":2},"unitWorth":1200,"name":"Boats for the River Watch","icon":"minecraft:oak_boat"},
+    "ccc_east_frontier_arrows": {"type":"item","content":"minecraft:arrow","amount":{"min":24,"max":48},"unitWorth":60,"name":"Dry Arrows for the Canopy","icon":"minecraft:arrow"},
+    "ccc_east_frontier_zombiflore": {"type":"entity","content":"skarrier_mobs:zombiflore","amount":{"min":2,"max":4},"unitWorth":1800,"rarity":"UNCOMMON","name":"Rot in the Wet Trail"},
+    "ccc_east_frontier_glowberries": {"type":"item","content":"minecraft:glow_berries","amount":{"min":12,"max":24},"unitWorth":140,"name":"Glow Berries for the Cave Crews","icon":"minecraft:glow_berries"}
+  }
+}

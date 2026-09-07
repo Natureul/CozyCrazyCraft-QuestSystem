@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "region": "EAST",
+  "authority": "Danger & Enemy Master Bible v1.0",
+  "contracts": [
+    {"name":"Foliaath","registry_id":"mowziesmobs:foliaath","class":"E5","disposition":"TERRITORIAL","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"Specific-place observation, protection, cultivation, reroute, or constrained clear only; never a broad ambient kill quota."},
+    {"name":"Carniflore","registry_id":"skarrier_mobs:carniflore","class":"E5","disposition":"TERRITORIAL","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"Stationary territorial landmark hazard. Quest completion must bind to a known patch/site before it becomes live."},
+    {"name":"Zombiflore","registry_id":"skarrier_mobs:zombiflore","class":"E2/E3","disposition":"HOSTILE","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"Valid restrained route-defense or night-hostile target."},
+    {"name":"Tiger","registry_id":null,"class":"E3/E4","disposition":"PREDATOR","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"Observation/avoidance/individual dangerous-animal work preferred; registry ID intentionally omitted until local audit."},
+    {"name":"Crocodile","registry_id":"alexsmobs:crocodile","class":"E1/E3","disposition":"PREDATOR","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"River-crossing ecology. Prefer route, observation, photography, or specific-problem handling."},
+    {"name":"Caiman","registry_id":null,"class":"E1/E2","disposition":"PREDATOR","bands":["FRONTIER","WILDLANDS"],"quest_rule":"Lighter wetland counterpart; no registry ID authored here."},
+    {"name":"Anaconda","registry_id":null,"class":"E1/E3","disposition":"PREDATOR","bands":["FRONTIER","WILDLANDS"],"quest_rule":"Special constrictor behavior requires encounter test before density or quest-count assumptions."},
+    {"name":"Naga","registry_id":null,"class":"E3","disposition":"HOSTILE","bands":["FRONTIER","WILDLANDS"],"quest_rule":"Uncommon aerial pressure; registry ID intentionally omitted until local audit."},
+    {"name":"Leapleaf","registry_id":null,"class":"E4","disposition":"HOSTILE","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"Very rare in Frontier, meaningful but sparse in Wildlands. Never authored here as a common bounty target."},
+    {"name":"Whisperer","registry_id":null,"class":"E3","disposition":"HOSTILE","bands":["FRONTIER","WILDLANDS","DREAD_REACHES"],"quest_rule":"Uncommon night specialist; do not inherit broad default spawn weight."},
+    {"name":"Mother Spider","registry_id":null,"class":"E4/E5","disposition":"TERRITORIAL","bands":["WILDLANDS","DREAD_REACHES"],"quest_rule":"Nest/deep-jungle fit only after mechanics test; no broad ambient or quest target authored here."},
+    {"name":"Jungle Abomination","registry_id":null,"class":"E9","disposition":"BOSS","bands":["DREAD_REACHES"],"quest_rule":"Future/feature-gated. No live quest, spawn, reward, location, or dialogue claim until production-ready."}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "region": "EAST",
+  "verified_structure_uses": [
+    {"structure_id":"dungeons_enhanced:jungle_monument","role":"CAGED_LONE_VILLAGER_RESCUE_LANDMARK","live_use":["frontier_overgrown_route","east_w3_temple_eight_roots"],"content_rule":"Current live quest may secure the approach; actual rescue/knowledge state remains runtime-gated and must have a redundant clue path."},
+    {"structure_id":"dungeons_enhanced:tree_house","role":"LONE_RESIDENT_HOMESTEAD","live_use":[],"staged_use":["east_treehouse_lone_resident"],"content_rule":"Use personal/HabitationContext relationship, not full Village Trust."},
+    {"structure_id":"betterjungletemples:jungle_temple","role":"JUNGLE_TEMPLE_DESTINATION","live_use":["frontier_vine_shrine","east_w3_temple_eight_roots"],"content_rule":"Route, rain, recovery, architecture, and bounded structure danger."},
+    {"structure_id":"bettermineshafts:mineshaft_jungle","role":"FRONTIER_CAVE_EXPEDITION","live_use":[],"staged_use":["east_cave_river_survey"],"content_rule":"Cave/river expedition candidate; no invented resident."},
+    {"structure_id":"bettermineshafts:mineshaft_lush","role":"FRONTIER_CAVE_EXPEDITION","live_use":["recovery_greenveil_folio"],"content_rule":"Recovery/survey, not arbitrary high kill count."},
+    {"structure_id":"bettermineshafts:mineshaft_overgrown","role":"FRONTIER_CAVE_EXPEDITION","live_use":["recovery_greenveil_folio","frontier_side_overgrown_mine"],"content_rule":"Recovery/survey and route evidence; no invented resident."}
+  ],
+  "unbound_site_kinds": [
+    {"kind":"river_bend_or_flooded_crossing","structure_id":null,"status":"NEEDS_RUNTIME_NEARBY_SITE_BINDING"},
+    {"kind":"submerged_ruin_or_cache","structure_id":null,"status":"DO_NOT_INVENT_STRUCTURE_ID"},
+    {"kind":"carniflore_or_foliaath_territory","structure_id":null,"status":"NEEDS_LOCATION_AWARE_ENCOUNTER_BINDING"}
+  ]
+}
