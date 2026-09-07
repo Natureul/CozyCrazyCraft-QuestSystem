@@ -30,11 +30,12 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(BountySourceTooltip::onTooltip);
         MinecraftForge.EVENT_BUS.addListener(BountyRedemptionGuard::onRightClickBlock);
 
-        // Authored quest state wins first. The social layer runs immediately after it and supplies a
-        // useful profession/ambient conversation only when no authored quest dialogue was selected.
-        // Both run before Conversations' normal-priority EntityInteract listener opens the screen.
+        // Profession-authored work gets first refusal. The civic fallback then makes regional work and
+        // jobless villages executable without mutating vanilla professions. Ambient/social dialogue runs
+        // last and therefore only fills genuinely unclaimed interactions.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageSocialConversationManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, CivicQuestFallbackManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, VillageSocialConversationManager::onEntityInteract);
 
         // Structure/recovery proof is physical. Survey completion requires sustained real-piece occupancy;
         // recovery evidence is bound to an actual container in the exact assigned structure and only
