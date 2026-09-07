@@ -1,0 +1,1 @@
+{"title":"The Deep Road","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Don't chase every side tunnel. Find the lair, see what made it, and come back alive. That is enough proof for me.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I'll remember that.","action":{"action":"dialogue.close"}}]}]}]}

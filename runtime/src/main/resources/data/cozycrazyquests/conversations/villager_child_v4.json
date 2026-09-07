@@ -1,0 +1,1 @@
+{"title":"Villager","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"They say I have to wait until I'm older to go past the last lamp. That just means nobody wants to explain what's past it.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Maybe listen to them for now.","action":{"action":"dialogue.close"}}]}]}]}

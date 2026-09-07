@@ -1,0 +1,1 @@
+{"title":"Villager","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"I found an old arrowhead by the path. The fletcher said it was ordinary. I think that means they wanted it.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"That's one possibility.","action":{"action":"dialogue.close"}}]}]}]}

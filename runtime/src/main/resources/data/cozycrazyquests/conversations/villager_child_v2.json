@@ -1,0 +1,1 @@
+{"title":"Villager","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"I can get from the well to the bell without touching the road. Almost. The fence counts only if grown-ups are watching.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"That sounds very official.","action":{"action":"dialogue.close"}}]}]}]}
