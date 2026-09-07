@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Daggerfall-style social navigation for an already accepted authored contract.
+ * Daggerfall-style social navigation for authored village progression.
  *
  * NPC speech belongs in Conversations. Runtime actions here only change knowledge, create a justified Atlas
  * marker, or emit tiny state feedback. RUMOR and LEAD never silently reveal an exact marker; KNOWN may mark
@@ -85,9 +85,11 @@ final class QuestHintNetwork {
         if (village == null) return false;
         CompoundTag root = VillageQuestState.root(player);
         CompoundTag active = VillageQuestState.activeForVillage(root, village.key());
-        if (active.isEmpty() || objectiveComplete(active) || active.getString("target_structure").isBlank()) return false;
+        if (active.isEmpty() || objectiveComplete(active) || active.getString("target_structure").isBlank()) {
+            return routeForVillageProgress(player, level, village, root);
+        }
 
-        Optional<Villager> specialist = findSpecialist(level, player, village, active);
+        Optional<Villager> specialist = findSpecialist(level, player, village, active, root);
         if (specialist.isPresent()) {
             Villager villager = specialist.get();
             VillagerNameService.ensureNamed(level, villager);
@@ -182,7 +184,8 @@ final class QuestHintNetwork {
             ServerLevel level,
             ServerPlayer player,
             VillageContext village,
-            CompoundTag active
+            CompoundTag active,
+            CompoundTag root
     ) {
         String approach = active.getString("target_approach");
         List<VillagerProfession> wanted = switch (approach) {
@@ -209,15 +212,111 @@ final class QuestHintNetwork {
             );
         };
 
+        String currentSpeaker = VillageQuestState.conversationSpeaker(root);
         AABB area = new AABB(village.anchor()).inflate(SOCIAL_RADIUS, 64, SOCIAL_RADIUS);
-        return level.getEntitiesOfClass(Villager.class, area, villager -> {
+        List<Villager> candidates = level.getEntitiesOfClass(Villager.class, area, villager -> {
                     if (villager.isBaby() || !wanted.contains(villager.getVillagerData().getProfession())) return false;
                     VillageContext theirs = VillageContext.resolve(level, villager.blockPosition());
                     return theirs != null && village.key().equals(theirs.key());
-                })
-                .stream()
+                });
+
+        Optional<Villager> other = candidates.stream()
+                .filter(villager -> !villager.getUUID().toString().equals(currentSpeaker))
                 .min(Comparator.comparingInt(v -> wanted.indexOf(v.getVillagerData().getProfession()) * 10000
                         + (int) Math.min(9999, v.distanceToSqr(player))));
+        if (other.isPresent()) return other;
+
+        return candidates.stream()
+                .min(Comparator.comparingInt(v -> wanted.indexOf(v.getVillagerData().getProfession()) * 10000
+                        + (int) Math.min(9999, v.distanceToSqr(player))));
+    }
+
+    private static boolean routeForVillageProgress(
+            ServerPlayer player,
+            ServerLevel level,
+            VillageContext village,
+            CompoundTag root
+    ) {
+        VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, village.key());
+        List<VillagerProfession> wanted;
+        if (progress.capstoneEligible() && !progress.capstoneComplete()) {
+            wanted = List.of(
+                    VillagerProfession.MASON,
+                    VillagerProfession.LIBRARIAN,
+                    VillagerProfession.CARTOGRAPHER,
+                    VillagerProfession.WEAPONSMITH,
+                    VillagerProfession.ARMORER
+            );
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.COMMUNITY)) {
+            wanted = List.of(
+                    VillagerProfession.FARMER,
+                    VillagerProfession.SHEPHERD,
+                    VillagerProfession.BUTCHER,
+                    VillagerProfession.FISHERMAN,
+                    VillagerProfession.LEATHERWORKER
+            );
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.EXPLORATION)) {
+            wanted = List.of(
+                    VillagerProfession.MASON,
+                    VillagerProfession.LIBRARIAN,
+                    VillagerProfession.CLERIC,
+                    VillagerProfession.CARTOGRAPHER,
+                    VillagerProfession.FISHERMAN
+            );
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.PROFESSION)) {
+            wanted = List.of(
+                    VillagerProfession.WEAPONSMITH,
+                    VillagerProfession.ARMORER,
+                    VillagerProfession.FLETCHER,
+                    VillagerProfession.TOOLSMITH,
+                    VillagerProfession.LEATHERWORKER
+            );
+        } else if (!progress.categories().contains(VillageProgressState.AccomplishmentCategory.DANGER)) {
+            wanted = List.of(
+                    VillagerProfession.WEAPONSMITH,
+                    VillagerProfession.ARMORER,
+                    VillagerProfession.FLETCHER,
+                    VillagerProfession.TOOLSMITH,
+                    VillagerProfession.CLERIC
+            );
+        } else {
+            wanted = List.of(VillagerProfession.CARTOGRAPHER, VillagerProfession.LIBRARIAN, VillagerProfession.MASON);
+        }
+
+        String currentSpeaker = VillageQuestState.conversationSpeaker(root);
+        AABB area = new AABB(village.anchor()).inflate(SOCIAL_RADIUS, 64, SOCIAL_RADIUS);
+        List<Villager> adults = level.getEntitiesOfClass(Villager.class, area, villager -> {
+                    if (villager.isBaby()) return false;
+                    VillageContext theirs = VillageContext.resolve(level, villager.blockPosition());
+                    return theirs != null && village.key().equals(theirs.key());
+                });
+
+        Optional<Villager> professionContact = adults.stream()
+                .filter(villager -> !villager.getUUID().toString().equals(currentSpeaker))
+                .filter(villager -> wanted.contains(villager.getVillagerData().getProfession()))
+                .min(Comparator.comparingInt(v -> wanted.indexOf(v.getVillagerData().getProfession()) * 10000
+                        + (int) Math.min(9999, v.distanceToSqr(player))));
+
+        Optional<Villager> contact = professionContact.isPresent()
+                ? professionContact
+                : adults.stream()
+                        .filter(villager -> !villager.getUUID().toString().equals(currentSpeaker))
+                        .filter(villager -> VillageCivicRoleService.isCivicContact(level, village, villager))
+                        .min(Comparator.comparingDouble(v -> v.distanceToSqr(player)));
+
+        if (contact.isPresent()) {
+            Villager villager = contact.get();
+            VillagerNameService.ensureNamed(level, villager);
+            player.displayClientMessage(
+                    Component.literal(compactReferral(player, villager)).withStyle(ChatFormatting.GOLD),
+                    true
+            );
+            return true;
+        }
+
+        String fallback = village.hasBoard() ? "Try the notice board." : "No other contact nearby.";
+        player.displayClientMessage(Component.literal(fallback).withStyle(ChatFormatting.GRAY), true);
+        return true;
     }
 
     private static boolean isFallbackGuide(
@@ -242,8 +341,17 @@ final class QuestHintNetwork {
         long dz = (long) villager.blockPosition().getZ() - player.blockPosition().getZ();
         int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
         String name = villager.getDisplayName().getString();
+        String profession = professionLabel(villager.getVillagerData().getProfession());
+        if (villager.getVillagerData().getProfession() == VillagerProfession.NONE
+                || villager.getVillagerData().getProfession() == VillagerProfession.NITWIT) {
+            VillageContext village = VillageContext.resolve(player.serverLevel(), villager.blockPosition());
+            if (village != null) {
+                VillageCivicRoleService.Role role = VillageCivicRoleService.roleFor(player.serverLevel(), village, villager);
+                if (role.isCivicContact()) profession = role.label();
+            }
+        }
         String route = distance <= 10 ? "nearby" : distance + " " + shortDirection(dx, dz);
-        String message = name + " • " + professionLabel(villager.getVillagerData().getProfession()) + " • " + route;
+        String message = name + " • " + profession + " • " + route;
         if (message.length() <= 45) return message;
         message = name + " • " + route;
         if (message.length() <= 45) return message;
