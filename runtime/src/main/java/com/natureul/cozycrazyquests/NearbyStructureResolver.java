@@ -21,8 +21,14 @@ import java.util.Optional;
  * This class intentionally does no background polling. A locate is performed only when an NPC
  * needs to decide whether a structure-dependent quest can be offered, and callers cache the
  * result. That keeps "villagers know what's near them" from becoming another permanent tick cost.
+ *
+ * Slow locate calls are timed here at the narrowest shared boundary. This does not make the locate
+ * cheaper, but it gives playtests an unambiguous server log record with origin/radius/candidates so
+ * structure-locate stalls can be separated from unrelated teleport/chunk-generation stalls.
  */
 final class NearbyStructureResolver {
+    private static final long SLOW_LOCATE_WARN_MS = 250L;
+
     private NearbyStructureResolver() {}
 
     static ResolvedStructure findNearest(
@@ -45,6 +51,7 @@ final class NearbyStructureResolver {
         if (holders.isEmpty()) return null;
 
         int radiusChunks = Math.max(1, (maxDistanceBlocks + 15) / 16);
+        long locateStartedNanos = System.nanoTime();
         Pair<BlockPos, Holder<Structure>> result = level.getChunkSource().getGenerator().findNearestMapStructure(
                 level,
                 HolderSet.direct(holders),
@@ -52,6 +59,18 @@ final class NearbyStructureResolver {
                 radiusChunks,
                 false
         );
+        long locateElapsedMs = (System.nanoTime() - locateStartedNanos) / 1_000_000L;
+        if (locateElapsedMs >= SLOW_LOCATE_WARN_MS) {
+            CozyCrazyQuests.LOGGER.warn(
+                    "Slow authored structure locate: {} ms on thread '{}' from {} within {} chunks for {} -> {}",
+                    locateElapsedMs,
+                    Thread.currentThread().getName(),
+                    origin,
+                    radiusChunks,
+                    structureIds,
+                    result == null ? "no result" : result.getFirst()
+            );
+        }
         if (result == null) return null;
 
         BlockPos pos = result.getFirst();
