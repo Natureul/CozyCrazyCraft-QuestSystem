@@ -30,12 +30,13 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(BountySourceTooltip::onTooltip);
         MinecraftForge.EVENT_BUS.addListener(BountyRedemptionGuard::onRightClickBlock);
 
-        // Profession-authored work gets first refusal. The civic fallback then makes regional work and
-        // jobless villages executable without mutating vanilla professions. Ambient/social dialogue runs
-        // last and therefore only fills genuinely unclaimed interactions.
+        // Profession-authored work gets first refusal. Civic fallback then makes regional work and
+        // jobless villages executable without mutating vanilla professions. Regional ambient voice may
+        // add local color only to otherwise idle villagers; the ordinary social fallback runs last.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, CivicQuestFallbackManager::onEntityInteract);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, VillageSocialConversationManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, RegionalAmbientConversationManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, VillageSocialConversationManager::onEntityInteract);
 
         // Structure/recovery proof is physical. Survey completion requires sustained real-piece occupancy;
         // recovery evidence is bound to an actual container in the exact assigned structure and only
