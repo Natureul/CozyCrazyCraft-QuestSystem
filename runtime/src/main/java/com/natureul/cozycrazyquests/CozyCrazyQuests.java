@@ -31,6 +31,11 @@ public final class CozyCrazyQuests {
         // Both run before Conversations' normal-priority EntityInteract listener opens the screen.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageSocialConversationManager::onEntityInteract);
+
+        // Exact structure occupancy runs before the older distance fallback. This makes underground
+        // survey completion agree with the world's actual structure-discovery semantics rather than
+        // trusting a modded structure locator's Y coordinate.
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, StructureSurveyCompletionBridge::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(GoreTunnelLead::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onLivingDeath);
