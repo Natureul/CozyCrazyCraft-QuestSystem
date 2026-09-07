@@ -4,12 +4,12 @@
   "item.cozycrazyquests.sunscar_tomb_tablet": "Sunscar Tomb Tablet",
   "item.cozycrazyquests.sunscar_tomb_tablet.desc": "A weathered tablet taken from a desert tomb.",
   "item.cozycrazyquests.greenveil_survey_notes": "Greenveil Survey Notes",
-  "item.cozycrazyquests.greenveil_survey_notes.desc": "Water-stained field notes recovered from a jungle monument.",
+  "item.cozycrazyquests.greenveil_survey_notes.desc": "Legacy public-notice proof from an older Jungle Monument contract.",
   "item.cozycrazyquests.frostmarch_dispatch": "Frostmarch Dispatch",
-  "item.cozycrazyquests.frostmarch_dispatch.desc": "A sealed dispatch recovered from an Ice Pit armory.",
+  "item.cozycrazyquests.frostmarch_dispatch.desc": "Legacy public-notice proof from an older Ice Pit contract.",
   "item.cozycrazyquests.recovered_evidence": "Recovered Evidence",
   "item.cozycrazyquests.recovered_evidence.desc": "A quest-bound object recovered from the exact place that issued the lead.",
-  "item.cozycrazyquests.quest_proof_hint": "Quest proof - a settlement may be looking for this.",
+  "item.cozycrazyquests.quest_proof_hint": "Notice-board proof item - unrelated to villager recovery contracts.",
   "item.cozycrazyquests.village_contract": "Village Contract",
   "item.cozycrazyquests.conversation_token": "Quest Action"
 }

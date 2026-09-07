@@ -11,19 +11,18 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.Map;
 
 /**
- * Adds one deterministic quest-proof item to a deliberately chosen structure loot table.
+ * Adds deterministic proof items for the small set of Bountiful public recovery notices that still
+ * intentionally use physical structure loot.
  *
- * This is intentionally loot-table scoped rather than structure-ID scoped: it is tiny,
- * data-safe, works when the structure is generated normally, and does not create any
- * ticking/searching workload. The chosen tables are the structure's distinctive chest
- * tables in Dungeons Enhanced 5.4.x.
+ * Important 0.4.1 boundary: a loot table used by an authored villager recovery contract must not also
+ * inject a different public-notice proof item. Authored recovery has one player-visible truth: the
+ * quest-bound object seeded by RecoveryQuestRuntime. Frostmarch Ice Pit and Greenveil Jungle Monument
+ * proofs were therefore retired once Last Warm Camp and Temple of Eight Roots became executable.
  */
 public final class ProofLootInjector {
     private static final Map<ResourceLocation, RegistryObject<Item>> PROOFS = Map.of(
             id("dungeons_enhanced", "chests/stables"), ModItems.STABLEMASTERS_SEAL,
-            id("dungeons_enhanced", "chests/desert_tomb"), ModItems.SUNSCAR_TOMB_TABLET,
-            id("dungeons_enhanced", "chests/jungle_monument/treasure"), ModItems.GREENVEIL_SURVEY_NOTES,
-            id("dungeons_enhanced", "chests/ice_pit/armory"), ModItems.FROSTMARCH_DISPATCH
+            id("dungeons_enhanced", "chests/desert_tomb"), ModItems.SUNSCAR_TOMB_TABLET
     );
 
     private ProofLootInjector() {}
@@ -38,7 +37,7 @@ public final class ProofLootInjector {
                         .add(LootItem.lootTableItem(proof.get()))
                         .build()
         );
-        CozyCrazyQuests.LOGGER.debug("Injected quest proof {} into loot table {}", proof.getId(), event.getName());
+        CozyCrazyQuests.LOGGER.debug("Injected public-notice proof {} into loot table {}", proof.getId(), event.getName());
     }
 
     private static ResourceLocation id(String namespace, String path) {
