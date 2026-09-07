@@ -7,9 +7,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
@@ -23,11 +23,11 @@ final class RecoveryQuestRuntime {
     private RecoveryQuestRuntime() {}
 
     /**
-     * A recovery object is bound into the first real container the player opens while inside a real
-     * piece of the exact assigned structure instance. The evidence is not awarded merely for crossing
-     * a bounding box. Normally it is inserted into an empty container slot before the GUI opens so the
-     * player actually sees and takes the requested object. A completely full container falls back to
-     * handing over the same quest-bound object from that physical cache interaction.
+     * A recovery object is bound into the first real loot/storage cache the player opens while inside a
+     * real piece of the exact assigned structure instance. The evidence is never awarded merely for
+     * crossing a bounding box and is never silently handed to the player because a container is full.
+     * If the cache has no free slot, the player must make room and open it again. That keeps one visible,
+     * physical truth for the quest object: it came out of the assigned structure's cache.
      */
     static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
@@ -35,7 +35,7 @@ final class RecoveryQuestRuntime {
 
         BlockPos clicked = event.getPos();
         BlockEntity blockEntity = level.getBlockEntity(clicked);
-        if (!(blockEntity instanceof Container container)) return;
+        if (!(blockEntity instanceof RandomizableContainerBlockEntity container)) return;
 
         CompoundTag root = VillageQuestState.root(player);
         boolean changed = false;
@@ -61,14 +61,19 @@ final class RecoveryQuestRuntime {
             if (!NamedPlaceBridge.insideExactStructure(
                     level, clicked, structureId, expectedChunkX, expectedChunkZ, locate)) continue;
 
-            ItemStack evidence = RecoveredEvidence.create(definition, active);
             int emptySlot = firstEmptySlot(container);
-            if (emptySlot >= 0) {
-                container.setItem(emptySlot, evidence);
-                container.setChanged();
-            } else {
-                if (!player.addItem(evidence)) player.drop(evidence, false);
+            if (emptySlot < 0) {
+                player.displayClientMessage(
+                        Component.literal("This cache is full. Free one slot and check it again.")
+                                .withStyle(ChatFormatting.GRAY),
+                        true
+                );
+                return;
             }
+
+            ItemStack evidence = RecoveredEvidence.create(definition, active);
+            container.setItem(emptySlot, evidence);
+            container.setChanged();
 
             active.putBoolean(SEEDED, true);
             active.putBoolean("visited_target", true);
@@ -79,7 +84,7 @@ final class RecoveryQuestRuntime {
             changed = true;
 
             CozyCrazyQuests.LOGGER.info(
-                    "Bound recovery evidence for '{}' to physical container {} in exact assigned structure near {}",
+                    "Bound recovery evidence for '{}' to physical cache {} in exact assigned structure near {}",
                     active.getString("quest_id"), clicked, locate
             );
             // One click should never seed evidence for two simultaneous contracts that happen to overlap.
@@ -133,7 +138,7 @@ final class RecoveryQuestRuntime {
     /**
      * Runs immediately before the normal authored turn-in action. Ordinary quests pass through.
      * Recovery jobs consume their quest-bound evidence; if the player lost it, the contract becomes
-     * active again and may bind a replacement on the next real container interaction in the target.
+     * active again and may bind a replacement on the next real cache interaction in the target.
      */
     static boolean beforeTurnIn(ServerPlayer player) {
         CompoundTag root = VillageQuestState.root(player);
@@ -171,7 +176,7 @@ final class RecoveryQuestRuntime {
         return false;
     }
 
-    private static int firstEmptySlot(Container container) {
+    private static int firstEmptySlot(RandomizableContainerBlockEntity container) {
         for (int slot = 0; slot < container.getContainerSize(); slot++) {
             if (container.getItem(slot).isEmpty()) return slot;
         }
