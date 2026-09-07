@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY = ROOT / "data" / "progression" / "social_progression_policy_v0_1.json"
+QUEST_HINT_RUNTIME = ROOT / "runtime" / "src" / "main" / "java" / "com" / "natureul" / "cozycrazyquests" / "QuestHintNetwork.java"
 
 
 def fail(message: str) -> None:
@@ -78,7 +79,16 @@ def main() -> None:
     if flags["ANCIENT_REMNANT_ENABLED"]:
         fail("Ancient Remnant final must remain feature-gated until encounter is enabled")
 
-    print("Validated CozyCrazyCraft semantic social-progression policy")
+    runtime = QUEST_HINT_RUNTIME.read_text(encoding="utf-8")
+    if "findSpecialist(" not in runtime or "isFallbackGuide(" not in runtime:
+        fail("active quest routing runtime is missing specialist/fallback guide surfaces")
+    same_village_guard = "village.key().equals(theirs.key())"
+    if runtime.count(same_village_guard) < 2:
+        fail("specialist and fallback-guide searches must both stay scoped to the issuing village")
+    if runtime.count("VillageContext.resolve(level, villager.blockPosition())") < 2:
+        fail("social hint candidates must resolve village membership before being selected")
+
+    print("Validated CozyCrazyCraft semantic social-progression policy and local routing integrity")
 
 
 if __name__ == "__main__":
