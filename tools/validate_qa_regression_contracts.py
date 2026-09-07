@@ -136,11 +136,12 @@ def validate_structure_and_recovery() -> None:
     require(recovery, 'targetKey.equals(tag.getString(TARGET_KEY))', "recovery matches target instance key")
     require(recovery, 'shrink(1)', "turn-in consumes one matching evidence item")
     require(runtime, 'PlayerInteractEvent.RightClickBlock', "evidence comes from a physical interaction")
-    require(runtime, 'instanceof Container container', "recovery source is a real container")
+    require(runtime, 'instanceof RandomizableContainerBlockEntity container', "recovery source is a real loot/storage cache")
     require(runtime, 'NamedPlaceBridge.insideExactStructure', "recovery container belongs to exact assigned structure")
     require(runtime, 'container.setItem(emptySlot, evidence)', "quest-bound evidence is placed in the physical cache")
     require(runtime, 'RecoveredEvidence.has(player, active)', "objective waits for evidence possession")
     require(runtime, 'RecoveredEvidence.consume(player, active)', "turn-in consumes exact quest-bound evidence")
+    forbid(runtime, 'player.addItem(evidence)', "full recovery cache must not silently award evidence")
     require(mod_main, 'RecoveryQuestRuntime::onRightClickBlock', "physical recovery interaction is registered")
     require(state, 'active_by_village', "simultaneous contracts remain village-keyed")
     require(manager, 'onPlayerClone', "authored quest state survives death/clone")
@@ -191,8 +192,9 @@ def validate_performance() -> None:
     mod_main = load_text(JAVA / "CozyCrazyQuests.java")
     watchdog = load_text(ROOT / "tools" / "analyze_watchdog_log.py")
 
-    # The September field test proved that a broad worldgen locate can stall a click for minutes.
-    # It is now forbidden anywhere in the authored quest Java runtime, not merely discouraged on ticks.
+    # The field log showed synchronous locate paths during quest resolution, while the captured watchdog
+    # itself was a teleport/chunk-load stall. Preventing broad locate calls here is a proactive latency
+    # boundary, not an attribution of that watchdog to the quest runtime.
     for path in JAVA.glob("*.java"):
         src = load_text(path)
         if "findNearestMapStructure(" in src:
