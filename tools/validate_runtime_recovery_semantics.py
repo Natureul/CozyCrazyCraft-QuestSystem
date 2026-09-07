@@ -46,8 +46,16 @@ for quest_id, object_name in quests.items():
 
 require(quest_catalog, "boolean isRecovery()", "quest definitions expose recovery specialization")
 require(quest_catalog, "HearthlandsRecoveryQuestCatalog.ALL", "recovery bank is executable")
-require(manager, "|| definition.isRecovery()) continue;", "legacy survey proximity fallback skips recovery jobs")
 require(manager, 'objective = "recover " + definition.recoveryObjectName()', "acceptance text says recover, not survey")
+
+# The 0.4.1 architecture removed the old VillageConversationQuestManager proximity-survey tick entirely.
+# Recovery safety therefore depends on there being only one structure-proof path, not on a special-case
+# `isRecovery()` guard inside a dead fallback.
+if "public static void onPlayerTick(" in manager:
+    raise SystemExit("ERROR: VillageConversationQuestManager must not own locator/proximity survey ticking")
+if "VillageConversationQuestManager::onPlayerTick" in mod_main:
+    raise SystemExit("ERROR: obsolete VillageConversationQuestManager survey tick must not be registered")
+require(mod_main, "StructureSurveyCompletionBridge::onPlayerTick", "physical structure survey bridge is registered")
 
 require(turnin, "PlayerInteractEvent.RightClickBlock", "recovery starts from a physical block interaction")
 require(turnin, "instanceof Container container", "recovery source is a real container")
