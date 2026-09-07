@@ -42,5 +42,14 @@ final class QuestDeparturePrompt {
                         .withStyle(ChatFormatting.LIGHT_PURPLE),
                 true
         );
+
+        VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
+        if (definition != null && definition.isRecovery()) {
+            player.sendSystemMessage(
+                    Component.literal("Recovery job: enter the actual structure and bring back "
+                                    + definition.recoveryObjectName() + ". A locator coordinate is only a route hint.")
+                            .withStyle(ChatFormatting.GOLD)
+            );
+        }
     }
 }
