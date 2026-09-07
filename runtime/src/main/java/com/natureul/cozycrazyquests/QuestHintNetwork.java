@@ -25,6 +25,10 @@ import java.util.Optional;
  * rumor, refer the player to somebody better informed, narrow the approach, identify the place by
  * name, or (where plausible) mark it on the Atlas. At least one loaded adult in the issuing village
  * is designated as a fallback guide so bad NPC rolls cannot make the whole settlement useless.
+ *
+ * The original giver is part of this network too. Before completion, asking the person who issued the
+ * contract for more help is a sensible player action and must not dead-end into a generic reminder.
+ * Completion/turn-in dialogue still wins because this network returns nothing once the objective is done.
  */
 final class QuestHintNetwork {
     private static final int SOCIAL_RADIUS = 176;
@@ -37,11 +41,6 @@ final class QuestHintNetwork {
         CompoundTag active = VillageQuestState.activeForVillage(root, village.key());
         if (active.isEmpty() || objectiveComplete(active)) return null;
         if (active.getString("target_structure").isBlank()) return null;
-
-        // The original giver keeps their authored reminder. Everybody else is allowed to become part
-        // of the information network, even when their profession also happens to be a legal turn-in role.
-        String giver = active.getString("giver_uuid");
-        if (!giver.isBlank() && giver.equals(speaker.getUUID().toString())) return null;
 
         VillageQuestState.noteConversation(root, village.key(), speaker.getUUID().toString());
         VillageQuestState.save(player, root);
@@ -152,7 +151,7 @@ final class QuestHintNetwork {
         if (subject.isBlank()) subject = descriptiveSubject(active);
 
         String extra = switch (approach) {
-            case "UNDERGROUND" -> " It's underground; the surface bearing is only the place to begin looking for a descent.";
+            case "UNDERGROUND" -> " It's underground; the surface bearing is only where to begin looking for a descent. Once you are actually inside the place, the survey counts — do not chase an imaginary depth below it.";
             case "SUBMERGED" -> " It's below the waterline; search the water around that bearing rather than the shore alone.";
             default -> " Look for the landmark itself once you're in that area.";
         };
@@ -196,11 +195,9 @@ final class QuestHintNetwork {
             );
         };
 
-        String giver = active.getString("giver_uuid");
         AABB area = new AABB(village.anchor()).inflate(SOCIAL_RADIUS, 64, SOCIAL_RADIUS);
         return level.getEntitiesOfClass(Villager.class, area, villager ->
                         !villager.isBaby()
-                                && !villager.getUUID().toString().equals(giver)
                                 && wanted.contains(villager.getVillagerData().getProfession()))
                 .stream()
                 .min(Comparator.comparingInt(v -> wanted.indexOf(v.getVillagerData().getProfession()) * 10000
