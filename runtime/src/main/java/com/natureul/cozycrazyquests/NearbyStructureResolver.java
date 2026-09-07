@@ -9,9 +9,10 @@ import java.util.List;
 /**
  * Resolves authored quest targets against the persistent index of real generated structure starts.
  *
- * The old implementation called ChunkGenerator.findNearestMapStructure synchronously from villager
- * interaction. A September 0.4.0 field test captured one Structure Gel locate holding the server thread
- * for roughly nine minutes. Normal NPC interaction must never enter that worldgen search again.
+ * The 0.4.0 field log showed synchronous structure-locate / Structure Gel paths occurring during quest
+ * target resolution. The captured watchdog stall itself was a teleport/chunk-load stall, so it would be
+ * incorrect to attribute that watchdog to this quest code. Even so, routine NPC interaction should not
+ * be allowed to invoke broad worldgen searches when a bounded generated-start index can answer safely.
  *
  * GeneratedStructureIndexSavedData is populated when real chunks load/generate and persists those starts.
  * This resolver is therefore a bounded in-memory search: no chunk generation, no broad locate, no N+1
