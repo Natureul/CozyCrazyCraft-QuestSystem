@@ -48,16 +48,26 @@ public final class VillageContractItem extends Item {
             }
 
             if (distance > 0 && !direction.isBlank()) {
-                tooltip.add(Component.literal("Location: about " + distance + " blocks " + direction)
+                tooltip.add(Component.literal("Initial lead: about " + distance + " blocks " + direction)
                         .withStyle(ChatFormatting.GRAY));
             }
 
             if ("UNDERGROUND".equals(approach)) {
-                tooltip.add(Component.literal("Approach: below ground — search the indicated area for a cave or opening")
+                tooltip.add(Component.literal("Approach: below ground — the surface bearing is not an entrance")
                         .withStyle(ChatFormatting.YELLOW));
             } else if ("SUBMERGED".equals(approach)) {
                 tooltip.add(Component.literal("Approach: below the waterline — the surface bearing is only a guide")
                         .withStyle(ChatFormatting.YELLOW));
+            }
+
+            if (definition != null
+                    && (definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY
+                    || definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR)) {
+                String place = village == null || village.isBlank() || "the village".equals(village)
+                        ? "the village"
+                        : village;
+                tooltip.add(Component.literal("Before setting out: ask around in " + place + " for a better lead")
+                        .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
             }
 
             if (definition != null) {
