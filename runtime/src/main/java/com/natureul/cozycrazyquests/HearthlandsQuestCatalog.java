@@ -16,7 +16,10 @@ final class HearthlandsQuestCatalog {
             VillageProgressState.AccomplishmentCategory.COMMUNITY, "HEARTHLANDS", 0,
             896, 56, "the old stables", structures("dungeons_enhanced:stables"), 0,
             "community_empty_stalls", false,
-            rewards(reward("minecraft:saddle", 1, "Recovered Riding Tack")), 4, 5
+            rewards(
+                    enchanted("minecraft:iron_shovel", 1, "Stableyard Spade", "minecraft:unbreaking", 1),
+                    reward("minecraft:golden_carrot", 4, null)
+            ), 4, 5
     );
 
     static final Definition SAFE_PASTURE = local(
@@ -24,7 +27,11 @@ final class HearthlandsQuestCatalog {
             profs(VillagerProfession.SHEPHERD, VillagerProfession.FARMER, VillagerProfession.BUTCHER),
             VillageProgressState.AccomplishmentCategory.COMMUNITY, "HEARTHLANDS",
             72, 96, 176, LocalTerrain.ANY, "the outer pasture", 3,
-            "community_safe_pasture", rewards(reward("minecraft:leather", 4, null)), 4, 4
+            "community_safe_pasture",
+            rewards(
+                    enchanted("minecraft:shears", 1, "Pasture Shears", "minecraft:unbreaking", 1),
+                    reward("minecraft:pumpkin_pie", 4, null)
+            ), 4, 4
     );
 
     static final Definition WATERLINE_TROUBLE = local(
@@ -40,27 +47,27 @@ final class HearthlandsQuestCatalog {
     );
 
     static final Definition BELOW_WHITE_SHELF = structure(
-            "hearthlands_exploration_below_white_shelf", "Below the White Shelf",
+            "hearthlands_exploration_below_white_shelf", "The Cellar Under the Hill",
             profs(VillagerProfession.LIBRARIAN, VillagerProfession.CLERIC, VillagerProfession.CARTOGRAPHER),
             VillageProgressState.AccomplishmentCategory.EXPLORATION, "HEARTHLANDS", 0,
-            1100, 72, "the buried ice works", structures("dungeons_enhanced:ice_pit"), 0,
+            1100, 64, "the old cellar", structures("dungeons_enhanced:dungeon_variant"), 0,
             "north_below_white_shelf", false,
             rewards(
-                    enchanted("minecraft:iron_boots", 1, "Shelfwalker Boots", "minecraft:feather_falling", 1),
-                    reward("minecraft:torch", 16, null)
-            ), 6, 8
+                    enchanted("minecraft:iron_boots", 1, "Hillwalker Boots", "minecraft:feather_falling", 1),
+                    reward("minecraft:torch", 12, null)
+            ), 5, 6
     );
 
     static final Definition STONE_UNDER_VINES = structure(
-            "hearthlands_exploration_stone_under_vines", "Stone Under the Vines",
+            "hearthlands_exploration_stone_under_vines", "Stone in the Green",
             profs(VillagerProfession.MASON, VillagerProfession.LIBRARIAN, VillagerProfession.CARTOGRAPHER),
             VillageProgressState.AccomplishmentCategory.EXPLORATION, "HEARTHLANDS", 0,
-            1150, 64, "the overgrown stonework", structures("dungeons_enhanced:jungle_monument"), 0,
+            1050, 56, "the old stone circle", structures("dungeons_enhanced:druid_circle"), 0,
             "east_stone_under_vines", false,
             rewards(
-                    enchanted("minecraft:iron_axe", 1, "Vine-Cutter", "minecraft:efficiency", 1),
+                    enchanted("minecraft:iron_axe", 1, "Brush-Cutter", "minecraft:efficiency", 1),
                     reward("minecraft:scaffolding", 8, null)
-            ), 6, 8
+            ), 5, 6
     );
 
     static final Definition STONE_UNDER_SUN = structure(
@@ -70,9 +77,9 @@ final class HearthlandsQuestCatalog {
             1150, 64, "the old desert stone", structures("dungeons_enhanced:desert_tomb"), 0,
             "south_stone_under_sun", false,
             rewards(
-                    enchanted("minecraft:iron_helmet", 1, "Sunroad Helm", "minecraft:unbreaking", 1),
+                    reward("cold_sweat:waterskin", 1, "Road Waterskin"),
                     reward("minecraft:compass", 1, "Road Compass")
-            ), 6, 8
+            ), 6, 7
     );
 
     static final Definition WITCHLIGHT_RECORDS = structure(
@@ -84,26 +91,21 @@ final class HearthlandsQuestCatalog {
             rewards(
                     enchanted("minecraft:iron_pickaxe", 1, "Old-Stone Pick", "minecraft:unbreaking", 1),
                     reward("minecraft:lantern", 4, null)
-            ), 6, 8
+            ), 6, 7
     );
 
     static final Definition OLD_WALLS_OLD_NAMES = structure(
             "hearthlands_exploration_old_walls", "Old Walls, Old Names",
             profs(VillagerProfession.MASON, VillagerProfession.LIBRARIAN, VillagerProfession.CLERIC),
             VillageProgressState.AccomplishmentCategory.EXPLORATION, "HEARTHLANDS", 0,
-            1024, 56, "the old site",
-            structures(
-                    "valhelsia_structures:tower_ruin",
-                    "dungeons_enhanced:watch_tower",
-                    "dungeons_enhanced:witch_tower",
-                    "dungeons_enhanced:sunken_shrine",
-                    "dungeons_enhanced:dungeon_variant"
-            ), 0, "exploration_old_walls", false,
+            1024, 56, "the ruined building",
+            structures("dungeons_enhanced:ruined_building"), 0,
+            "exploration_old_walls", false,
             rewards(
                     multiEnchanted("minecraft:iron_pickaxe", 1, "Surveyor's Pick",
                             enchant("minecraft:efficiency", 1), enchant("minecraft:unbreaking", 1)),
-                    reward("minecraft:iron_ingot", 6, null)
-            ), 8, 10
+                    reward("minecraft:bricks", 12, null)
+            ), 6, 8
     );
 
     static final Definition SUNKEN_RECORDS = structure(
@@ -113,9 +115,9 @@ final class HearthlandsQuestCatalog {
             1024, 64, "the drowned old place", structures("dungeons_enhanced:sunken_shrine"), 0,
             "exploration_sunken_records", false,
             rewards(
-                    enchanted("minecraft:fishing_rod", 1, "Keeper's Line", "minecraft:luck_of_the_sea", 1),
+                    enchanted("minecraft:iron_boots", 1, "Fordwalker Boots", "minecraft:depth_strider", 1),
                     reward("minecraft:paper", 8, null)
-            ), 6, 8
+            ), 6, 7
     );
 
     static final Definition LANTERNS_BELOW = structureClear(
@@ -125,8 +127,8 @@ final class HearthlandsQuestCatalog {
             1000, 72, "the buried chamber", structures("valhelsia_structures:spawner_room"), 4,
             "exploration_lanterns_below",
             rewards(
-                    enchanted("minecraft:iron_pickaxe", 1, "Lamplighter's Pick", "minecraft:efficiency", 1),
-                    reward("minecraft:lantern", 6, null)
+                    enchanted("minecraft:shield", 1, "Chamber Guard", "minecraft:unbreaking", 1),
+                    reward("minecraft:lantern", 4, null)
             ), 6, 8
     );
 
@@ -136,83 +138,78 @@ final class HearthlandsQuestCatalog {
             VillageProgressState.AccomplishmentCategory.EXPLORATION, "HEARTHLANDS", 1,
             1280, 56, "local landmark",
             structures(
-                    "dungeons_enhanced:watch_tower",
-                    "valhelsia_structures:tower_ruin",
-                    "dungeons_enhanced:stables",
-                    "dungeons_enhanced:witch_tower",
-                    "dungeons_enhanced:sunken_shrine",
-                    "dungeons_enhanced:dungeon_variant",
-                    "betterdungeons:spider_dungeon",
-                    "valhelsia_structures:spawner_dungeon"
+                    "dungeons_enhanced:mushroom_house",
+                    "valhelsia_structures:big_tree",
+                    "valhelsia_structures:witch_hut",
+                    "born_in_chaos_v1:observation_tower_forest",
+                    "born_in_chaos_v1:observation_tower_plains"
             ), 0, "cartographer_first_real_map", true,
-            rewards(reward("minecraft:spyglass", 1, null), reward("minecraft:paper", 8, null)), 5, 6,
+            rewards(reward("minecraft:spyglass", 1, "Survey Glass"), reward("minecraft:paper", 8, null)), 5, 6,
             id("cartographer_quest_active"), id("cartographer_quest_turnin")
     );
 
     static final Definition WATCHLINE_PIKE = structureClear(
-            "hearthlands_profession_watchline_pike", "The Watchline Below",
+            "hearthlands_profession_watchline_pike", "Hold the Watchline",
             profs(VillagerProfession.FLETCHER, VillagerProfession.ARMORER, VillagerProfession.WEAPONSMITH),
             VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            1100, 80, "the buried watchline", structures("dungeons_enhanced:ice_pit"), 4,
+            1050, 72, "the old watch tower", structures("dungeons_enhanced:watch_tower"), 4,
             "north_watchline_pike",
             rewards(enchanted("spartanweaponry:iron_pike", 1, "Watchline Pike", "minecraft:unbreaking", 1)), 6, 8
     );
 
-    static final Definition CANOPY_STAFF = structureClear(
-            "hearthlands_profession_canopy_staff", "The Path Under the Canopy",
+    static final Definition CANOPY_STAFF = local(
+            "hearthlands_profession_canopy_staff", "Keep the Lane Open",
             profs(VillagerProfession.FLETCHER, VillagerProfession.TOOLSMITH, VillagerProfession.WEAPONSMITH),
-            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            1150, 80, "the overgrown route", structures("dungeons_enhanced:jungle_monument"), 4,
+            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS",
+            80, 104, 208, LocalTerrain.ANY, "the wooded lane", 4,
             "east_canopy_staff",
-            rewards(enchanted("spartanweaponry:iron_quarterstaff", 1, "Canopy Staff", "minecraft:unbreaking", 1)), 6, 8
+            rewards(enchanted("spartanweaponry:iron_quarterstaff", 1, "Lane Staff", "minecraft:unbreaking", 1)), 5, 7
     );
 
-    static final Definition ROADRUNNER_SPEAR = structureClear(
-            "hearthlands_profession_roadrunner_spear", "The Road Past the Tomb",
+    static final Definition ROADRUNNER_SPEAR = local(
+            "hearthlands_profession_roadrunner_spear", "Test the Long Reach",
             profs(VillagerProfession.FLETCHER, VillagerProfession.LEATHERWORKER, VillagerProfession.WEAPONSMITH),
-            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            1150, 80, "the exposed road", structures("dungeons_enhanced:desert_tomb"), 4,
+            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS",
+            80, 112, 224, LocalTerrain.ANY, "the exposed road", 4,
             "south_roadrunner_spear",
-            rewards(enchanted("spartanweaponry:iron_spear", 1, "Roadrunner Spear", "minecraft:unbreaking", 1)), 6, 8
+            rewards(enchanted("spartanweaponry:iron_spear", 1, "Road Spear", "minecraft:unbreaking", 1)), 5, 7
     );
 
-    static final Definition WOODCUTTER_BATTLEAXE = structureClear(
-            "hearthlands_profession_woodcutter_battleaxe", "Cut the Witchlight",
+    static final Definition WOODCUTTER_BATTLEAXE = local(
+            "hearthlands_profession_woodcutter_battleaxe", "Clear the Timber Track",
             profs(VillagerProfession.TOOLSMITH, VillagerProfession.WEAPONSMITH, VillagerProfession.FLETCHER),
-            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            1050, 80, "the witch-road tower", structures("dungeons_enhanced:witch_tower"), 4,
+            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS",
+            80, 104, 208, LocalTerrain.ANY, "the timber track", 4,
             "west_woodcutter_battleaxe",
-            rewards(multiEnchanted("spartanweaponry:iron_battleaxe", 1, "Woodcutter Battleaxe",
-                    enchant("minecraft:efficiency", 1), enchant("minecraft:unbreaking", 1))), 6, 8
+            rewards(multiEnchanted("spartanweaponry:iron_battleaxe", 1, "Roadcutter Battleaxe",
+                    enchant("minecraft:efficiency", 1), enchant("minecraft:unbreaking", 1))), 5, 7
     );
 
-    static final Definition BRING_BACK_MAIL = structure(
-            "hearthlands_profession_bring_back_mail", "Bring Back the Mail",
+    static final Definition BRING_BACK_MAIL = local(
+            "hearthlands_profession_bring_back_mail", "Field-Test the Mail",
             profs(VillagerProfession.ARMORER, VillagerProfession.LEATHERWORKER, VillagerProfession.TOOLSMITH),
-            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            900, 56, "the old stable yard", structures("dungeons_enhanced:stables"), 0,
-            "profession_bring_back_mail", false,
-            rewards(
-                    enchanted("minecraft:chainmail_chestplate", 1, "Road-Mended Mail", "minecraft:unbreaking", 1),
-                    reward("minecraft:iron_ingot", 4, null)
-            ), 5, 7
+            VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS",
+            80, 112, 224, LocalTerrain.ANY, "the rough road", 4,
+            "profession_bring_back_mail",
+            rewards(reward("minecraft:iron_ingot", 4, null)), 5, 7,
+            rewards(enchanted("minecraft:chainmail_chestplate", 1, "Road-Mended Mail", "minecraft:unbreaking", 1))
     );
 
     static final Definition QUIET_WATCH = structureClear(
-            "hearthlands_profession_quiet_watch", "The Watch Went Quiet",
+            "hearthlands_profession_quiet_watch", "Silk Across the Road",
             profs(VillagerProfession.FLETCHER, VillagerProfession.WEAPONSMITH, VillagerProfession.ARMORER, VillagerProfession.TOOLSMITH),
             VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            1024, 64, "the silent watch",
-            structures("dungeons_enhanced:watch_tower", "betterdungeons:spider_dungeon", "valhelsia_structures:spawner_dungeon"), 4,
+            1024, 64, "the spider dungeon",
+            structures("betterdungeons:spider_dungeon"), 4,
             "profession_quiet_watch",
-            rewards(enchanted("minecraft:crossbow", 1, "Watch Crossbow", "minecraft:quick_charge", 1)), 6, 8
+            rewards(enchanted("minecraft:crossbow", 1, "Roadwatch Crossbow", "minecraft:quick_charge", 1)), 6, 8
     );
 
     static final Definition RUINED_ROAD = structureClear(
             "hearthlands_profession_ruined_road", "The Road Through the Ruin",
             profs(VillagerProfession.MASON, VillagerProfession.TOOLSMITH, VillagerProfession.FLETCHER),
             VillageProgressState.AccomplishmentCategory.PROFESSION, "HEARTHLANDS", 0,
-            1000, 72, "the ruined road", structures("valhelsia_structures:tower_ruin"), 4,
+            1000, 72, "the tower ruin", structures("valhelsia_structures:tower_ruin"), 4,
             "profession_ruined_road",
             rewards(
                     enchanted("minecraft:iron_shovel", 1, "Roadwright's Spade", "minecraft:unbreaking", 1),
