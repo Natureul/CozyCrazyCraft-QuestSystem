@@ -1,7 +1,1 @@
-{
-  "title": "The Watch Went Quiet",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"You reached it and came back. Good. That's enough to stop us guessing about a place sitting right beside our road.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Here's the report.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},{"action":"dialogue.close"}]}]}]}
-  ]
-}
+{"title":"Silk Across the Road","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"That solves a road problem by dealing with the place causing it. Take the crossbow; distance is a sensible answer to too many legs.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"The road should hold.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"turnin\"})"},{"action":"dialogue.close"}]}]}]}]}

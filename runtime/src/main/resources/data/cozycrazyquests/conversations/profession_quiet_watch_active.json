@@ -1,7 +1,1 @@
-{
-  "title": "The Watch Went Quiet",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"The trouble has to be at the watch itself. Clear four hostiles around the site, then come back here.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Understood.","action":{"action":"dialogue.close"}}]}]}
-  ]
-}
+{"title":"Silk Across the Road","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"The assigned spider dungeon is the source. Four hostiles cleared inside or around it is enough to break the pressure on the road.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"Understood.","action":{"action":"dialogue.close"}}]}]}]}

@@ -1,7 +1,1 @@
-{
-  "title": "The Empty Stalls",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"The old stables nearby have been empty too long. I want someone to look them over before we trust animals there again.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Show me where.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"accept\"})"},{"action":"dialogue.close"}]},{"reply":"Not right now.","action":{"action":"dialogue.close"}}]}]}
-  ]
-}
+{"title":"The Empty Stalls","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"The old stables may be useful again. Check the stalls, yard, and any old route marks. I need their condition, not another pile of monster parts.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I'll take it.","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"accept\"})"},{"action":"dialogue.close"}]},{"reply":"Not now.","action":{"action":"dialogue.close"}}]}]}]}
