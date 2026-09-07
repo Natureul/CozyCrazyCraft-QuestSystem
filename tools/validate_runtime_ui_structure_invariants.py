@@ -2,8 +2,8 @@
 """Protect 0.4.1 playtest fixes that are easy to accidentally reintroduce.
 
 This is intentionally source-level. The failure modes are architectural regressions: putting authored
-structure surveys back on a locator-radius tick, mirroring NPC offer prose into the action bar, or
-marking underground structure centers as if they were entrances.
+structure surveys back on a locator-radius tick, mirroring NPC offer prose into the action bar, turning
+social hints into long HUD sentences, or marking underground structure centers as if they were entrances.
 """
 
 from __future__ import annotations
@@ -40,6 +40,7 @@ def main() -> int:
     mod = read("CozyCrazyQuests.java")
     survey = read("StructureSurveyCompletionBridge.java")
     places = read("NamedPlaceBridge.java")
+    hints = read("QuestHintNetwork.java")
 
     # Structure visits have one authority: physical exact-structure proof. The old manager tick used
     # horizontal distance to the locate coordinate and caused the Amber Rest early-completion failure.
@@ -61,6 +62,16 @@ def main() -> int:
         forbid(interaction, "displayClientMessage(", "authored quest offer interaction")
         forbid(interaction, " • ", "authored quest offer interaction")
 
+    # Spoken social meaning stays in Conversations, but a HUD confirmation may carry a compact bearing.
+    # The useful data must therefore be terse and state-sensitive rather than a sentence-sized referral.
+    require(hints, 'case RUMOR -> "Rumor: " + compactRoute(active, rounding);', "RUMOR compact route confirmation")
+    require(hints, 'case LEAD -> "Lead: " + compactRoute(active, rounding);', "LEAD compact route confirmation")
+    require(hints, "compactReferral(player, villager)", "compact named-person referral")
+    require(hints, "message.length() <= 45", "referral action-bar length budget")
+    require(hints, 'case KNOWN -> marked ? "Atlas marked." : "Place identified.";', "KNOWN short confirmation")
+    forbid(hints, 'Component.literal("Referral: "', "sentence-style active referral action bar")
+    forbid(hints, '"Atlas marked: " + active.getString("target_name")', "named-place prose in KNOWN action bar")
+
     # Objective anchor and navigation anchor are deliberately different for underground/submerged work.
     require(manager, "navigationAnchorFor(", "VillageConversationQuestManager Atlas routing")
     require(manager, "NamedPlaceBridge.surfaceApproach(", "VillageConversationQuestManager Atlas routing")
@@ -73,7 +84,7 @@ def main() -> int:
         print(f"\nFAILED: {len(errors)} runtime UI/structure invariant regression(s)")
         return 1
 
-    print("OK: structure-proof, Conversations-first offer UI, and navigation-anchor invariants validated")
+    print("OK: structure-proof, compact hint UI, Conversations-first offer UI, and navigation-anchor invariants validated")
     return 0
 
 
