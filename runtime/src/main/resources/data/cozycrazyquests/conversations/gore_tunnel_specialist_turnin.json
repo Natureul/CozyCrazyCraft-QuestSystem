@@ -1,0 +1,1 @@
+{"title":"A Vein Worth Knowing","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"So the deep road is real. Good. I wanted the route confirmed, not a trophy dragged home. Keep what you found and remember where the cut runs.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"I will.","action":{"action":"dialogue.close"}}]}]}]}
