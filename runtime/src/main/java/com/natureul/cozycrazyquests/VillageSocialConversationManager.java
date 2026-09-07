@@ -2,6 +2,7 @@ package com.natureul.cozycrazyquests;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -53,6 +54,14 @@ public final class VillageSocialConversationManager {
                 return;
             }
 
+            // Do not replace the actual giver's active reminder with the same generic hint page every
+            // specialist can say. Civic representatives also keep their authored reminder when vanilla
+            // profession compatibility was precisely what the fallback layer was compensating for.
+            if (village != null && ConversationBridge.hasOwnDialogue(villager)
+                    && preserveAuthoredActiveVoice(player, level, village, villager)) {
+                return;
+            }
+
             if (village != null) {
                 ResourceLocation activeHint = QuestHintNetwork.dialogue(player, villager, village);
                 if (activeHint != null) {
@@ -61,7 +70,6 @@ public final class VillageSocialConversationManager {
                 }
             }
 
-            // Authored offers, original-giver reminders and completed turn-ins still win.
             if (ConversationBridge.hasOwnDialogue(villager)) return;
             if (ConversationBridge.hasDialogue(villager)) return;
 
@@ -121,6 +129,23 @@ public final class VillageSocialConversationManager {
         return false;
     }
 
+    private static boolean preserveAuthoredActiveVoice(
+            ServerPlayer player,
+            ServerLevel level,
+            VillageContext village,
+            Villager villager
+    ) {
+        CompoundTag root = VillageQuestState.root(player);
+        CompoundTag active = VillageQuestState.activeForVillage(root, village.key());
+        if (active.isEmpty()) return false;
+        if (villager.getUUID().toString().equals(active.getString("giver_uuid"))) return true;
+
+        VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
+        return definition != null
+                && !definition.accepts(villager.getVillagerData().getProfession())
+                && VillageCivicRoleService.isCivicContact(level, village, villager);
+    }
+
     private static ResourceLocation genericVillagerDialogue(
             ServerPlayer player,
             Villager villager,
@@ -161,11 +186,6 @@ public final class VillageSocialConversationManager {
         return ambientVariant(villager, "villager_" + path);
     }
 
-    /**
-     * Child chatter changes only once per Minecraft day, not every click. Only three out of thirty-two
-     * day/person rolls are potentially useful. The rarest branch mentions the Tunnel Gore only when
-     * the resolver has found a real lair inside the bounded local search radius.
-     */
     private static ResourceLocation childDialogue(
             ServerPlayer player,
             Villager villager,
@@ -223,7 +243,6 @@ public final class VillageSocialConversationManager {
         String label = usefulLabel(level, village, villager);
         String where = distance <= 10 ? "nearby" : "~" + distance + " blocks " + direction(dx, dz);
 
-        // Action bar is a compact waypoint confirmation. The actual explanation stays in Conversations.
         player.displayClientMessage(
                 Component.literal("Ask " + villager.getDisplayName().getString() + " — " + label + ", " + where + ".")
                         .withStyle(ChatFormatting.GOLD),
@@ -293,8 +312,6 @@ public final class VillageSocialConversationManager {
                 .min(Comparator.comparingDouble(v -> v.distanceToSqr(player)));
         if (professionContact.isPresent()) return professionContact;
 
-        // A village with zero useful vanilla professions is still a functioning social place.
-        // Civic contacts route the player without altering jobs, trades or workstation ownership.
         List<Villager> civic = adults.stream()
                 .filter(villager -> VillageCivicRoleService.isCivicContact(level, village, villager))
                 .sorted(Comparator.comparingDouble(v -> v.distanceToSqr(player)))
