@@ -50,9 +50,7 @@ final class QuestHintNetwork {
             return id(underground ? "hint_underground_known" : "hint_structure_known");
         }
 
-        if (!(speaker instanceof Villager villager)) {
-            return id("hint_structure_guard");
-        }
+        if (!(speaker instanceof Villager villager)) return id("hint_structure_guard");
 
         VillagerProfession profession = villager.getVillagerData().getProfession();
         if (profession == VillagerProfession.CARTOGRAPHER) return id("hint_cartographer_target");
@@ -102,8 +100,6 @@ final class QuestHintNetwork {
             return true;
         }
 
-        // No specialist loaded? The village still must not strand the player. The spoken Conversation
-        // gives the bounded route; this action only records that the player now has a LEAD.
         return giveLead(player, PlayerKnowledgeState.Knowledge.LEAD, 100, false);
     }
 
@@ -140,33 +136,7 @@ final class QuestHintNetwork {
             PlayerKnowledgeState.advance(player, targetKey, knowledge, provenance);
         }
 
-        boolean marked = false;
-        if (knowledge == PlayerKnowledgeState.Knowledge.KNOWN) {
-            ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
-            if (structureId != null) {
-                BlockPos target = readPos(active, "target");
-                String approach = active.getString("target_approach");
-                BlockPos navigationAnchor = ("UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach))
-                        ? NamedPlaceBridge.surfaceApproach(player.serverLevel(), structureId, target, readPos(active, "village"))
-                        : target;
-                marked = NamedPlaceBridge.revealStructureToAtlas(
-                        player,
-                        structureId,
-                        target,
-                        active.getString("target_name"),
-                        navigationAnchor
-                );
-                if (marked && !targetKey.isBlank()) {
-                    PlayerKnowledgeState.advance(
-                            player,
-                            targetKey,
-                            PlayerKnowledgeState.Knowledge.KNOWN,
-                            PlayerKnowledgeState.Provenance.MAP_RECORD
-                    );
-                }
-            }
-        }
-
+        boolean marked = knowledge == PlayerKnowledgeState.Knowledge.KNOWN && markKnownTarget(player, active);
         String status = switch (knowledge) {
             case UNKNOWN -> "No reliable lead yet.";
             case RUMOR -> "Rumor noted.";
@@ -181,6 +151,34 @@ final class QuestHintNetwork {
                 true
         );
         return true;
+    }
+
+    /** Only the KNOWN path calls this method; RUMOR and LEAD cannot reveal an Atlas marker. */
+    private static boolean markKnownTarget(ServerPlayer player, CompoundTag active) {
+        ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
+        if (structureId == null) return false;
+        BlockPos target = readPos(active, "target");
+        String approach = active.getString("target_approach");
+        BlockPos navigationAnchor = ("UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach))
+                ? NamedPlaceBridge.surfaceApproach(player.serverLevel(), structureId, target, readPos(active, "village"))
+                : target;
+        boolean marked = NamedPlaceBridge.revealStructureToAtlas(
+                player,
+                structureId,
+                target,
+                active.getString("target_name"),
+                navigationAnchor
+        );
+        String targetKey = active.getString("target_key");
+        if (marked && !targetKey.isBlank()) {
+            PlayerKnowledgeState.advance(
+                    player,
+                    targetKey,
+                    PlayerKnowledgeState.Knowledge.KNOWN,
+                    PlayerKnowledgeState.Provenance.MAP_RECORD
+            );
+        }
+        return marked;
     }
 
     private static Optional<Villager> findSpecialist(
