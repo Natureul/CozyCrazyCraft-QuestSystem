@@ -157,6 +157,7 @@ def validate_navigation_and_social() -> None:
     gore = load_text(JAVA / "GoreTunnelLead.java")
     places = load_text(JAVA / "NamedPlaceBridge.java")
     village = load_text(JAVA / "VillageContext.java")
+    state = load_text(JAVA / "VillageQuestState.java")
 
     rumor_case = re.search(r'case "quest_hint_rumor"\s*->\s*([^;]+);', hints)
     if not rumor_case or "Knowledge.RUMOR" not in rumor_case.group(1):
@@ -168,6 +169,17 @@ def validate_navigation_and_social() -> None:
     require(hints, 'NamedPlaceBridge.surfaceApproach', "underground KNOWN hint uses a surface approach")
     require(hints, 'objectiveComplete(active)', "completed quests suppress hint network")
     require(hints, 'village.key().equals(theirs.key())', "referrals reject cross-village villagers")
+
+    # Conversation Bible v0.2: remember semantic hint families at village/player scope so walking down
+    # a line of residents cannot produce the same generic answer five times. Personality remains stable;
+    # this is recent-family suppression, not random NPC rerolling.
+    require(state, 'RECENT_HINT_FAMILIES', "village/player state persists recent semantic hint history")
+    require(state, 'RECENT_HINT_LIMIT = 5', "recent semantic hint history is bounded to five families")
+    require(state, 'recentHintFamilies(', "recent semantic hint history can be read")
+    require(state, 'noteHintFamily(', "selected semantic hint families are recorded")
+    require(hints, 'chooseRecent(', "hint selection scores against recent semantic families")
+    require(hints, 'rememberHint(', "spoken hint selection is persisted after assignment")
+    require(hints, 'rotatedGenericFamilies(', "generic residents retain deterministic diversity before recent suppression")
 
     require(places, 'BlockPos navigationAnchor', "Atlas API separates objective identity from navigation anchor")
     require(places, 'static BlockPos surfaceApproach', "runtime exposes safe surface approach geometry")
