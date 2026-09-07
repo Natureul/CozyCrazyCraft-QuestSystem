@@ -20,9 +20,11 @@ def fail(message: str) -> None:
 
 def main() -> None:
     data = load(POLICY)
+    if data.get("schema_version") != 2:
+        fail("structure recovery policy must use schema_version 2")
     contracts = data.get("contracts", [])
-    if len(contracts) < 4:
-        fail("expected at least four recovery contracts")
+    if len(contracts) < 2:
+        fail("expected at least two active local public recovery contracts")
 
     proof_source = (RUNTIME / "java/com/natureul/cozycrazyquests/ProofLootInjector.java").read_text(encoding="utf-8")
     item_source = (RUNTIME / "java/com/natureul/cozycrazyquests/ModItems.java").read_text(encoding="utf-8")
@@ -40,6 +42,8 @@ def main() -> None:
         objective_id = contract["objective_id"]
         min_rep = contract["minimum_village_trust_rep"]
 
+        if contract.get("issued_from_tier") != contract.get("target_tier"):
+            fail(f"{cid}: public Bountiful recovery must stay in its issuing tier")
         if proof in seen_items:
             fail(f"{cid}: proof item reused: {proof}")
         if objective_id in seen_objectives:
@@ -82,7 +86,16 @@ def main() -> None:
         if f"item.cozycrazyquests.{item_path}.desc" not in lang:
             fail(f"{cid}: missing tooltip translation")
 
-    print(f"OK: structure recovery validation passed ({len(contracts)} contracts)")
+    retired = data.get("retired", [])
+    retired_ids = {entry.get("id") for entry in retired if isinstance(entry, dict)}
+    required_retired = {"greenveil_jungle_monument", "frostmarch_ice_pit"}
+    if not required_retired.issubset(retired_ids):
+        fail("policy must document the retired Greenveil and Frostmarch cross-tier proof prototypes")
+    for entry in retired:
+        if not isinstance(entry, dict) or not entry.get("reason"):
+            fail("every retired public proof contract needs a reason")
+
+    print(f"OK: public structure recovery validation passed ({len(contracts)} active, {len(retired)} retired)")
 
 
 if __name__ == "__main__":
