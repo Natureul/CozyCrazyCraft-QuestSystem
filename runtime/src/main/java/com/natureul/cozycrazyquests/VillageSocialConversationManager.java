@@ -29,11 +29,16 @@ import java.util.Optional;
  * Village civic roles are independent of vanilla trade professions. A settlement full of unemployed
  * adults therefore still has people who can route the player without the quest system silently asking
  * the player to manufacture workstations just to make the village function.
+ *
+ * Ambient, hint and Gore pages are refreshable social state, not permanent entity identity. Before
+ * falling back to generic chatter we clear only those known refreshable CozyCrazyQuests IDs. Authored
+ * quest offer/active/turn-in pages from the higher-priority managers remain sticky and are never cleared.
  */
 public final class VillageSocialConversationManager {
     private static final int BOARD_DIRECTION_RADIUS = 192;
     private static final int SOCIAL_ROUTE_RADIUS = 176;
     private static final ResourceLocation GUARD_TYPE = new ResourceLocation("guardvillagers", "guard");
+    private static final String OWN_PREFIX = CozyCrazyQuests.MOD_ID + ":";
 
     private VillageSocialConversationManager() {}
 
@@ -48,6 +53,7 @@ public final class VillageSocialConversationManager {
             VillageContext village = VillageContext.resolve(level, villager.blockPosition());
 
             if (villager.isBaby()) {
+                clearRefreshableSocialDialogue(villager);
                 if (!ConversationBridge.hasOwnDialogue(villager) && !ConversationBridge.hasDialogue(villager)) {
                     ConversationBridge.setDialogue(villager, childDialogue(player, villager, village));
                 }
@@ -70,6 +76,9 @@ public final class VillageSocialConversationManager {
                 }
             }
 
+            // A previous click may have left this entity on an ambient, hint or earlier Gore-stage page.
+            // Re-evaluate those pages now; never clear authored quest pages selected by higher-priority code.
+            clearRefreshableSocialDialogue(villager);
             if (ConversationBridge.hasOwnDialogue(villager)) return;
             if (ConversationBridge.hasDialogue(villager)) return;
 
@@ -103,6 +112,7 @@ public final class VillageSocialConversationManager {
             }
         }
 
+        clearRefreshableSocialDialogue(target);
         ResourceLocation dialogue = findUsefulPerson(player, village).isPresent()
                 ? id("guard_local")
                 : id("guard_local_quiet");
@@ -229,6 +239,26 @@ public final class VillageSocialConversationManager {
         };
     }
 
+    /** Only social-state pages are refreshable; authored quest pages selected earlier in the event are not. */
+    private static void clearRefreshableSocialDialogue(LivingEntity entity) {
+        String current = ConversationBridge.currentDialogueId(entity);
+        if (!isRefreshableSocialDialogue(current)) return;
+        ConversationBridge.clearOwnDialogue(entity);
+    }
+
+    private static boolean isRefreshableSocialDialogue(String dialogueId) {
+        if (dialogueId == null || !dialogueId.startsWith(OWN_PREFIX)) return false;
+        String path = dialogueId.substring(OWN_PREFIX.length());
+        return path.startsWith("villager_")
+                || path.startsWith("hint_")
+                || path.startsWith("gore_tunnel_")
+                || path.startsWith("guard_local")
+                || "civic_steward".equals(path)
+                || "civic_roadwarden".equals(path)
+                || "civic_quartermaster".equals(path)
+                || "civic_watch_contact".equals(path);
+    }
+
     private static void routeToUsefulPerson(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         VillageContext village = VillageContext.resolve(level, player.blockPosition());
@@ -241,13 +271,16 @@ public final class VillageSocialConversationManager {
         long dz = (long) villager.blockPosition().getZ() - player.blockPosition().getZ();
         int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
         String label = usefulLabel(level, village, villager);
-        String where = distance <= 10 ? "nearby" : "~" + distance + " blocks " + direction(dx, dz);
+        String where = distance <= 10 ? "nearby" : distance + " " + shortDirection(dx, dz);
+        String name = villager.getDisplayName().getString();
+        String message = name + " • " + label + " • " + where;
+        if (message.length() > 45) message = name + " • " + where;
+        if (message.length() > 45) {
+            if (name.length() > 26) name = name.substring(0, 23) + "...";
+            message = name + " • " + where;
+        }
 
-        player.displayClientMessage(
-                Component.literal("Ask " + villager.getDisplayName().getString() + " — " + label + ", " + where + ".")
-                        .withStyle(ChatFormatting.GOLD),
-                true
-        );
+        player.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.GOLD), true);
     }
 
     private static Optional<Villager> findUsefulPerson(ServerPlayer player, VillageContext village) {
@@ -339,7 +372,7 @@ public final class VillageSocialConversationManager {
         Optional<VillageBoardSavedData.VillageRecord> record = VillageBoardSavedData.get(level)
                 .findNearby(player.blockPosition(), BOARD_DIRECTION_RADIUS);
         if (record.isEmpty()) {
-            player.displayClientMessage(Component.literal("No posted board is close enough to point out.")
+            player.displayClientMessage(Component.literal("No nearby notice board.")
                     .withStyle(ChatFormatting.GRAY), true);
             return;
         }
@@ -349,7 +382,7 @@ public final class VillageSocialConversationManager {
         long dz = (long) board.getZ() - player.blockPosition().getZ();
         int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
         player.displayClientMessage(
-                Component.literal("Notice board: ~" + distance + " blocks " + direction(dx, dz) + ".")
+                Component.literal("Board • " + distance + " " + shortDirection(dx, dz))
                         .withStyle(ChatFormatting.GOLD),
                 true
         );
@@ -372,18 +405,18 @@ public final class VillageSocialConversationManager {
         return "villager";
     }
 
-    private static String direction(long dx, long dz) {
+    private static String shortDirection(long dx, long dz) {
         double angle = Math.atan2(dx, -dz);
         int octant = Math.floorMod((int) Math.round(angle / (Math.PI / 4.0)), 8);
         return switch (octant) {
-            case 0 -> "north";
-            case 1 -> "northeast";
-            case 2 -> "east";
-            case 3 -> "southeast";
-            case 4 -> "south";
-            case 5 -> "southwest";
-            case 6 -> "west";
-            default -> "northwest";
+            case 0 -> "N";
+            case 1 -> "NE";
+            case 2 -> "E";
+            case 3 -> "SE";
+            case 4 -> "S";
+            case 5 -> "SW";
+            case 6 -> "W";
+            default -> "NW";
         };
     }
 
