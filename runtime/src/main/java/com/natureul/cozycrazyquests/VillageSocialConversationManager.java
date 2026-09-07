@@ -25,10 +25,9 @@ import java.util.Optional;
  * ordinary right click; sneak-right-click is deliberately left alone for Carry On and other entity
  * interaction mods.
  *
- * An important exception is an active structure contract: a non-giver who plausibly knows the route
- * may replace the generic active reminder with QuestHintNetwork dialogue. This is intentional. It
- * lets a cartographer, mason, librarian, guard, etc. actually help even when their profession also
- * happens to be a legal turn-in profession for that quest.
+ * Village civic roles are independent of vanilla trade professions. A settlement full of unemployed
+ * adults therefore still has people who can route the player without the quest system silently asking
+ * the player to manufacture workstations just to make the village function.
  */
 public final class VillageSocialConversationManager {
     private static final int BOARD_DIRECTION_RADIUS = 192;
@@ -47,8 +46,6 @@ public final class VillageSocialConversationManager {
             VillagerNameService.ensureNamed(level, villager);
             VillageContext village = VillageContext.resolve(level, villager.blockPosition());
 
-            // Children never become paid informants or generic quest hint machines. Their useful
-            // moments are deliberately rare and handled by the child dialogue bank below.
             if (villager.isBaby()) {
                 if (!ConversationBridge.hasOwnDialogue(villager) && !ConversationBridge.hasDialogue(villager)) {
                     ConversationBridge.setDialogue(villager, childDialogue(player, villager, village));
@@ -57,9 +54,6 @@ public final class VillageSocialConversationManager {
             }
 
             if (village != null) {
-                // This deliberately runs before the "quest manager already attached something" guard.
-                // It fixes cases where a second cartographer/fisherman/etc. inherited the generic active
-                // reminder and therefore could not actually give the player the clue they came to ask for.
                 ResourceLocation activeHint = QuestHintNetwork.dialogue(player, villager, village);
                 if (activeHint != null) {
                     ConversationBridge.setDialogue(villager, activeHint);
@@ -87,7 +81,6 @@ public final class VillageSocialConversationManager {
         if (!GUARD_TYPE.equals(entityId)) return;
         VillagerNameService.ensureNamed(level, target);
 
-        // Carry On uses sneak-right-click in this pack. Leave that gesture entirely alone.
         if (player.isShiftKeyDown()) {
             ConversationBridge.clearOwnDialogue(target);
             return;
@@ -133,6 +126,11 @@ public final class VillageSocialConversationManager {
             Villager villager,
             VillageContext village
     ) {
+        if (village != null) {
+            VillageCivicRoleService.Role role = VillageCivicRoleService.roleFor(player.serverLevel(), village, villager);
+            if (role.isCivicContact()) return id(role.dialoguePath());
+        }
+
         VillagerProfession profession = villager.getVillagerData().getProfession();
         if (profession == VillagerProfession.NONE) {
             return findUsefulPerson(player, village).isPresent()
@@ -166,8 +164,7 @@ public final class VillageSocialConversationManager {
     /**
      * Child chatter changes only once per Minecraft day, not every click. Only three out of thirty-two
      * day/person rolls are potentially useful. The rarest branch mentions the Tunnel Gore only when
-     * the resolver has found a real lair inside the bounded local search radius. If the player already
-     * followed that rumor through, the same rare slot becomes a small continuity reaction instead.
+     * the resolver has found a real lair inside the bounded local search radius.
      */
     private static ResourceLocation childDialogue(
             ServerPlayer player,
@@ -216,9 +213,6 @@ public final class VillageSocialConversationManager {
         ServerLevel level = player.serverLevel();
         VillageContext village = VillageContext.resolve(level, player.blockPosition());
         Optional<Villager> candidate = findUsefulPerson(player, village);
-
-        // No system-chat failure bark. The quiet conversation page already told the player the local
-        // resident does not know a suitable person and suggested the guard/board in-world.
         if (candidate.isEmpty()) return;
 
         Villager villager = candidate.get();
@@ -226,12 +220,12 @@ public final class VillageSocialConversationManager {
         long dx = (long) villager.blockPosition().getX() - player.blockPosition().getX();
         long dz = (long) villager.blockPosition().getZ() - player.blockPosition().getZ();
         int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
-        String profession = professionLabel(villager.getVillagerData().getProfession());
-        String where = distance <= 10 ? "right nearby" : "about " + distance + " blocks " + direction(dx, dz);
+        String label = usefulLabel(level, village, villager);
+        String where = distance <= 10 ? "nearby" : "~" + distance + " blocks " + direction(dx, dz);
 
+        // Action bar is a compact waypoint confirmation. The actual explanation stays in Conversations.
         player.displayClientMessage(
-                Component.literal(villager.getDisplayName().getString() + ", the " + profession
-                                + ", is the person I'd ask. They're " + where + ".")
+                Component.literal("Ask " + villager.getDisplayName().getString() + " — " + label + ", " + where + ".")
                         .withStyle(ChatFormatting.GOLD),
                 true
         );
@@ -288,12 +282,39 @@ public final class VillageSocialConversationManager {
         }
 
         AABB area = new AABB(village.anchor()).inflate(SOCIAL_ROUTE_RADIUS, 64, SOCIAL_ROUTE_RADIUS);
-        return level.getEntitiesOfClass(Villager.class, area, villager -> {
-                    if (villager.isBaby() || !wanted.contains(villager.getVillagerData().getProfession())) return false;
+        List<Villager> adults = level.getEntitiesOfClass(Villager.class, area, villager -> {
+                    if (villager.isBaby()) return false;
                     VillageContext theirs = VillageContext.resolve(level, villager.blockPosition());
                     return theirs != null && village.key().equals(theirs.key());
-                }).stream()
+                });
+
+        Optional<Villager> professionContact = adults.stream()
+                .filter(villager -> wanted.contains(villager.getVillagerData().getProfession()))
                 .min(Comparator.comparingDouble(v -> v.distanceToSqr(player)));
+        if (professionContact.isPresent()) return professionContact;
+
+        // A village with zero useful vanilla professions is still a functioning social place.
+        // Civic contacts route the player without altering jobs, trades or workstation ownership.
+        List<Villager> civic = adults.stream()
+                .filter(villager -> VillageCivicRoleService.isCivicContact(level, village, villager))
+                .sorted(Comparator.comparingDouble(v -> v.distanceToSqr(player)))
+                .toList();
+        if (civic.isEmpty()) return Optional.empty();
+
+        String currentSpeaker = VillageQuestState.conversationSpeaker(VillageQuestState.root(player));
+        for (Villager villager : civic) {
+            if (!villager.getUUID().toString().equals(currentSpeaker)) return Optional.of(villager);
+        }
+        return Optional.of(civic.get(0));
+    }
+
+    private static String usefulLabel(ServerLevel level, VillageContext village, Villager villager) {
+        VillagerProfession profession = villager.getVillagerData().getProfession();
+        if (profession != VillagerProfession.NONE && profession != VillagerProfession.NITWIT) {
+            return professionLabel(profession);
+        }
+        VillageCivicRoleService.Role role = VillageCivicRoleService.roleFor(level, village, villager);
+        return role.isCivicContact() ? role.label() : "resident";
     }
 
     private static void pointToNoticeBoard(ServerPlayer player) {
@@ -311,7 +332,7 @@ public final class VillageSocialConversationManager {
         long dz = (long) board.getZ() - player.blockPosition().getZ();
         int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
         player.displayClientMessage(
-                Component.literal("Notice board: about " + distance + " blocks " + direction(dx, dz) + ".")
+                Component.literal("Notice board: ~" + distance + " blocks " + direction(dx, dz) + ".")
                         .withStyle(ChatFormatting.GOLD),
                 true
         );
