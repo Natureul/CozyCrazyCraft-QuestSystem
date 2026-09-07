@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -98,6 +99,21 @@ final class NamedPlaceBridge {
     }
 
     static boolean revealStructureToAtlas(ServerPlayer player, ResourceLocation structureId, BlockPos locatedPos, String name) {
+        return revealStructureToAtlas(player, structureId, locatedPos, name, null);
+    }
+
+    /**
+     * Reveal a generated structure while allowing quest code to supply a player-safe navigation anchor.
+     * The discovery key still belongs to the exact generated structure start; only the rendered Atlas
+     * position is overridden. This keeps objective identity separate from navigation geometry.
+     */
+    static boolean revealStructureToAtlas(
+            ServerPlayer player,
+            ResourceLocation structureId,
+            BlockPos locatedPos,
+            String name,
+            BlockPos navigationAnchor
+    ) {
         try {
             ServerLevel level = player.serverLevel();
             Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
@@ -105,6 +121,7 @@ final class NamedPlaceBridge {
             if (structure == null) return false;
 
             StructureIdentity identity = structureIdentity(level, structure, locatedPos);
+            BlockPos markerPos = navigationAnchor == null ? identity.markerPos() : navigationAnchor.immutable();
 
             Class<?> profileClass = Class.forName("com.natureul.cozycrazyzones.StructureDiscoveryProfile");
             Method classify = profileClass.getMethod("classify", Registry.class, Structure.class, ResourceLocation.class);
@@ -113,7 +130,7 @@ final class NamedPlaceBridge {
 
             Class<?> zonesApi = Class.forName("com.natureul.cozycrazyzones.CozyZonesApi");
             Method regionalCellAt = zonesApi.getMethod("regionalCellAt", ServerLevel.class, double.class, double.class);
-            Object cell = regionalCellAt.invoke(null, level, identity.markerPos().getX() + 0.5D, identity.markerPos().getZ() + 0.5D);
+            Object cell = regionalCellAt.invoke(null, level, markerPos.getX() + 0.5D, markerPos.getZ() + 0.5D);
             if (cell == null) return false;
 
             Method categoryAccessor = profileClass.getMethod("category");
@@ -131,7 +148,7 @@ final class NamedPlaceBridge {
 
             Class<?> markerService = Class.forName("com.natureul.cozycrazyzones.AtlasDiscoveryMarkerService");
             Method enqueue = markerService.getMethod("enqueue", ServerPlayer.class, String.class, category.getClass(), String.class, BlockPos.class, MapDecoration.Type.class);
-            enqueue.invoke(null, player, discoveryKey, category, name, identity.markerPos(), mapIcon);
+            enqueue.invoke(null, player, discoveryKey, category, name, markerPos, mapIcon);
             return true;
         } catch (Throwable error) {
             if (!warnedAtlas) {
@@ -140,6 +157,39 @@ final class NamedPlaceBridge {
             }
             return false;
         }
+    }
+
+    /**
+     * Returns a surface navigation anchor on or immediately beside the generated structure footprint,
+     * biased toward the caller's origin. This is intentionally not used as completion proof. It is a
+     * route marker for underground/submerged/large structures whose locator or center would be misleading.
+     */
+    static BlockPos surfaceApproach(ServerLevel level, ResourceLocation structureId, BlockPos locatedPos, BlockPos from) {
+        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Structure structure = registry.get(structureId);
+        if (structure == null) return surfaceAt(level, locatedPos.getX(), locatedPos.getZ());
+
+        StructureStart start = level.structureManager().getStructureAt(locatedPos, structure);
+        if (start == null || !start.isValid()) return surfaceAt(level, locatedPos.getX(), locatedPos.getZ());
+
+        BoundingBox box = start.getBoundingBox();
+        int x = clamp(from.getX(), box.minX(), box.maxX());
+        int z = clamp(from.getZ(), box.minZ(), box.maxZ());
+
+        // If the origin projects inside the footprint, choose the nearest edge instead of the center.
+        if (from.getX() >= box.minX() && from.getX() <= box.maxX()
+                && from.getZ() >= box.minZ() && from.getZ() <= box.maxZ()) {
+            int west = from.getX() - box.minX();
+            int east = box.maxX() - from.getX();
+            int north = from.getZ() - box.minZ();
+            int south = box.maxZ() - from.getZ();
+            int nearest = Math.min(Math.min(west, east), Math.min(north, south));
+            if (nearest == west) x = box.minX();
+            else if (nearest == east) x = box.maxX();
+            else if (nearest == north) z = box.minZ();
+            else z = box.maxZ();
+        }
+        return surfaceAt(level, x, z);
     }
 
     /**
@@ -168,9 +218,9 @@ final class NamedPlaceBridge {
     }
 
     /**
-     * True only when the player is physically inside the exact generated structure instance assigned
-     * to the quest. This mirrors CozyCrazyZones discovery logic and avoids brittle Y-distance checks
-     * for underground structures whose locate coordinate may be nowhere near the room the player enters.
+     * True only when the supplied position is inside a real piece of the exact generated structure
+     * instance assigned to the quest. A StructureStart bounding box can contain enormous empty gaps;
+     * those gaps are navigation/worldgen metadata, not proof that the player entered the structure.
      */
     static boolean insideExactStructure(
             ServerLevel level,
@@ -185,7 +235,8 @@ final class NamedPlaceBridge {
         if (structure == null) return false;
 
         StructureStart current = level.structureManager().getStructureAt(playerPos, structure);
-        if (current == null || !current.isValid() || !current.getBoundingBox().isInside(playerPos)) return false;
+        if (current == null || !current.isValid()) return false;
+        if (!insideAnyPiece(current, playerPos)) return false;
 
         ChunkPos currentStart = current.getChunkPos();
         if (expectedStartChunkX != Integer.MIN_VALUE && expectedStartChunkZ != Integer.MIN_VALUE) {
@@ -193,19 +244,35 @@ final class NamedPlaceBridge {
         }
 
         // Compatibility for contracts accepted by older builds or locators that could not prove an
-        // exact start chunk at offer time.
+        // exact start chunk at offer time. Spatial proof is still a real structure piece.
         StructureIdentity expected = structureIdentity(level, structure, legacyLocatePos);
         if (expected.startChunk().equals(currentStart)) return true;
 
-        // Some modded locators return a navigation position outside the actual bounding box. If the
-        // player is inside a matching instance whose box is still centered near the original locate,
-        // accept it rather than making a legitimate discovery impossible to report.
+        // Some modded locators return a navigation position outside the actual bounding box. Legacy
+        // contracts may therefore lack an authoritative start chunk. Permit a nearby matching start,
+        // but only after the real-piece test above has succeeded.
         BoundingBox box = current.getBoundingBox();
         long cx = ((long) box.minX() + box.maxX()) / 2L;
         long cz = ((long) box.minZ() + box.maxZ()) / 2L;
         long dx = cx - legacyLocatePos.getX();
         long dz = cz - legacyLocatePos.getZ();
         return dx * dx + dz * dz <= 192L * 192L;
+    }
+
+    private static boolean insideAnyPiece(StructureStart start, BlockPos pos) {
+        for (var piece : start.getPieces()) {
+            if (piece.getBoundingBox().isInside(pos)) return true;
+        }
+        return false;
+    }
+
+    private static BlockPos surfaceAt(ServerLevel level, int x, int z) {
+        int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        return new BlockPos(x, Math.max(level.getMinBuildHeight() + 1, y), z);
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     private static StructureIdentity structureIdentity(ServerLevel level, Structure structure, BlockPos locatedPos) {
