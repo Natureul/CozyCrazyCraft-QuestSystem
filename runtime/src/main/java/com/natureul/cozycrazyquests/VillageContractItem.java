@@ -60,6 +60,11 @@ public final class VillageContractItem extends Item {
                         .withStyle(ChatFormatting.YELLOW));
             }
 
+            if (definition != null && definition.isRecovery()) {
+                tooltip.add(Component.literal("Bring the recovered object back with you")
+                        .withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
+            }
+
             if (definition != null
                     && (definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY
                     || definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR)) {
@@ -83,6 +88,10 @@ public final class VillageContractItem extends Item {
 
     private static String objectiveLine(VillageQuestCatalog.Definition definition, String target) {
         String place = target == null || target.isBlank() ? definition.targetLabel() : target;
+        if (definition.isRecovery()) {
+            String object = definition.recoveryObjectName().isBlank() ? "the requested evidence" : definition.recoveryObjectName();
+            return "Recover " + object + " from " + place;
+        }
         return switch (definition.objectiveType()) {
             case STRUCTURE_SURVEY -> "Survey " + place;
             case STRUCTURE_HOSTILE_CLEAR -> "Clear " + definition.requiredKills() + " hostiles at " + place;
