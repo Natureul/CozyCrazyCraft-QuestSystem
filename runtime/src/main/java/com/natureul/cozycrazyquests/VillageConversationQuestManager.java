@@ -15,7 +15,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -34,6 +33,9 @@ import java.util.Map;
  * travels. Structure work is grounded in a generated place before it is spoken about, and contract
  * papers carry enough approach information to make underground targets fair without turning the
  * Atlas into a quest tracker.
+ *
+ * Structure-survey completion deliberately does not live in this class. StructureSurveyCompletionBridge
+ * owns physical proof so an authored survey cannot regress to locator-radius completion.
  */
 public final class VillageConversationQuestManager {
     private static final long PENDING_LIFETIME = 2400L;
@@ -88,70 +90,8 @@ public final class VillageConversationQuestManager {
         writePending(root, level, player, villager, village, offer.definition(), offer.target());
         VillageQuestState.save(player, root);
         ConversationBridge.setDialogue(villager, offer.definition().offerDialogue());
-
-        PreparedTarget target = offer.target();
-        player.displayClientMessage(
-                Component.literal(offer.definition().title() + "  •  " + target.displayName() + "  •  about "
-                                + target.distanceBlocks() + " blocks " + direction(village.anchor(), target.pos()))
-                        .withStyle(ChatFormatting.GOLD),
-                true
-        );
-    }
-
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer player)) return;
-        if (!(player.level() instanceof ServerLevel level)) return;
-        if (player.tickCount % 20 != 0) return;
-
-        CompoundTag root = VillageQuestState.root(player);
-        boolean changed = false;
-        for (CompoundTag active : VillageQuestState.allActives(root)) {
-            if (objectiveComplete(active)) continue;
-
-            VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-            if (definition == null
-                    || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY
-                    || definition.isRecovery()) continue;
-            if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
-
-            String approach = active.getString("target_approach");
-            ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
-
-            // Underground/submerged surveys are handled by StructureSurveyCompletionBridge using the
-            // generated structure instance (or CozyCrazyZones' matching discovery record). Never fall
-            // back to locator-Y arithmetic here: locate positions are navigation anchors, not a depth
-            // objective, and that old behavior could require the player to dig below a dungeon they had
-            // already entered.
-            if (structureId != null && ("UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach))) continue;
-
-            BlockPos target = readPos(active, "target");
-            int radius = Math.max(1, active.getInt("target_radius"));
-            long dx = (long) player.blockPosition().getX() - target.getX();
-            long dz = (long) player.blockPosition().getZ() - target.getZ();
-            if (dx * dx + dz * dz > (long) radius * radius) continue;
-
-            active.putBoolean("objective_complete", true);
-            active.putBoolean("surveyed", true);
-            VillageQuestState.putActive(root, active.getString("village_key"), active);
-            changed = true;
-
-            String targetKey = active.getString("target_key");
-            if (targetKey.isBlank()) targetKey = legacyTargetSubjectKey(level, active, target);
-            PlayerKnowledgeState.advance(
-                    player,
-                    targetKey,
-                    PlayerKnowledgeState.Knowledge.CONFIRMED,
-                    PlayerKnowledgeState.Provenance.QUEST_PROOF
-            );
-
-            player.sendSystemMessage(
-                    Component.literal("Survey complete: " + active.getString("target_name") + ". "
-                                    + returnInstruction(definition, active.getString("village_name")))
-                            .withStyle(ChatFormatting.AQUA)
-            );
-        }
-        if (changed) VillageQuestState.save(player, root);
+        // Offer prose, target explanation and choices belong in the Conversations panel. Do not mirror
+        // the same information into a large action-bar banner simply because the NPC was clicked.
     }
 
     public static void onLivingDeath(LivingDeathEvent event) {
@@ -286,11 +226,13 @@ public final class VillageConversationQuestManager {
         if (active.isEmpty()) return false;
         ResourceLocation targetId = ResourceLocation.tryParse(active.getString("target_structure"));
         if (targetId == null) return false;
+        BlockPos target = readPos(active, "target");
         boolean marked = NamedPlaceBridge.revealStructureToAtlas(
                 player,
                 targetId,
-                readPos(active, "target"),
-                active.getString("target_name")
+                target,
+                active.getString("target_name"),
+                navigationAnchorFor(player, active, targetId, target)
         );
         if (marked) {
             String targetKey = active.getString("target_key");
@@ -443,12 +385,16 @@ public final class VillageConversationQuestManager {
         boolean atlasMarked = false;
         if (definition.revealAtlasOnAccept()) {
             ResourceLocation targetId = ResourceLocation.tryParse(active.getString("target_structure"));
-            atlasMarked = targetId != null && NamedPlaceBridge.revealStructureToAtlas(
-                    player,
-                    targetId,
-                    readPos(active, "target"),
-                    active.getString("target_name")
-            );
+            if (targetId != null) {
+                BlockPos target = readPos(active, "target");
+                atlasMarked = NamedPlaceBridge.revealStructureToAtlas(
+                        player,
+                        targetId,
+                        target,
+                        active.getString("target_name"),
+                        navigationAnchorFor(player, active, targetId, target)
+                );
+            }
             if (atlasMarked && !acceptedTargetKey.isBlank()) {
                 PlayerKnowledgeState.advance(
                         player,
@@ -737,13 +683,6 @@ public final class VillageConversationQuestManager {
                 + Math.floorDiv(target.getX(), 16) + "," + Math.floorDiv(target.getZ(), 16);
     }
 
-    private static String legacyTargetSubjectKey(ServerLevel level, CompoundTag active, BlockPos target) {
-        ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
-        if (structureId != null) return targetSubjectKey(level, structureId, target);
-        return level.dimension().location() + "|place|" + active.getString("target_name") + "|"
-                + Math.floorDiv(target.getX(), 16) + "," + Math.floorDiv(target.getZ(), 16);
-    }
-
     private static String legacyVillageKey(ServerLevel level, CompoundTag active, BlockPos anchor) {
         String name = active.getString("village_name");
         if (!name.isBlank() && !"the village".equalsIgnoreCase(name)) {
@@ -766,6 +705,27 @@ public final class VillageConversationQuestManager {
 
     private static BlockPos readPos(CompoundTag tag, String prefix) {
         return new BlockPos(tag.getInt(prefix + "X"), tag.getInt(prefix + "Y"), tag.getInt(prefix + "Z"));
+    }
+
+    /**
+     * Objective identity stays at the generated structure; navigation may use a safer surface approach.
+     * This helper is shared by map-on-accept and explicit cartographer marking so neither path can leak
+     * an underground chamber center as though it were an entrance.
+     */
+    private static BlockPos navigationAnchorFor(
+            ServerPlayer player,
+            CompoundTag active,
+            ResourceLocation targetId,
+            BlockPos target
+    ) {
+        String approach = active.getString("target_approach");
+        if (!"UNDERGROUND".equals(approach) && !"SUBMERGED".equals(approach)) return target;
+        return NamedPlaceBridge.surfaceApproach(
+                player.serverLevel(),
+                targetId,
+                target,
+                readPos(active, "village")
+        );
     }
 
     private static ApproachInfo approachInfo(ServerLevel level, BlockPos target) {
