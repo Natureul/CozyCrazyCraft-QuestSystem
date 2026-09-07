@@ -1,5 +1,6 @@
 package com.natureul.cozycrazyquests;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.Villager;
@@ -8,18 +9,20 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import java.util.Locale;
 
 /**
- * Occasional local-color Conversations layer for otherwise idle adult villagers.
+ * Contextual Conversations layer for otherwise idle adult villagers.
  *
- * Profession/personality ambient pages remain the default voice. This manager only replaces roughly
- * one in three-to-five idle ambient surfaces (depending on trust), stable per villager/player/day, with
- * a region + radial-tier observation drawn from the Conversation Bible v0.2 context bank. It runs after
- * authored profession/civic quest managers but before the ordinary social fallback, so quest, hint and
- * Gore dialogue always outrank local chatter.
+ * Profession/personality ambient pages remain the default voice. This manager occasionally replaces
+ * an idle ambient surface with either (a) a recent village-completion acknowledgement or (b) a
+ * region + radial-tier observation drawn from Conversation Bible v0.2. Selection is deterministic for
+ * the villager/player/day so a villager does not reroll personality every click. Authored quests, hints,
+ * civic work and bespoke Gore knowledge outrank this layer.
  */
 final class RegionalAmbientConversationManager {
     private static final String OWN_PREFIX = CozyCrazyQuests.MOD_ID + ":";
     private static final String REGIONAL_PREFIX = OWN_PREFIX + "ambient_region_";
+    private static final String COMPLETION_PREFIX = OWN_PREFIX + "ambient_completion_";
     private static final String GENERIC_PREFIX = OWN_PREFIX + "villager_";
+    private static final long COMPLETION_MEMORY_TICKS = 72000L;
 
     private RegionalAmbientConversationManager() {}
 
@@ -34,27 +37,63 @@ final class RegionalAmbientConversationManager {
         String current = ConversationBridge.currentDialogueId(villager);
         if (current != null && current.startsWith(OWN_PREFIX)
                 && !current.startsWith(GENERIC_PREFIX)
-                && !current.startsWith(REGIONAL_PREFIX)) {
+                && !current.startsWith(REGIONAL_PREFIX)
+                && !current.startsWith(COMPLETION_PREFIX)) {
             return;
         }
         if (current != null && !current.isBlank() && !current.startsWith(OWN_PREFIX)) return;
 
         // Bespoke local knowledge outranks ambient color. If a Gore route becomes relevant while an
-        // ambient region page is currently attached, clear it now so the social manager can expose Gore.
+        // ambient context page is attached, clear it now so the social manager can expose Gore.
         if (GoreTunnelLead.adultDialogue(player, villager, village) != null) {
-            clearRegionalIfPresent(villager, current);
+            clearContextIfPresent(villager, current);
             return;
         }
 
-        ResourceLocation selected = select(player, villager, village);
+        ResourceLocation selected = recentCompletionDialogue(player, villager, village);
+        if (selected == null) selected = regionalDialogue(player, villager, village);
         if (selected == null) {
-            clearRegionalIfPresent(villager, current);
+            clearContextIfPresent(villager, current);
             return;
         }
         ConversationBridge.setDialogue(villager, selected);
     }
 
-    private static ResourceLocation select(ServerPlayer player, Villager villager, VillageContext village) {
+    /** Village-wide memory: recent completed work can surface from residents other than the giver. */
+    private static ResourceLocation recentCompletionDialogue(
+            ServerPlayer player,
+            Villager villager,
+            VillageContext village
+    ) {
+        CompoundTag root = VillageQuestState.root(player);
+        CompoundTag recent = VillageQuestState.recentCompletion(root, village.key());
+        if (recent.isEmpty()) return null;
+
+        String questId = recent.getString("quest_id");
+        if (questId.isBlank()) return null;
+        long age = player.serverLevel().getGameTime() - recent.getLong("completed_game_time");
+        if (age < 0 || age > COMPLETION_MEMORY_TICKS) return null;
+
+        VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(questId);
+        if (definition == null || definition.accomplishmentCategory() == null) return null;
+
+        long day = player.serverLevel().getDayTime() / 24000L;
+        int seed = villager.getUUID().hashCode()
+                ^ Integer.rotateLeft(player.getUUID().hashCode(), 5)
+                ^ Integer.rotateLeft(questId.hashCode(), 13)
+                ^ Long.hashCode(day * 0xD1B54A32D192ED03L);
+        if (Math.floorMod(seed, 3) != 0) return null;
+
+        String category = definition.accomplishmentCategory().name().toLowerCase(Locale.ROOT);
+        return new ResourceLocation(CozyCrazyQuests.MOD_ID, "ambient_completion_" + category);
+    }
+
+    /** Region/tier local color: frequent enough to give place identity, rare enough to preserve professions. */
+    private static ResourceLocation regionalDialogue(
+            ServerPlayer player,
+            Villager villager,
+            VillageContext village
+    ) {
         ZoneBridge.Cell cell = village.cell();
         if (cell == null || !cell.known()) return null;
 
@@ -86,8 +125,8 @@ final class RegionalAmbientConversationManager {
         return new ResourceLocation(CozyCrazyQuests.MOD_ID, "ambient_region_" + region + "_" + tier);
     }
 
-    private static void clearRegionalIfPresent(Villager villager, String current) {
-        if (current != null && current.startsWith(REGIONAL_PREFIX)) {
+    private static void clearContextIfPresent(Villager villager, String current) {
+        if (current != null && (current.startsWith(REGIONAL_PREFIX) || current.startsWith(COMPLETION_PREFIX))) {
             ConversationBridge.clearOwnDialogue(villager);
         }
     }
