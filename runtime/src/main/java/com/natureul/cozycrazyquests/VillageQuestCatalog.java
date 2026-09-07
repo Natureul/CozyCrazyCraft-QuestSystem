@@ -83,9 +83,10 @@ final class VillageQuestCatalog {
     }
 
     /**
-     * Recover a quest-bound object from a real generated structure. The runtime creates the evidence
-     * only after the player physically enters the exact assigned structure instance, so this does not
-     * depend on arbitrary mob drops or on globally polluting every matching loot table.
+     * Recover a quest-bound object from a real generated structure. Recovery deliberately reuses the
+     * structure-survey lifecycle so all existing target selection, local-knowledge and exact-instance
+     * safeguards stay intact; a non-empty recoveryObjectName tells the visit bridge to create evidence
+     * only after the player physically enters the assigned structure.
      */
     static Definition recovery(
             String id, String title, List<VillagerProfession> professions,
@@ -95,7 +96,7 @@ final class VillageQuestCatalog {
             List<RewardStack> rewards, int emeralds, int xp
     ) {
         return new Definition(
-                id, title, professions, category, false, ObjectiveType.STRUCTURE_RECOVERY,
+                id, title, professions, category, false, ObjectiveType.STRUCTURE_SURVEY,
                 tier, 0, maxTierOffset, true, searchRadius, targetRadius, 0, 0, LocalTerrain.ANY,
                 targetLabel, recoveryObjectName, candidates, 0,
                 id(dialogueStem + "_offer"), id(dialogueStem + "_active"), id(dialogueStem + "_turnin"),
@@ -175,7 +176,6 @@ final class VillageQuestCatalog {
     enum ObjectiveType {
         STRUCTURE_SURVEY,
         STRUCTURE_HOSTILE_CLEAR,
-        STRUCTURE_RECOVERY,
         LOCAL_HOSTILE_CLEAR
     }
 
@@ -223,6 +223,10 @@ final class VillageQuestCatalog {
     ) {
         boolean accepts(VillagerProfession profession) {
             return giverProfessions.contains(profession);
+        }
+
+        boolean isRecovery() {
+            return !recoveryObjectName.isBlank();
         }
     }
 }
