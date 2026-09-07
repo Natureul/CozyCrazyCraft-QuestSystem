@@ -24,6 +24,10 @@ import java.util.Optional;
  * marker, or emit tiny state feedback. RUMOR and LEAD never silently reveal an exact marker; KNOWN may mark
  * a destination when the speaker's conversation establishes reliable knowledge. Underground/submerged KNOWN
  * markers use a surface approach rather than the chamber/structure center.
+ *
+ * The player's village quest state remembers the last five semantic hint families. Profession evidence still
+ * determines the first-choice voice, but another resident will prefer an appropriate unused family before the
+ * village repeats itself. This is anti-repeat, not random personality rerolling.
  */
 final class QuestHintNetwork {
     private static final int SOCIAL_RADIUS = 176;
@@ -38,45 +42,59 @@ final class QuestHintNetwork {
         if (active.getString("target_structure").isBlank()) return null;
 
         VillageQuestState.noteConversation(root, village.key(), speaker.getUUID().toString());
-        VillageQuestState.save(player, root);
 
         String approach = active.getString("target_approach");
         boolean underground = "UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach);
         PlayerKnowledgeState.Knowledge current = PlayerKnowledgeState.knowledge(player, active.getString("target_key"));
         if (current == PlayerKnowledgeState.Knowledge.CONFIRMED) {
-            return id(underground ? "hint_underground_confirmed" : "hint_structure_confirmed");
-        }
-        if (current == PlayerKnowledgeState.Knowledge.KNOWN) {
-            return id(underground ? "hint_underground_known" : "hint_structure_known");
+            return rememberHint(player, root, village,
+                    id(underground ? "hint_underground_confirmed" : "hint_structure_confirmed"));
         }
 
-        if (!(speaker instanceof Villager villager)) return id("hint_structure_guard");
+        if (!(speaker instanceof Villager villager)) {
+            ResourceLocation selected = current == PlayerKnowledgeState.Knowledge.KNOWN
+                    ? id(underground ? "hint_underground_known" : "hint_structure_known")
+                    : id("hint_structure_guard");
+            return rememberHint(player, root, village, selected);
+        }
 
         VillagerProfession profession = villager.getVillagerData().getProfession();
-        if (profession == VillagerProfession.CARTOGRAPHER) return id("hint_cartographer_target");
-        if (profession == VillagerProfession.MASON) return id("hint_structure_mason");
+        if (current == PlayerKnowledgeState.Knowledge.KNOWN) {
+            return rememberHint(player, root, village,
+                    chooseKnownHint(root, village, profession, underground, approach));
+        }
+
+        if (profession == VillagerProfession.CARTOGRAPHER) {
+            return rememberHint(player, root, village,
+                    chooseRecent(root, village, "hint_cartographer_target", "hint_structure_route", "hint_structure_lead"));
+        }
+        if (profession == VillagerProfession.MASON) {
+            return rememberHint(player, root, village,
+                    chooseRecent(root, village, "hint_structure_mason", "hint_structure_route", "hint_structure_lead"));
+        }
         if (profession == VillagerProfession.LIBRARIAN || profession == VillagerProfession.CLERIC) {
-            return id("hint_structure_records");
+            return rememberHint(player, root, village,
+                    chooseRecent(root, village, "hint_structure_records", "hint_structure_rumor", "hint_structure_referral"));
         }
         if (profession == VillagerProfession.FISHERMAN && "SUBMERGED".equals(approach)) {
-            return id("hint_structure_water");
+            return rememberHint(player, root, village,
+                    chooseRecent(root, village, "hint_structure_water", "hint_structure_route", "hint_structure_rumor"));
         }
         if (profession == VillagerProfession.TOOLSMITH
                 || profession == VillagerProfession.WEAPONSMITH
                 || profession == VillagerProfession.ARMORER
                 || profession == VillagerProfession.FLETCHER) {
-            return id("hint_structure_route");
+            return rememberHint(player, root, village,
+                    chooseRecent(root, village, "hint_structure_route", "hint_structure_lead", "hint_structure_referral"));
         }
 
         if (isFallbackGuide(player.serverLevel(), village, villager, active.getString("quest_id"))) {
-            return id("hint_structure_lead");
+            return rememberHint(player, root, village,
+                    chooseRecent(root, village, "hint_structure_lead", "hint_structure_route", "hint_structure_referral"));
         }
 
-        int roll = Math.floorMod(villager.getUUID().hashCode() * 31 + active.getString("quest_id").hashCode(), 100);
-        if (roll < 20) return id("hint_structure_unknown");
-        if (roll < 45) return id("hint_structure_rumor");
-        if (roll < 70) return id("hint_structure_referral");
-        return id("hint_structure_lead");
+        String[] generic = rotatedGenericFamilies(villager, active.getString("quest_id"));
+        return rememberHint(player, root, village, chooseRecent(root, village, generic));
     }
 
     static boolean routeForActiveQuest(ServerPlayer player) {
@@ -178,6 +196,78 @@ final class QuestHintNetwork {
             );
         }
         return marked;
+    }
+
+    private static ResourceLocation chooseKnownHint(
+            CompoundTag root,
+            VillageContext village,
+            VillagerProfession profession,
+            boolean underground,
+            String approach
+    ) {
+        String known = underground ? "hint_underground_known" : "hint_structure_known";
+        if (profession == VillagerProfession.CARTOGRAPHER) {
+            return chooseRecent(root, village, "hint_cartographer_target", known, "hint_structure_route");
+        }
+        if (profession == VillagerProfession.MASON) {
+            return chooseRecent(root, village, "hint_structure_mason", known, "hint_structure_route");
+        }
+        if (profession == VillagerProfession.LIBRARIAN || profession == VillagerProfession.CLERIC) {
+            return chooseRecent(root, village, "hint_structure_records", known);
+        }
+        if (profession == VillagerProfession.FISHERMAN && "SUBMERGED".equals(approach)) {
+            return chooseRecent(root, village, "hint_structure_water", known, "hint_structure_route");
+        }
+        if (profession == VillagerProfession.TOOLSMITH
+                || profession == VillagerProfession.WEAPONSMITH
+                || profession == VillagerProfession.ARMORER
+                || profession == VillagerProfession.FLETCHER) {
+            return chooseRecent(root, village, "hint_structure_route", known, "hint_structure_lead");
+        }
+        return chooseRecent(root, village, known, "hint_structure_lead", "hint_structure_referral");
+    }
+
+    private static ResourceLocation chooseRecent(CompoundTag root, VillageContext village, String... candidates) {
+        if (candidates == null || candidates.length == 0) return id("hint_structure_unknown");
+        List<String> recent = VillageQuestState.recentHintFamilies(root, village.key());
+        for (String candidate : candidates) {
+            if (!recent.contains(candidate)) return id(candidate);
+        }
+
+        String oldest = candidates[0];
+        int oldestIndex = -1;
+        for (String candidate : candidates) {
+            int index = recent.indexOf(candidate);
+            if (index > oldestIndex) {
+                oldestIndex = index;
+                oldest = candidate;
+            }
+        }
+        return id(oldest);
+    }
+
+    private static ResourceLocation rememberHint(
+            ServerPlayer player,
+            CompoundTag root,
+            VillageContext village,
+            ResourceLocation selected
+    ) {
+        if (selected != null) VillageQuestState.noteHintFamily(root, village.key(), selected.getPath());
+        VillageQuestState.save(player, root);
+        return selected;
+    }
+
+    private static String[] rotatedGenericFamilies(Villager villager, String questId) {
+        String[] base = {
+                "hint_structure_unknown",
+                "hint_structure_rumor",
+                "hint_structure_referral",
+                "hint_structure_lead"
+        };
+        int start = Math.floorMod(villager.getUUID().hashCode() * 31 + questId.hashCode(), base.length);
+        String[] ordered = new String[base.length];
+        for (int i = 0; i < base.length; i++) ordered[i] = base[(start + i) % base.length];
+        return ordered;
     }
 
     private static Optional<Villager> findSpecialist(
