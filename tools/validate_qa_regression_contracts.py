@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """0.4.1 QA regression contract.
 
-This is intentionally a static/fixture validator: Forge game tests are not available in CI yet.
-It protects invariants that can be proven from source/data and reports known P0/P1 debt without
-pretending the base 0.4.0 runtime already satisfies the new field-playtest acceptance criteria.
+Static/fixture CI guardrails for the September field-test failures. The runtime has now moved authored
+structure targeting away from synchronous worldgen locate calls and toward a persistent index of real
+generated StructureStart instances, so this validator protects that architecture directly rather than
+blessing the old expensive boundary.
 """
 from __future__ import annotations
 
@@ -16,7 +17,6 @@ ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "runtime" / "src" / "main" / "java" / "com" / "natureul" / "cozycrazyquests"
 CONVERSATIONS = ROOT / "runtime" / "src" / "main" / "resources" / "data" / "cozycrazyquests" / "conversations"
 MATRIX = ROOT / "data" / "qa_regression_matrix.json"
-TARGETING = ROOT / "data" / "targeting_policy.json"
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -33,6 +33,11 @@ def load_text(path: Path) -> str:
 def require(text: str, needle: str, label: str) -> None:
     if needle not in text:
         errors.append(f"missing guard: {label}")
+
+
+def forbid(text: str, needle: str, label: str) -> None:
+    if needle in text:
+        errors.append(f"forbidden regression: {label}")
 
 
 def warn_if(condition: bool, debt_id: str, message: str) -> None:
@@ -71,58 +76,29 @@ def validate_matrix() -> None:
         return
 
     required = {
-        "STRUCT-SURFACE-OUTSIDE",
-        "STRUCT-UNDERGROUND-ABOVE",
-        "STRUCT-HUGE-START-BOX",
-        "STRUCT-WRONG-INSTANCE",
-        "STRUCT-LOCATOR-OUTSIDE-BOX",
-        "STRUCT-PIECE-VS-START",
-        "STRUCT-UNLOADED-CHUNK",
-        "REC-AUTO-GRANT",
-        "REC-DUPLICATE",
-        "REC-SIMILAR-NAME",
-        "REC-INVENTORY-FULL",
-        "REC-DEATH-RELOG",
-        "REC-WRONG-QUEST",
-        "REC-WRONG-VILLAGE",
-        "REC-NOT-CONSUMED",
-        "REC-SIMULTANEOUS",
-        "NAV-RUMOR-NO-PIN",
-        "NAV-KNOWN-CAN-MARK",
-        "NAV-SAFE-OBJECTIVE-MARKER",
-        "NAV-UNDERGROUND-APPROACH",
-        "NAV-GORE-SEMANTICS",
-        "SOC-NO-PROFESSIONS",
-        "SOC-TINY-VILLAGE",
-        "SOC-GIVERS-DIE",
-        "SOC-CLOSE-VILLAGES",
-        "SOC-CROSS-VILLAGE-REFERRAL",
-        "SOC-WRONG-VILLAGER",
-        "SOC-COMPLETE-HINTS-OFF",
-        "SOC-HINT-VARIATION",
-        "VAR-SAME-INSTANCE",
-        "VAR-SAME-REWARD",
-        "VAR-SAME-VERB",
-        "VAR-RECYCLE-COMPLETED",
-        "UI-ACTIONBAR-LENGTH",
-        "UI-NPC-PROSE-SURFACE",
-        "UI-CONVERSATION-LENGTH",
-        "UI-CONVERSATION-STATES",
-        "PERF-LOCATE-ON-INTERACT",
-        "PERF-CACHE-BOUNDARY",
-        "PERF-WATCHDOG-STACK",
+        "STRUCT-SURFACE-OUTSIDE", "STRUCT-UNDERGROUND-ABOVE", "STRUCT-HUGE-START-BOX",
+        "STRUCT-WRONG-INSTANCE", "STRUCT-LOCATOR-OUTSIDE-BOX", "STRUCT-PIECE-VS-START",
+        "STRUCT-UNLOADED-CHUNK", "REC-AUTO-GRANT", "REC-DUPLICATE", "REC-SIMILAR-NAME",
+        "REC-INVENTORY-FULL", "REC-DEATH-RELOG", "REC-WRONG-QUEST", "REC-WRONG-VILLAGE",
+        "REC-NOT-CONSUMED", "REC-SIMULTANEOUS", "NAV-RUMOR-NO-PIN", "NAV-KNOWN-CAN-MARK",
+        "NAV-SAFE-OBJECTIVE-MARKER", "NAV-UNDERGROUND-APPROACH", "NAV-GORE-SEMANTICS",
+        "SOC-NO-PROFESSIONS", "SOC-TINY-VILLAGE", "SOC-GIVERS-DIE", "SOC-CLOSE-VILLAGES",
+        "SOC-CROSS-VILLAGE-REFERRAL", "SOC-WRONG-VILLAGER", "SOC-COMPLETE-HINTS-OFF",
+        "SOC-HINT-VARIATION", "VAR-SAME-INSTANCE", "VAR-SAME-REWARD", "VAR-SAME-VERB",
+        "VAR-RECYCLE-COMPLETED", "UI-ACTIONBAR-LENGTH", "UI-NPC-PROSE-SURFACE",
+        "UI-CONVERSATION-LENGTH", "UI-CONVERSATION-STATES", "PERF-LOCATE-ON-INTERACT",
+        "PERF-CACHE-BOUNDARY", "PERF-WATCHDOG-STACK",
     }
     ids = {case.get("id") for case in cases if isinstance(case, dict)}
     missing = required - ids
     if missing:
         errors.append("qa regression matrix missing cases: " + ", ".join(sorted(missing)))
 
-    allowed_status = {"GUARDED", "KNOWN_DEBT", "MANUAL"}
     for case in cases:
         if not isinstance(case, dict):
             errors.append("qa regression matrix contains non-object case")
             continue
-        if case.get("status") not in allowed_status:
+        if case.get("status") not in {"GUARDED", "KNOWN_DEBT", "MANUAL"}:
             errors.append(f"{case.get('id')}: invalid status {case.get('status')!r}")
         if case.get("severity") not in {"P0", "P1", "P2"}:
             errors.append(f"{case.get('id')}: invalid severity")
@@ -137,52 +113,48 @@ def validate_structure_and_recovery() -> None:
     survey = load_text(JAVA / "StructureSurveyCompletionBridge.java")
     places = load_text(JAVA / "NamedPlaceBridge.java")
     recovery = load_text(JAVA / "RecoveredEvidence.java")
-    turnin = load_text(JAVA / "RecoveryQuestRuntime.java")
+    runtime = load_text(JAVA / "RecoveryQuestRuntime.java")
     state = load_text(JAVA / "VillageQuestState.java")
+    mod_main = load_text(JAVA / "CozyCrazyQuests.java")
 
-    require(manager, 'target_start_chunk_x', "accepted structure contracts persist exact start-chunk identity when known")
-    require(manager, 'target_start_chunk_z', "accepted structure contracts persist exact start-chunk identity when known")
+    require(manager, 'target_start_chunk_x', "accepted contracts persist exact start chunk X")
+    require(manager, 'target_start_chunk_z', "accepted contracts persist exact start chunk Z")
+    require(places, 'insideAnyPiece(current, playerPos)', "exact occupancy requires a real structure piece")
     require(places, 'currentStart.x == expectedStartChunkX && currentStart.z == expectedStartChunkZ',
-            "exact structure completion checks assigned start chunk")
-    require(manager, '("UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach))',
-            "generic horizontal fallback is skipped for underground/submerged targets")
+            "exact occupancy checks the assigned generated instance")
+    require(survey, 'QUALIFYING_DWELL_TICKS', "structure surveys require sustained meaningful presence")
+    require(survey, '|| definition.isRecovery()) continue;', "survey runtime does not impersonate recovery")
+    require(mod_main, 'StructureSurveyCompletionBridge::onPlayerTick', "piece/dwell survey runtime is registered")
+    forbid(mod_main, 'VillageConversationQuestManager::onPlayerTick',
+           "legacy horizontal locator-radius survey tick must not be registered")
 
     for key in ('"ccc_recovery_quest"', '"ccc_recovery_village"', '"ccc_recovery_target"'):
         require(recovery, key, f"recovery evidence carries {key}")
-    require(recovery, 'stack.is(ModItems.RECOVERED_EVIDENCE.get())', "recovery accepts exact evidence item type")
+    require(recovery, 'stack.is(ModItems.RECOVERED_EVIDENCE.get())', "recovery matches exact evidence item")
     require(recovery, 'questId.equals(tag.getString(QUEST_ID))', "recovery matches quest id")
     require(recovery, 'villageKey.equals(tag.getString(VILLAGE_KEY))', "recovery matches village id")
-    require(recovery, 'targetKey.equals(tag.getString(TARGET_KEY))', "recovery matches target id")
-    if "getHoverName" in recovery or "getDisplayName" in recovery:
-        errors.append("recovery evidence matching must not use display names")
-    require(recovery, 'shrink(1)', "recovery turn-in consumes one evidence item")
-    require(turnin, 'RecoveredEvidence.consume(player, active)', "turn-in is evidence guarded")
-    require(state, 'active_by_village', "simultaneous contracts are village-keyed")
-    require(state, 'static List<CompoundTag> allActives', "runtime can process multiple simultaneous contracts")
-    require(manager, 'onPlayerClone', "authored quest state survives player clone/death")
+    require(recovery, 'targetKey.equals(tag.getString(TARGET_KEY))', "recovery matches target instance key")
+    require(recovery, 'shrink(1)', "turn-in consumes one matching evidence item")
+    require(runtime, 'PlayerInteractEvent.RightClickBlock', "evidence comes from a physical interaction")
+    require(runtime, 'instanceof Container container', "recovery source is a real container")
+    require(runtime, 'NamedPlaceBridge.insideExactStructure', "recovery container belongs to exact assigned structure")
+    require(runtime, 'container.setItem(emptySlot, evidence)', "quest-bound evidence is placed in the physical cache")
+    require(runtime, 'RecoveredEvidence.has(player, active)', "objective waits for evidence possession")
+    require(runtime, 'RecoveredEvidence.consume(player, active)', "turn-in consumes exact quest-bound evidence")
+    require(mod_main, 'RecoveryQuestRuntime::onRightClickBlock', "physical recovery interaction is registered")
+    require(state, 'active_by_village', "simultaneous contracts remain village-keyed")
+    require(manager, 'onPlayerClone', "authored quest state survives death/clone")
 
-    warn_if(
-        'RecoveredEvidence.create(definition, active)' in survey,
-        "P0-REC-AUTO-GRANT",
-        "recovery evidence is still minted by structure occupancy instead of a real container/interactable",
-    )
-    warn_if(
-        'current.getBoundingBox().isInside(playerPos)' in places
-        and 'getPieces()' not in method_body(places, 'static boolean insideExactStructure'),
-        "P0-STRUCT-WHOLE-BOX",
-        "insideExactStructure still trusts the whole StructureStart bounding box rather than occupied pieces/dwell",
-    )
-    tick = method_body(manager, 'public static void onPlayerTick')
-    warn_if(
-        'dx * dx + dz * dz' in tick and 'objective_complete' in tick,
-        "P0-STRUCT-SURFACE-RADIUS",
-        "surface STRUCTURE_SURVEY completion still has a horizontal locator-radius path",
-    )
+    if "getHoverName" in recovery or "getDisplayName" in recovery:
+        errors.append("recovery evidence matching must never use display names")
+    if 'RecoveredEvidence.create(definition, active)' in survey:
+        errors.append("structure occupancy bridge must never mint recovery evidence")
 
 
 def validate_navigation_and_social() -> None:
     hints = load_text(JAVA / "QuestHintNetwork.java")
     gore = load_text(JAVA / "GoreTunnelLead.java")
+    places = load_text(JAVA / "NamedPlaceBridge.java")
     village = load_text(JAVA / "VillageContext.java")
 
     rumor_case = re.search(r'case "quest_hint_rumor"\s*->\s*([^;]+);', hints)
@@ -190,77 +162,50 @@ def validate_navigation_and_social() -> None:
         errors.append("RUMOR action is not explicitly routed through RUMOR knowledge")
     give_lead = method_body(hints, 'private static boolean giveLead')
     if "revealStructureToAtlas" in give_lead:
-        errors.append("RUMOR/LEAD giveLead path must not directly reveal an exact Atlas marker")
-    require(hints, 'objectiveComplete(active)', "completed quests suppress social hint network")
-    require(hints, 'village.key().equals(theirs.key())', "specialist/referral search rejects cross-village villagers")
-    require(village, 'VillageNameCacheBridge.nearestAssigned', "routine village context avoids structure locate for names")
-    require(village, 'findClosest(', "village context is anchored by nearby civic POI when available")
+        errors.append("RUMOR/LEAD giveLead path must not directly reveal an Atlas marker")
+    require(hints, 'private static boolean markKnownTarget', "KNOWN reveal is isolated from RUMOR/LEAD")
+    require(hints, 'NamedPlaceBridge.surfaceApproach', "underground KNOWN hint uses a surface approach")
+    require(hints, 'objectiveComplete(active)', "completed quests suppress hint network")
+    require(hints, 'village.key().equals(theirs.key())', "referrals reject cross-village villagers")
 
-    warn_if(
-        'NamedPlaceBridge.revealStructureToAtlas' in method_body(gore, 'private static boolean revealSpecialistLead'),
-        "P0-NAV-GORE-CENTER",
-        "Gore KNOWN lead still marks the structure locator/center rather than a verified safe approach",
-    )
-    warn_if(
-        'DISCOVERY_RADIUS' in method_body(gore, 'static void onPlayerTick')
-        and 'VERTICAL_TOLERANCE' in method_body(gore, 'static void onPlayerTick'),
-        "P0-NAV-GORE-FALLBACK",
-        "Gore discovery retains a broad radius/vertical fallback when exact occupancy is unavailable",
-    )
+    require(places, 'BlockPos navigationAnchor', "Atlas API separates objective identity from navigation anchor")
+    require(places, 'static BlockPos surfaceApproach', "runtime exposes safe surface approach geometry")
+    require(gore, 'NamedPlaceBridge.surfaceApproach', "Gore lead computes a separate approach anchor")
+    require(gore, 'readApproach(state)', "Gore Atlas reveal uses stored approach position")
+    forbid(method_body(gore, 'static void onPlayerTick'), 'DISCOVERY_RADIUS',
+           "Gore discovery must not use broad horizontal radius fallback")
+    require(gore, 'QUALIFYING_DWELL_TICKS', "Gore confirmation requires sustained exact-piece presence")
+
+    require(village, 'VillageNameCacheBridge.nearestAssigned', "routine village naming avoids structure locate")
+    require(village, 'findClosest(', "village context uses nearby civic POI when available")
     warn_if(
         'fallback|' in village and 'Math.floorDiv(anchor.getX(), 128)' in village,
         "P1-SOC-CLOSE-VILLAGES",
-        "unnamed-village fallback identity is 128-block quantized and can collide for unusually close settlements",
+        "unnamed-village fallback identity is still 128-block quantized",
     )
 
 
 def validate_performance() -> None:
     resolver = load_text(JAVA / "NearbyStructureResolver.java")
-    manager = load_text(JAVA / "VillageConversationQuestManager.java")
-    gore = load_text(JAVA / "GoreTunnelLead.java")
-    policy = {}
-    try:
-        policy = json.loads(TARGETING.read_text(encoding="utf-8"))
-    except Exception as exc:
-        errors.append(f"targeting policy unreadable: {exc}")
+    index = load_text(JAVA / "GeneratedStructureIndexSavedData.java")
+    mod_main = load_text(JAVA / "CozyCrazyQuests.java")
+    watchdog = load_text(ROOT / "tools" / "analyze_watchdog_log.py")
 
+    # The September field test proved that a broad worldgen locate can stall a click for minutes.
+    # It is now forbidden anywhere in the authored quest Java runtime, not merely discouraged on ticks.
     for path in JAVA.glob("*.java"):
         src = load_text(path)
-        body = method_body(src, "onPlayerTick(")
-        if body and "findNearestMapStructure" in body:
-            errors.append(f"{path.name}: findNearestMapStructure must never run directly from onPlayerTick")
-        if body and "NearbyStructureResolver.findNearest" in body:
-            errors.append(f"{path.name}: NearbyStructureResolver.findNearest must never run directly from onPlayerTick")
+        if "findNearestMapStructure(" in src:
+            errors.append(f"{path.name}: authored quest runtime must not call findNearestMapStructure")
 
-    require(resolver, 'findNearestMapStructure(', "structure resolver uses a single identifiable expensive locate boundary")
-    require(manager, 'TARGET_CACHE', "authored quest target lookup has a village/quest cache")
-    require(manager, 'village.key() + ":" + definition.id()', "authored target cache key includes village and quest target")
-    require(gore, 'CACHE', "Gore target lookup has a per-village cache")
-    require(gore, 'village.key()', "Gore target cache is village scoped")
-
-    candidate_search = policy.get("candidate_search", {}) if isinstance(policy, dict) else {}
-    positive = candidate_search.get("positive_cache_ticks")
-    runtime_match = re.search(r'TARGET_CACHE_LIFETIME\s*=\s*(\d+)L', manager)
-    if isinstance(positive, int) and runtime_match:
-        runtime_ttl = int(runtime_match.group(1))
-        warn_if(
-            runtime_ttl < positive,
-            "P1-PERF-CACHE-TTL",
-            f"runtime positive target cache is {runtime_ttl} ticks but targeting policy specifies {positive}",
-        )
-
-    interaction = method_body(manager, 'public static void onEntityInteract')
-    warn_if(
-        'selectOffer(' in interaction,
-        "P0-PERF-INTERACT-LOCATE",
-        "ordinary villager interaction can synchronously enter target selection; first-cache-miss structure locate can block server thread",
-    )
-    resolve_body = method_body(manager, 'private static NearbyStructureResolver.ResolvedStructure resolveStructureTarget')
-    warn_if(
-        'for (ResourceLocation candidate' in resolve_body and resolve_body.count('NearbyStructureResolver.findNearest') >= 2,
-        "P1-PERF-RETRY-FANOUT",
-        "mixed-family illegal-nearest fallback can fan one cache miss into 1+N synchronous structure locates",
-    )
+    require(resolver, 'GeneratedStructureIndexSavedData.get(level).findNearest',
+            "authored structure target resolution is an indexed in-memory lookup")
+    require(index, 'ChunkEvent.Load', "generated structure index observes authoritative chunk loads")
+    require(index, 'chunk.getAllStarts()', "generated structure index reads real generated starts")
+    require(index, 'extends SavedData', "generated structure index persists across restarts")
+    require(index, 'maxDistanceBlocks', "indexed nearest search remains distance bounded")
+    require(mod_main, 'GeneratedStructureIndexSavedData::onChunkLoad', "structure index is registered")
+    require(watchdog, 'QUEST_STRUCTURE_LOCATE', "watchdog classifier preserves structure-locate regression detection")
 
 
 def validate_ui_and_conversations() -> None:
@@ -305,21 +250,12 @@ def validate_ui_and_conversations() -> None:
     hints = load_text(JAVA / "QuestHintNetwork.java")
     gore = load_text(JAVA / "GoreTunnelLead.java")
     survey = load_text(JAVA / "StructureSurveyCompletionBridge.java")
-    warn_if(
-        'player.displayClientMessage' in hints and '" It\'s underground;' in hints,
-        "P0-UI-HINT-ACTIONBAR",
-        "QuestHintNetwork still emits explanatory NPC prose through the action bar",
-    )
-    warn_if(
-        'player.displayClientMessage' in gore and '"The child points "' in gore,
-        "P0-UI-GORE-ACTIONBAR",
-        "Gore social prose still uses the action bar",
-    )
-    warn_if(
-        'returnInstruction(definition' in survey and 'displayClientMessage' in survey,
-        "P0-UI-SURVEY-ACTIONBAR",
-        "survey/recovery action-bar confirmation still appends return-direction prose",
-    )
+    if '" It\'s underground;' in hints:
+        errors.append("QuestHintNetwork must not emit explanatory route prose through action bar")
+    if '"The child points "' in gore:
+        errors.append("Gore social prose must not use action bar")
+    if 'returnInstruction(definition' in survey:
+        errors.append("survey confirmation must not append return-direction prose")
 
 
 def main() -> int:
