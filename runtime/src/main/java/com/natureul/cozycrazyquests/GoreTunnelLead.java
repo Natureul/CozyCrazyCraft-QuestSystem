@@ -3,6 +3,7 @@ package com.natureul.cozycrazyquests;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
@@ -51,6 +53,12 @@ final class GoreTunnelLead {
         if (sameVillage(state, village) && STAGE_COMPLETE.equals(state.getString("stage"))) return false;
         if (sameVillage(state, village) && state.contains("targetX")) return true;
         return resolve(player.serverLevel(), village) != null;
+    }
+
+    static boolean completedFor(ServerPlayer player, VillageContext village) {
+        return village != null
+                && sameVillage(state(player), village)
+                && STAGE_COMPLETE.equals(state(player).getString("stage"));
     }
 
     static ResourceLocation adultDialogue(ServerPlayer player, Villager villager, VillageContext village) {
@@ -101,6 +109,13 @@ final class GoreTunnelLead {
                                 + displayVillage(state) + ".")
                         .withStyle(ChatFormatting.AQUA)
         );
+    }
+
+    static void onPlayerClone(PlayerEvent.Clone event) {
+        CompoundTag oldData = event.getOriginal().getPersistentData();
+        if (oldData.contains(ROOT, Tag.TAG_COMPOUND)) {
+            event.getEntity().getPersistentData().put(ROOT, oldData.getCompound(ROOT).copy());
+        }
     }
 
     private static boolean shareChildRumor(ServerPlayer player) {
