@@ -18,10 +18,10 @@ import java.util.List;
  * Reliable completion path for authored structure visits.
  *
  * Locate Y values are navigation hints, not proof that the player reached a room. Survey jobs therefore
- * complete from exact generated-structure occupancy, while recovery jobs create their quest-bound object
- * only after the player physically enters the exact assigned structure instance. Legacy survey contracts
- * can also recover from CozyCrazyZones' prior discovery record; recovery jobs intentionally cannot, because
- * an old discovery is not the same thing as going back inside and retrieving the requested object.
+ * complete from exact generated-structure occupancy, while recovery-specialized survey jobs create their
+ * quest-bound object only after the player physically enters the exact assigned structure instance. Legacy
+ * ordinary surveys can recover from CozyCrazyZones' prior discovery record; recovery jobs intentionally
+ * cannot, because an old discovery is not the same thing as going back inside and retrieving the object.
  */
 final class StructureSurveyCompletionBridge {
     private static final String ZONES_DISCOVERED = "cozycrazyzones:discovered_structures";
@@ -41,10 +41,7 @@ final class StructureSurveyCompletionBridge {
         for (CompoundTag active : VillageQuestState.allActives(root)) {
             if (objectiveComplete(active)) continue;
             VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-            if (definition == null) continue;
-            boolean survey = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY;
-            boolean recovery = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_RECOVERY;
-            if (!survey && !recovery) continue;
+            if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) continue;
             if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
             ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
@@ -66,7 +63,8 @@ final class StructureSurveyCompletionBridge {
                     expectedChunkZ,
                     locate
             );
-            boolean previouslyDiscovered = survey && !physicallyInside
+            boolean recovery = definition.isRecovery();
+            boolean previouslyDiscovered = !recovery && !physicallyInside
                     && alreadyDiscoveredMatchingTarget(player, structureId, locate, expectedChunkX, expectedChunkZ);
             if (!physicallyInside && !previouslyDiscovered) continue;
 
