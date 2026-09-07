@@ -15,6 +15,9 @@ import java.util.Optional;
  * a board is missing, undiscovered, destroyed, or waiting for the board manager to record it. The
  * nearest meeting POI supplies the civic anchor when available; CozyCrazyZones supplies the
  * persistent settlement name. Bountiful is retained only as an optional civic-service bridge.
+ *
+ * Crucially, resolving a conversation never performs a structure locate. Village names are read
+ * only from CozyCrazyZones' already-assigned in-memory ledger so a right click cannot force worldgen.
  */
 record VillageContext(
         String key,
@@ -37,7 +40,7 @@ record VillageContext(
         );
 
         BlockPos anchor = meeting.filter(level::isVillage).orElse(origin).immutable();
-        String name = NamedPlaceBridge.nearestVillageName(level, anchor, NAME_RADIUS);
+        String name = VillageNameCacheBridge.nearestAssigned(level, anchor, NAME_RADIUS);
         boolean namedVillage = name != null && !name.isBlank() && !"the village".equalsIgnoreCase(name);
         boolean villageHere = level.isVillage(anchor) || level.isVillage(origin) || namedVillage;
         if (!villageHere) return null;
