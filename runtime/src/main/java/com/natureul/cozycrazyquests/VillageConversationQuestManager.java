@@ -256,6 +256,9 @@ public final class VillageConversationQuestManager {
             VillageProgressState.Snapshot progress,
             CompoundTag root
     ) {
+        Offer fallback = null;
+        int fallbackPenalty = Integer.MAX_VALUE;
+
         for (VillageQuestCatalog.Definition definition : VillageQuestCatalog.forProfession(villager.getVillagerData().getProfession())) {
             if (!definition.issuingTier().equals(village.cell().tier())) continue;
 
@@ -268,9 +271,17 @@ public final class VillageConversationQuestManager {
 
             if (isCompleted(root, definition, level, village)) continue;
             PreparedTarget target = prepareTarget(level, player, village, definition);
-            if (target != null) return new Offer(definition, target);
+            if (target == null) continue;
+
+            Offer candidate = new Offer(definition, target);
+            int penalty = QuestNoveltyPolicy.penalty(root, village.key(), definition, target.targetKey());
+            if (penalty == 0) return candidate;
+            if (penalty < fallbackPenalty) {
+                fallback = candidate;
+                fallbackPenalty = penalty;
+            }
         }
-        return null;
+        return fallback;
     }
 
     private static PreparedTarget prepareTarget(
@@ -502,6 +513,14 @@ public final class VillageConversationQuestManager {
         }
 
         markCompleted(root, definition, level, villageKey, active);
+        VillageQuestState.noteRecentCompletion(
+                root,
+                villageKey,
+                definition.id(),
+                targetKey,
+                QuestNoveltyPolicy.primaryRewardFamily(definition),
+                level.getGameTime()
+        );
         VillageQuestState.removeActive(root, villageKey);
         root.remove(VillageQuestState.PENDING);
         VillageQuestState.save(player, root);
