@@ -221,6 +221,44 @@ final class VillageQuestCatalog {
             int emeraldReward,
             int experienceReward
     ) {
+        Definition(
+                String id,
+                String title,
+                List<VillagerProfession> giverProfessions,
+                VillageProgressState.AccomplishmentCategory accomplishmentCategory,
+                boolean zoneOneCapstone,
+                ObjectiveType objectiveType,
+                String issuingTier,
+                int targetMinTierOffset,
+                int targetMaxTierOffset,
+                boolean sameMacroRegion,
+                int searchRadiusBlocks,
+                int targetRadiusBlocks,
+                int localTargetMinDistance,
+                int localTargetMaxDistance,
+                LocalTerrain localTerrain,
+                String targetLabel,
+                List<ResourceLocation> structureCandidates,
+                int requiredKills,
+                ResourceLocation offerDialogue,
+                ResourceLocation activeDialogue,
+                ResourceLocation turninDialogue,
+                boolean revealAtlasOnAccept,
+                List<RewardStack> acceptanceItems,
+                List<RewardStack> rewardItems,
+                int emeraldReward,
+                int experienceReward
+        ) {
+            this(
+                    id, title, giverProfessions, accomplishmentCategory, zoneOneCapstone, objectiveType,
+                    issuingTier, targetMinTierOffset, targetMaxTierOffset, sameMacroRegion,
+                    searchRadiusBlocks, targetRadiusBlocks, localTargetMinDistance, localTargetMaxDistance,
+                    localTerrain, targetLabel, "", structureCandidates, requiredKills,
+                    offerDialogue, activeDialogue, turninDialogue, revealAtlasOnAccept,
+                    acceptanceItems, rewardItems, emeraldReward, experienceReward
+            );
+        }
+
         boolean accepts(VillagerProfession profession) {
             return giverProfessions.contains(profession);
         }
