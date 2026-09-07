@@ -110,7 +110,9 @@ public final class VillageConversationQuestManager {
             if (objectiveComplete(active)) continue;
 
             VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-            if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) continue;
+            if (definition == null
+                    || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY
+                    || definition.isRecovery()) continue;
             if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
             String approach = active.getString("target_approach");
@@ -450,11 +452,16 @@ public final class VillageConversationQuestManager {
         if (prefix.isBlank() || "the village".equals(prefix)) prefix = "Accepted";
         else prefix += " — " + definition.title();
 
-        String objective = switch (definition.objectiveType()) {
-            case STRUCTURE_SURVEY -> "survey " + active.getString("target_name");
-            case STRUCTURE_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles at " + active.getString("target_name");
-            case LOCAL_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles around " + active.getString("target_name");
-        };
+        String objective;
+        if (definition.isRecovery()) {
+            objective = "recover " + definition.recoveryObjectName() + " from " + active.getString("target_name");
+        } else {
+            objective = switch (definition.objectiveType()) {
+                case STRUCTURE_SURVEY -> "survey " + active.getString("target_name");
+                case STRUCTURE_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles at " + active.getString("target_name");
+                case LOCAL_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles around " + active.getString("target_name");
+            };
+        }
         player.sendSystemMessage(
                 Component.literal(prefix + ": " + objective + ", about " + active.getInt("target_distance")
                                 + " blocks " + active.getString("target_direction") + ".")
