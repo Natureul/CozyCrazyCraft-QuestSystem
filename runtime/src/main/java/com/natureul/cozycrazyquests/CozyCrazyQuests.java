@@ -35,6 +35,7 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(GoreTunnelLead::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onLivingDeath);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerClone);
+        MinecraftForge.EVENT_BUS.addListener(GoreTunnelLead::onPlayerClone);
         MinecraftForge.EVENT_BUS.addListener(VillageProgressState::onPlayerClone);
         MinecraftForge.EVENT_BUS.addListener(PlayerKnowledgeState::onPlayerClone);
 
