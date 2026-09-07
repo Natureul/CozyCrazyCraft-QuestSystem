@@ -37,5 +37,10 @@ public final class ConversationTokenItem extends Item {
         if (!VillageSocialConversationManager.consumeConversationAction(player, action)) {
             VillageConversationQuestManager.consumeConversationAction(player, action);
         }
+
+        // Structure contracts deliberately start with social investigation. The physical contract keeps
+        // the coarse bearing, while this one-shot reminder makes it clear that speaking to other locals
+        // is the intended next move rather than blindly walking hundreds of blocks from the village.
+        if ("accept".equals(action)) QuestDeparturePrompt.afterAccept(player);
     }
 }
