@@ -1,6 +1,5 @@
 package com.natureul.cozycrazyquests;
 
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -18,6 +17,8 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /** Reflection-only bridge into CozyCrazyZones' persistent named-place and Atlas systems. */
@@ -61,22 +62,25 @@ final class NamedPlaceBridge {
         return fallbackStructureName(structureId);
     }
 
+    /** Resolve nearby village naming from the persisted generated-start index; never invoke worldgen locate. */
     static String nearestVillageName(ServerLevel level, BlockPos origin, int maxDistanceBlocks) {
         try {
             Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
             Optional<HolderSet.Named<Structure>> villages = registry.getTag(StructureTags.VILLAGE);
             if (villages.isEmpty()) return "the village";
 
-            int radiusChunks = Math.max(1, (maxDistanceBlocks + 15) / 16);
-            Pair<BlockPos, Holder<Structure>> result = level.getChunkSource().getGenerator().findNearestMapStructure(level, villages.get(), origin, radiusChunks, false);
+            List<ResourceLocation> villageIds = new ArrayList<>();
+            for (Holder<Structure> holder : villages.get()) {
+                ResourceLocation id = registry.getKey(holder.value());
+                if (id != null) villageIds.add(id);
+            }
+            NearbyStructureResolver.ResolvedStructure result = GeneratedStructureIndexSavedData.get(level)
+                    .findNearest(origin, villageIds, maxDistanceBlocks);
             if (result == null) return "the village";
 
-            BlockPos locatedPos = result.getFirst();
-            long dx = (long) locatedPos.getX() - origin.getX();
-            long dz = (long) locatedPos.getZ() - origin.getZ();
-            if (dx * dx + dz * dz > (long) maxDistanceBlocks * maxDistanceBlocks) return "the village";
-
-            StructureIdentity identity = structureIdentity(level, result.getSecond().value(), locatedPos);
+            Structure structure = registry.get(result.id());
+            if (structure == null) return "the village";
+            StructureIdentity identity = structureIdentity(level, structure, result.pos());
 
             Class<?> zonesApi = Class.forName("com.natureul.cozycrazyzones.CozyZonesApi");
             Method macroRegionAt = zonesApi.getMethod("macroRegionAt", ServerLevel.class, double.class, double.class);
@@ -176,7 +180,6 @@ final class NamedPlaceBridge {
         int x = clamp(from.getX(), box.minX(), box.maxX());
         int z = clamp(from.getZ(), box.minZ(), box.maxZ());
 
-        // If the origin projects inside the footprint, choose the nearest edge instead of the center.
         if (from.getX() >= box.minX() && from.getX() <= box.maxX()
                 && from.getZ() >= box.minZ() && from.getZ() <= box.maxZ()) {
             int west = from.getX() - box.minX();
@@ -192,14 +195,6 @@ final class NamedPlaceBridge {
         return surfaceAt(level, x, z);
     }
 
-    /**
-     * Stable identity for the exact generated structure instance represented by a locate result.
-     *
-     * This method is intentionally strict. If StructureManager cannot prove that the locator position
-     * belongs to a real StructureStart, return null instead of fabricating a start chunk from the locate
-     * point. A fabricated identity can make a perfectly valid modded structure impossible to complete
-     * when its /locate navigation point sits outside its actual bounding box.
-     */
     static StructureInstance structureInstance(ServerLevel level, ResourceLocation structureId, BlockPos locatedPos) {
         Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         Structure structure = registry.get(structureId);
@@ -217,11 +212,6 @@ final class NamedPlaceBridge {
         return new StructureInstance(start.getChunkPos(), marker);
     }
 
-    /**
-     * True only when the supplied position is inside a real piece of the exact generated structure
-     * instance assigned to the quest. A StructureStart bounding box can contain enormous empty gaps;
-     * those gaps are navigation/worldgen metadata, not proof that the player entered the structure.
-     */
     static boolean insideExactStructure(
             ServerLevel level,
             BlockPos playerPos,
@@ -243,14 +233,9 @@ final class NamedPlaceBridge {
             return currentStart.x == expectedStartChunkX && currentStart.z == expectedStartChunkZ;
         }
 
-        // Compatibility for contracts accepted by older builds or locators that could not prove an
-        // exact start chunk at offer time. Spatial proof is still a real structure piece.
         StructureIdentity expected = structureIdentity(level, structure, legacyLocatePos);
         if (expected.startChunk().equals(currentStart)) return true;
 
-        // Some modded locators return a navigation position outside the actual bounding box. Legacy
-        // contracts may therefore lack an authoritative start chunk. Permit a nearby matching start,
-        // but only after the real-piece test above has succeeded.
         BoundingBox box = current.getBoundingBox();
         long cx = ((long) box.minX() + box.maxX()) / 2L;
         long cz = ((long) box.minZ() + box.maxZ()) / 2L;
