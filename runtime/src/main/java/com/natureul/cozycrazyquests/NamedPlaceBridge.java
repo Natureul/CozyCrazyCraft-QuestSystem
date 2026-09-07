@@ -86,7 +86,7 @@ final class NamedPlaceBridge {
             Method get = namesClass.getMethod("get", ServerLevel.class);
             Object names = get.invoke(null, level);
             Method getOrAssign = namesClass.getMethod("getOrAssign", macro.getClass(), long.class, ChunkPos.class);
-            Object value = getOrAssign.invoke(names, macro, celllessSeed(level), identity.startChunk());
+            Object value = getOrAssign.invoke(names, macro, level.getSeed(), identity.startChunk());
             if (value instanceof String name && !name.isBlank()) return name;
         } catch (Throwable error) {
             if (!warnedVillageName) {
@@ -95,10 +95,6 @@ final class NamedPlaceBridge {
             }
         }
         return "the village";
-    }
-
-    private static long celllessSeed(ServerLevel level) {
-        return level.getSeed();
     }
 
     static boolean revealStructureToAtlas(ServerPlayer player, ResourceLocation structureId, BlockPos locatedPos, String name) {
