@@ -34,6 +34,8 @@ public final class ConversationTokenItem extends Item {
                 player.getGameProfile().getName()
         );
 
+        if ("turnin".equals(action) && !RecoveryQuestRuntime.beforeTurnIn(player)) return;
+
         if (!VillageSocialConversationManager.consumeConversationAction(player, action)) {
             VillageConversationQuestManager.consumeConversationAction(player, action);
         }
