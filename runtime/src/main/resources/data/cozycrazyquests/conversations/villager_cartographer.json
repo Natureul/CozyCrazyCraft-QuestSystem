@@ -1,8 +1,1 @@
-{
-  "title": "Cartographer",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"Need a map, or just trying to get your bearings?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Any news?","action":{"action":"dialogue.goto(1)"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Nothing right now.","action":{"action":"dialogue.close"}}]}]},
-    {"dialogue_options":[{"dialogue":"I sell maps. A route that needs walking is different work; if I have one, I'll say so.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Good to know.","action":{"action":"dialogue.close"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}}]}]}
-  ]
-}
+{"title":"Cartographer","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Roads, crossings, old names. Tell me which one you need and I will tell you how much I actually trust.","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"What do you notice?","action":{"action":"dialogue.goto(1)"}},{"reply":"Anyone need help?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"I’ll let you work.","action":{"action":"dialogue.close"}}]}]},{"dialogue_options":[{"dialogue":"A map is useful only if I know when the line was last true. Old ink gets people lost very confidently.","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"Anyone need help?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Thanks.","action":{"action":"dialogue.close"}}]}]}]}

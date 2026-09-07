@@ -1,8 +1,1 @@
-{
-  "title": "Butcher",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"Need something?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Any news?","action":{"action":"dialogue.goto(1)"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Nothing right now.","action":{"action":"dialogue.close"}}]}]},
-    {"dialogue_options":[{"dialogue":"If livestock or food stores go wrong, people tell me quickly.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Good to know.","action":{"action":"dialogue.close"}},{"reply":"Show me your trades.","action":{"action":"villager.trade"}}]}]}
-  ]
-}
+{"title":"Butcher","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Stores, livestock, carcasses, rations. Problems look different once you have to account for every missing meal.","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"What do you notice?","action":{"action":"dialogue.goto(1)"}},{"reply":"Anyone need help?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"I’ll let you work.","action":{"action":"dialogue.close"}}]}]},{"dialogue_options":[{"dialogue":"A predator kill, spoiled stores, and a stolen crate each leave different evidence. I do not call all three “bad luck.”","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"Anyone need help?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Show me your trades.","action":{"action":"villager.trade"}},{"reply":"Thanks.","action":{"action":"dialogue.close"}}]}]}]}

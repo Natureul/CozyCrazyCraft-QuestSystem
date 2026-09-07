@@ -1,7 +1,1 @@
-{
-  "title": "Local Rumor",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"That place is below the surface. People who found it before didn't dig a shaft at the exact bearing; they searched the stone around the area for an opening.","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"That helps.","action":{"action":"dialogue.close"}},{"reply":"Anything more exact?","action":{"action":"dialogue.close"}}]}]}
-  ]
-}
+{"title":"Underground Rumor","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"People place it somewhere below that country. Nobody I trust has shown me the entrance, so treat this as a search area.","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"What did they report?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"quest_hint_rumor\"})"},{"action":"dialogue.close"}]},{"reply":"I need a better lead.","action":{"action":"dialogue.close"}}]}]}]}

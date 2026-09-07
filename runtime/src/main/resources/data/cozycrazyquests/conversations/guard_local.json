@@ -1,7 +1,1 @@
-{
-  "title": "Village Guard",
-  "starting_index": 0,
-  "dialogues": [
-    {"dialogue_options":[{"dialogue":"Keeping an eye on the roads. Need something local?","condition":"*","closable":"always","timings":[0.18,0.04,0.35,0.60],"replies":[{"reply":"Anyone need help?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Where's the notice board?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"guard_board\"})"},{"action":"dialogue.close"}]},{"reply":"Never mind.","action":{"action":"dialogue.close"}}]}]}
-  ]
-}
+{"title":"Village Guard","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"I know patrol routes, recent trouble, and who came back hurt. For old maps or old stone, ask somebody else.","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"Who should I ask?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"route_help\"})"},{"action":"dialogue.close"}]},{"reply":"Where is the notice board?","action":[{"action":"give.item(1,cozycrazyquests:conversation_token{ccc_action:\"guard_board\"})"},{"action":"dialogue.close"}]},{"reply":"Anything else?","action":{"action":"dialogue.goto(1)"}},{"reply":"Thanks.","action":{"action":"dialogue.close"}}]}]},{"dialogue_options":[{"dialogue":"If I send you to someone, it is because their evidence is better than mine — not because every guard knows every secret.","condition":"*","closable":"always","timings":[0.12,0.035,0.28,0.48],"replies":[{"reply":"Got it.","action":{"action":"dialogue.close"}}]}]}]}
