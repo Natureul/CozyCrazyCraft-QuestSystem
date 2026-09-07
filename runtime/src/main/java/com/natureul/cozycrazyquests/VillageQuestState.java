@@ -1,6 +1,9 @@
 package com.natureul.cozycrazyquests;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.nio.charset.StandardCharsets;
@@ -16,9 +19,10 @@ import java.util.List;
  * contract book: at most one authored contract per village, but contracts from different villages
  * can coexist. The physical contract papers remain the lightweight player-facing reminder.
  *
- * 0.4.1 also keeps one compact recent-completion record per village. That is enough to prevent the
- * most visible generated-feeling sequence — immediately returning to the exact same structure for the
- * same reward family — without turning quest history into an unbounded player NBT archive.
+ * 0.4.1 also keeps compact recent-completion and recent-hint records per village. That is enough to
+ * prevent the most visible generated-feeling sequences without turning quest history into an
+ * unbounded player NBT archive. Hint history stores semantic resource families, not villager identity,
+ * so several residents cannot all answer one question with the same-feeling page in a row.
  */
 final class VillageQuestState {
     static final String ROOT = "CozyCrazyVillagerQuests";
@@ -27,9 +31,11 @@ final class VillageQuestState {
     static final String ACTIVES = "active_by_village";
     static final String COMPLETED = "completed";
     static final String RECENT_COMPLETIONS = "recent_completion_by_village";
+    static final String RECENT_HINT_FAMILIES = "recent_hint_families_by_village";
     static final String CONVERSATION_VILLAGE = "conversation_village_key";
     static final String CONVERSATION_SPEAKER = "conversation_speaker_uuid";
     static final String PAID_HINTS = "paid_hints";
+    private static final int RECENT_HINT_LIMIT = 5;
 
     private VillageQuestState() {}
 
@@ -101,6 +107,34 @@ final class VillageQuestState {
         CompoundTag recent = root.getCompound(RECENT_COMPLETIONS);
         recent.put(slot(villageKey), entry);
         root.put(RECENT_COMPLETIONS, recent);
+    }
+
+    static List<String> recentHintFamilies(CompoundTag root, String villageKey) {
+        List<String> result = new ArrayList<>();
+        if (villageKey == null || villageKey.isBlank()) return result;
+
+        CompoundTag byVillage = root.getCompound(RECENT_HINT_FAMILIES);
+        ListTag stored = byVillage.getList(slot(villageKey), Tag.TAG_STRING);
+        for (int i = 0; i < stored.size() && result.size() < RECENT_HINT_LIMIT; i++) {
+            String family = stored.getString(i);
+            if (!family.isBlank() && !result.contains(family)) result.add(family);
+        }
+        return result;
+    }
+
+    static void noteHintFamily(CompoundTag root, String villageKey, String family) {
+        if (villageKey == null || villageKey.isBlank() || family == null || family.isBlank()) return;
+
+        List<String> values = new ArrayList<>(recentHintFamilies(root, villageKey));
+        values.remove(family);
+        values.add(0, family);
+        while (values.size() > RECENT_HINT_LIMIT) values.remove(values.size() - 1);
+
+        ListTag stored = new ListTag();
+        for (String value : values) stored.add(StringTag.valueOf(value));
+        CompoundTag byVillage = root.getCompound(RECENT_HINT_FAMILIES);
+        byVillage.put(slot(villageKey), stored);
+        root.put(RECENT_HINT_FAMILIES, byVillage);
     }
 
     static void noteConversation(CompoundTag root, String villageKey, String speakerUuid) {
