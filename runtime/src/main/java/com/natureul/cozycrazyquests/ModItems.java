@@ -14,6 +14,7 @@ public final class ModItems {
     public static final RegistryObject<Item> SUNSCAR_TOMB_TABLET = proof("sunscar_tomb_tablet");
     public static final RegistryObject<Item> GREENVEIL_SURVEY_NOTES = proof("greenveil_survey_notes");
     public static final RegistryObject<Item> FROSTMARCH_DISPATCH = proof("frostmarch_dispatch");
+    public static final RegistryObject<Item> RECOVERED_EVIDENCE = proof("recovered_evidence");
 
     public static final RegistryObject<Item> CONVERSATION_TOKEN = ITEMS.register(
             "conversation_token",
