@@ -25,22 +25,21 @@ import java.util.Map;
  * The lair is the reward. Killing the Gore is explicitly NOT an objective and is not tracked here.
  * A child can very rarely start the rumor, but children are only one route: once the player is at
  * least Recognized in a village, appropriate stone/tool specialists may independently share a real
- * nearby deep-road site as valuable local knowledge. The social lead can mark the surface position
- * on the Atlas, and reaching the real underground structure simply confirms the discovery.
- *
- * No structure means no rumor or reward. The structure locate is lazy and cached per village; there
- * is no background world scan.
+ * nearby deep-road site as valuable local knowledge. A knowledgeable specialist marks a safe surface
+ * approach rather than the lair center; reaching a real piece of the exact underground structure
+ * confirms discovery after a short dwell.
  */
 final class GoreTunnelLead {
     private static final ResourceLocation GORE_LAIR = new ResourceLocation("skarrier_mobs", "tunnel_gore_lair_x");
     private static final int SEARCH_RADIUS = 2000;
-    private static final int DISCOVERY_RADIUS = 104;
-    private static final int VERTICAL_TOLERANCE = 80;
-    private static final long CACHE_LIFETIME = 6000L;
+    private static final int QUALIFYING_DWELL_TICKS = 20;
+    private static final long POSITIVE_CACHE_LIFETIME = 24000L;
+    private static final long NEGATIVE_CACHE_LIFETIME = 6000L;
     private static final String ROOT = "CozyCrazyGoreTunnelLead";
     private static final String STAGE_RUMOR = "RUMOR";
     private static final String STAGE_LEAD = "LEAD";
     private static final String STAGE_COMPLETE = "COMPLETE";
+    private static final String PRESENCE_TICKS = "piece_presence_ticks";
 
     private static final Map<String, CachedTarget> CACHE = new HashMap<>();
 
@@ -92,7 +91,7 @@ final class GoreTunnelLead {
     static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         if (!(event.player instanceof ServerPlayer player)) return;
-        if (player.tickCount % 20 != 0) return;
+        if (player.tickCount % 10 != 0) return;
 
         CompoundTag state = state(player);
         if (!STAGE_LEAD.equals(state.getString("stage"))) return;
@@ -107,11 +106,7 @@ final class GoreTunnelLead {
                 ? state.getInt("target_start_chunk_z")
                 : Integer.MIN_VALUE;
 
-        // The lair is an underground generated structure, so its locate result's Y coordinate is not
-        // an objective. Prefer the actual generated bounding box just like ordinary authored survey
-        // contracts. This prevents a player who is literally inside the Gore tunnels from being told
-        // to keep digging tens of blocks beneath them merely because the locator anchor was lower.
-        boolean insideLair = NamedPlaceBridge.insideExactStructure(
+        boolean insideLairPiece = NamedPlaceBridge.insideExactStructure(
                 level,
                 player.blockPosition(),
                 GORE_LAIR,
@@ -120,16 +115,20 @@ final class GoreTunnelLead {
                 target
         );
 
-        if (!insideLair) {
-            // Compatibility fallback for an older saved Deep Road lead that predates stable instance
-            // identity, or an unusual third-party structure whose occupied pieces are not exposed by
-            // StructureManager. This path remains intentionally stricter than the normal exact check.
-            long dx = (long) player.blockPosition().getX() - target.getX();
-            long dz = (long) player.blockPosition().getZ() - target.getZ();
-            if (dx * dx + dz * dz > (long) DISCOVERY_RADIUS * DISCOVERY_RADIUS) return;
-            if (Math.abs(player.blockPosition().getY() - target.getY()) > VERTICAL_TOLERANCE) return;
+        if (!insideLairPiece) {
+            if (state.getInt(PRESENCE_TICKS) != 0) {
+                state.putInt(PRESENCE_TICKS, 0);
+                save(player, state);
+            }
+            return;
         }
 
+        int dwell = Math.min(QUALIFYING_DWELL_TICKS, state.getInt(PRESENCE_TICKS) + 10);
+        state.putInt(PRESENCE_TICKS, dwell);
+        save(player, state);
+        if (dwell < QUALIFYING_DWELL_TICKS) return;
+
+        state.remove(PRESENCE_TICKS);
         state.putString("stage", STAGE_COMPLETE);
         state.putBoolean("surveyed", true);
         save(player, state);
@@ -140,8 +139,7 @@ final class GoreTunnelLead {
                 PlayerKnowledgeState.Provenance.LOCAL_OBSERVATION
         );
         player.displayClientMessage(
-                Component.literal("You found " + state.getString("target_name")
-                                + ". The deep-road story was true; what you do with the tunnels is up to you.")
+                Component.literal("Found: " + state.getString("target_name") + ".")
                         .withStyle(ChatFormatting.AQUA),
                 true
         );
@@ -168,19 +166,15 @@ final class GoreTunnelLead {
             save(player, state);
         }
 
-        BlockPos target = readTarget(state);
-        int distance = roundedDistance(village.anchor(), target, 200);
-        String where = direction(village.anchor(), target);
         PlayerKnowledgeState.advance(
                 player,
                 state.getString("target_key"),
                 PlayerKnowledgeState.Knowledge.RUMOR,
                 PlayerKnowledgeState.Provenance.RUMOR_NETWORK
         );
+        // The actual rumor belongs in the Conversations box; action bar is only state feedback.
         player.displayClientMessage(
-                Component.literal("The child points " + where + ": somewhere underground, maybe " + distance
-                                + " blocks out. They insist someone who knows stone has heard it too.")
-                        .withStyle(ChatFormatting.GOLD),
+                Component.literal("Rumor noted.").withStyle(ChatFormatting.GOLD),
                 true
         );
         return true;
@@ -199,6 +193,7 @@ final class GoreTunnelLead {
             writeTargetState(state, level, village, target, STAGE_LEAD);
         } else {
             state.putString("stage", STAGE_LEAD);
+            ensureApproach(state, level, village);
         }
         save(player, state);
 
@@ -209,23 +204,24 @@ final class GoreTunnelLead {
                 PlayerKnowledgeState.Provenance.PROFESSION_EVIDENCE
         );
 
+        BlockPos target = readTarget(state);
+        BlockPos approach = readApproach(state);
         boolean marked = NamedPlaceBridge.revealStructureToAtlas(
                 player,
                 GORE_LAIR,
-                readTarget(state),
-                state.getString("target_name")
+                target,
+                state.getString("target_name"),
+                approach
         );
 
         // A small prospector's courtesy; the valuable reward is the ore-rich location itself.
         giveOrDrop(player, new ItemStack(Items.TORCH, 12));
 
-        BlockPos target = readTarget(state);
-        int distance = roundedDistance(village.anchor(), target, 50);
-        String message = state.getString("target_name") + ": about " + distance + " blocks "
-                + direction(village.anchor(), target)
-                + ". It is underground; the surface position is a reference, not an entrance.";
-        if (marked) message += " I've marked that surface position on your Atlas.";
-        player.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.GOLD), true);
+        player.displayClientMessage(
+                Component.literal(marked ? "Atlas marked: Deep Road approach." : "Deep Road lead noted.")
+                        .withStyle(ChatFormatting.GOLD),
+                true
+        );
         return true;
     }
 
@@ -245,6 +241,9 @@ final class GoreTunnelLead {
         state.putString("target_name", NamedPlaceBridge.structureName(level, target.id(), target.pos()));
         state.putString("target_key", targetKey(level, target));
 
+        BlockPos approach = NamedPlaceBridge.surfaceApproach(level, target.id(), target.pos(), village.anchor());
+        putApproach(state, approach);
+
         NamedPlaceBridge.StructureInstance instance = NamedPlaceBridge.structureInstance(level, target.id(), target.pos());
         if (instance != null) {
             state.putInt("target_start_chunk_x", instance.startChunk().x);
@@ -252,10 +251,19 @@ final class GoreTunnelLead {
         }
     }
 
+    private static void ensureApproach(CompoundTag state, ServerLevel level, VillageContext village) {
+        if (state.contains("approachX") && state.contains("approachY") && state.contains("approachZ")) return;
+        BlockPos approach = NamedPlaceBridge.surfaceApproach(level, GORE_LAIR, readTarget(state), village.anchor());
+        putApproach(state, approach);
+    }
+
     private static NearbyStructureResolver.ResolvedStructure resolve(ServerLevel level, VillageContext village) {
         String key = level.getSeed() + ":" + level.dimension().location() + ":" + village.key();
         CachedTarget cached = CACHE.get(key);
-        if (cached != null && level.getGameTime() - cached.checkedAt() <= CACHE_LIFETIME) return cached.target();
+        if (cached != null) {
+            long lifetime = cached.target() == null ? NEGATIVE_CACHE_LIFETIME : POSITIVE_CACHE_LIFETIME;
+            if (level.getGameTime() - cached.checkedAt() <= lifetime) return cached.target();
+        }
         NearbyStructureResolver.ResolvedStructure found = NearbyStructureResolver.findNearest(
                 level,
                 village.anchor(),
@@ -311,28 +319,14 @@ final class GoreTunnelLead {
         return new BlockPos(tag.getInt("targetX"), tag.getInt("targetY"), tag.getInt("targetZ"));
     }
 
-    private static int roundedDistance(BlockPos from, BlockPos to, int step) {
-        long dx = (long) to.getX() - from.getX();
-        long dz = (long) to.getZ() - from.getZ();
-        int exact = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
-        return Math.max(step, (int) Math.round(exact / (double) step) * step);
+    private static void putApproach(CompoundTag tag, BlockPos pos) {
+        tag.putInt("approachX", pos.getX());
+        tag.putInt("approachY", pos.getY());
+        tag.putInt("approachZ", pos.getZ());
     }
 
-    private static String direction(BlockPos from, BlockPos to) {
-        long dx = (long) to.getX() - from.getX();
-        long dz = (long) to.getZ() - from.getZ();
-        double angle = Math.atan2(dx, -dz);
-        int octant = Math.floorMod((int) Math.round(angle / (Math.PI / 4.0)), 8);
-        return switch (octant) {
-            case 0 -> "north";
-            case 1 -> "northeast";
-            case 2 -> "east";
-            case 3 -> "southeast";
-            case 4 -> "south";
-            case 5 -> "southwest";
-            case 6 -> "west";
-            default -> "northwest";
-        };
+    private static BlockPos readApproach(CompoundTag tag) {
+        return new BlockPos(tag.getInt("approachX"), tag.getInt("approachY"), tag.getInt("approachZ"));
     }
 
     private static void giveOrDrop(ServerPlayer player, ItemStack stack) {
