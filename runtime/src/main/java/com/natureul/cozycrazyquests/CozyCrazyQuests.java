@@ -32,10 +32,12 @@ public final class CozyCrazyQuests {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, VillageSocialConversationManager::onEntityInteract);
 
-        // Exact structure occupancy runs before the older distance fallback. This makes underground
-        // survey completion agree with the world's actual structure-discovery semantics rather than
-        // trusting a modded structure locator's Y coordinate.
+        // Structure/recovery proof is physical. Survey completion requires sustained real-piece occupancy;
+        // recovery evidence is bound to an actual container in the exact assigned structure and only
+        // completes after the player takes that quest-bound object.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, StructureSurveyCompletionBridge::onPlayerTick);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, RecoveryQuestRuntime::onRightClickBlock);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, RecoveryQuestRuntime::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(GoreTunnelLead::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onLivingDeath);
