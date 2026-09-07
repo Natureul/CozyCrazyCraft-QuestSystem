@@ -32,11 +32,13 @@ public final class CozyCrazyQuests {
 
         // Profession-authored work gets first refusal. Civic fallback then makes regional work and
         // jobless villages executable without mutating vanilla professions. Regional ambient voice may
-        // add local color only to otherwise idle villagers; the ordinary social fallback runs last.
+        // add local color only to otherwise idle villagers; the ordinary social fallback runs after it.
+        // Recovery support is the final narrow override only when a previously seeded physical object is missing.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, VillageConversationQuestManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, CivicQuestFallbackManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, RegionalAmbientConversationManager::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, VillageSocialConversationManager::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, RecoverySupportConversationManager::onEntityInteract);
 
         // Structure/recovery proof is physical. Survey completion requires sustained real-piece occupancy;
         // recovery evidence is bound to an actual container in the exact assigned structure and only

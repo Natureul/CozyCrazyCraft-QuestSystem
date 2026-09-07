@@ -12,6 +12,7 @@ final class RecoveredEvidence {
     private static final String VILLAGE_KEY = "ccc_recovery_village";
     private static final String TARGET_KEY = "ccc_recovery_target";
     private static final String OBJECT_NAME = "ccc_recovery_object";
+    private static final String GENERATION = "ccc_recovery_generation";
 
     private RecoveredEvidence() {}
 
@@ -22,6 +23,7 @@ final class RecoveredEvidence {
         tag.putString(VILLAGE_KEY, active.getString("village_key"));
         tag.putString(TARGET_KEY, active.getString("target_key"));
         tag.putString(OBJECT_NAME, definition.recoveryObjectName());
+        tag.putInt(GENERATION, active.getInt(RecoveryQuestRuntime.GENERATION));
         String name = definition.recoveryObjectName().isBlank() ? "Recovered Evidence" : definition.recoveryObjectName();
         stack.setHoverName(Component.literal(name).withStyle(ChatFormatting.GOLD));
         return stack;
@@ -42,6 +44,7 @@ final class RecoveredEvidence {
         String questId = active.getString("quest_id");
         String villageKey = active.getString("village_key");
         String targetKey = active.getString("target_key");
+        int generation = active.getInt(RecoveryQuestRuntime.GENERATION);
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             if (!stack.is(ModItems.RECOVERED_EVIDENCE.get()) || !stack.hasTag()) continue;
@@ -49,6 +52,8 @@ final class RecoveredEvidence {
             if (!questId.equals(tag.getString(QUEST_ID))) continue;
             if (!villageKey.equals(tag.getString(VILLAGE_KEY))) continue;
             if (!targetKey.isBlank() && !targetKey.equals(tag.getString(TARGET_KEY))) continue;
+            // Missing legacy generation tags read as zero, preserving pre-0.4.1 evidence until a reset occurs.
+            if (generation != tag.getInt(GENERATION)) continue;
             return slot;
         }
         return -1;
