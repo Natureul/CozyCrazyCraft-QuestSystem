@@ -37,9 +37,9 @@ record VillageContext(
                 origin,
                 MEETING_RADIUS,
                 PoiManager.Occupancy.ANY
-        );
+        ).filter(level::isVillage).map(BlockPos::immutable);
 
-        BlockPos anchor = meeting.filter(level::isVillage).orElse(origin).immutable();
+        BlockPos anchor = meeting.orElse(origin.immutable());
         String name = VillageNameCacheBridge.nearestAssigned(level, anchor, NAME_RADIUS);
         boolean namedVillage = name != null && !name.isBlank() && !"the village".equalsIgnoreCase(name);
         boolean villageHere = level.isVillage(anchor) || level.isVillage(origin) || namedVillage;
@@ -52,7 +52,7 @@ record VillageContext(
                 .orElse(null);
 
         return new VillageContext(
-                stableKey(level, name, anchor, namedVillage),
+                stableKey(level, name, anchor, namedVillage, meeting.orElse(null), board),
                 name,
                 anchor,
                 cell,
@@ -72,14 +72,32 @@ record VillageContext(
         return hasBoard() ? BountifulBridge.boardCompletedCount(level, boardRecord.board()) : 0;
     }
 
-    private static String stableKey(ServerLevel level, String name, BlockPos anchor, boolean namedVillage) {
+    private static String stableKey(
+            ServerLevel level,
+            String name,
+            BlockPos anchor,
+            boolean namedVillage,
+            BlockPos meeting,
+            VillageBoardSavedData.VillageRecord board
+    ) {
         String dimension = level.dimension().location().toString();
         if (namedVillage) {
             return dimension + "|name|" + slug(name);
         }
-        // Fallback for settlements whose CozyCrazyZones identity cannot currently be resolved.
-        // Quantize around the meeting point so individual villagers do not become separate villages.
-        return dimension + "|fallback|" + Math.floorDiv(anchor.getX(), 128) + "," + Math.floorDiv(anchor.getZ(), 128);
+
+        // Prefer a physical civic object over coordinate bucketing. Two settlements can be unusually
+        // close together; their bell/meeting POIs remain distinct even when a coarse 128-block grid does not.
+        if (meeting != null) {
+            return dimension + "|meeting|" + meeting.getX() + "," + meeting.getY() + "," + meeting.getZ();
+        }
+        if (board != null) {
+            BlockPos pos = board.board();
+            return dimension + "|board|" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
+        }
+
+        // Emergency compatibility path for an inhabited POI cluster before its meeting point or board is
+        // available. This is intentionally finer than the old 128-block bucket and should be rare.
+        return dimension + "|fallback|" + Math.floorDiv(anchor.getX(), 48) + "," + Math.floorDiv(anchor.getZ(), 48);
     }
 
     private static String slug(String value) {
