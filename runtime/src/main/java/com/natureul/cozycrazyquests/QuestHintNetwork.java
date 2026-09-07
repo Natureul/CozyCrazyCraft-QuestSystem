@@ -196,9 +196,11 @@ final class QuestHintNetwork {
         };
 
         AABB area = new AABB(village.anchor()).inflate(SOCIAL_RADIUS, 64, SOCIAL_RADIUS);
-        return level.getEntitiesOfClass(Villager.class, area, villager ->
-                        !villager.isBaby()
-                                && wanted.contains(villager.getVillagerData().getProfession()))
+        return level.getEntitiesOfClass(Villager.class, area, villager -> {
+                    if (villager.isBaby() || !wanted.contains(villager.getVillagerData().getProfession())) return false;
+                    VillageContext theirs = VillageContext.resolve(level, villager.blockPosition());
+                    return theirs != null && village.key().equals(theirs.key());
+                })
                 .stream()
                 .min(Comparator.comparingInt(v -> wanted.indexOf(v.getVillagerData().getProfession()) * 10000
                         + (int) Math.min(9999, v.distanceToSqr(player))));
@@ -211,7 +213,11 @@ final class QuestHintNetwork {
             String questId
     ) {
         AABB area = new AABB(village.anchor()).inflate(SOCIAL_RADIUS, 64, SOCIAL_RADIUS);
-        return level.getEntitiesOfClass(Villager.class, area, villager -> !villager.isBaby()).stream()
+        return level.getEntitiesOfClass(Villager.class, area, villager -> {
+                    if (villager.isBaby()) return false;
+                    VillageContext theirs = VillageContext.resolve(level, villager.blockPosition());
+                    return theirs != null && village.key().equals(theirs.key());
+                }).stream()
                 .min(Comparator.comparingInt(villager -> Math.floorMod(villager.getUUID().hashCode() ^ questId.hashCode(), Integer.MAX_VALUE)))
                 .map(villager -> villager.getUUID().equals(speaker.getUUID()))
                 .orElse(false);
