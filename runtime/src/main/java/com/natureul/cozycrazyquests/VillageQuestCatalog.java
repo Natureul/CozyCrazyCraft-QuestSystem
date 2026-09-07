@@ -9,9 +9,10 @@ import java.util.List;
 /**
  * Executable authored quest catalogue facade.
  *
- * The definitions are split by progression layer so the Bible can keep growing without turning one
- * source file into a wall of hundreds of quest rows. The facade preserves the original runtime API:
- * callers still ask for a quest by id or profession, while authored banks can grow independently.
+ * Regional banks are deliberately excluded from the legacy profession-only lookup. A method that has
+ * no village cell cannot safely decide whether west/east/north/south content belongs in the current
+ * settlement. Region-scoped work is exposed through region-aware helpers instead, preventing a western
+ * story from leaking into another macro merely because the same structure mod generated there.
  */
 final class VillageQuestCatalog {
     private VillageQuestCatalog() {}
@@ -34,8 +35,44 @@ final class VillageQuestCatalog {
         return null;
     }
 
+    /** Legacy/global authored bank. Region-prefixed definitions require a village cell and are excluded. */
     static List<Definition> forProfession(VillagerProfession profession) {
-        return ALL.stream().filter(definition -> definition.giverProfessions.contains(profession)).toList();
+        return ALL.stream()
+                .filter(definition -> !isRegionScoped(definition))
+                .filter(definition -> definition.giverProfessions.contains(profession))
+                .toList();
+    }
+
+    static List<Definition> regionalForProfession(VillagerProfession profession, ZoneBridge.Cell cell) {
+        return ALL.stream()
+                .filter(VillageQuestCatalog::isRegionScoped)
+                .filter(definition -> definition.giverProfessions.contains(profession))
+                .filter(definition -> issuesInCell(definition, cell))
+                .toList();
+    }
+
+    static List<Definition> civicCandidates(ZoneBridge.Cell cell) {
+        return ALL.stream()
+                .filter(definition -> issuesInCell(definition, cell))
+                .toList();
+    }
+
+    static boolean issuesInCell(Definition definition, ZoneBridge.Cell cell) {
+        if (definition == null || cell == null || !cell.known()) return false;
+        if (!definition.issuingTier.equals(cell.tier())) return false;
+        String id = definition.id;
+        if (id.startsWith("west_")) return "WEST".equals(cell.macro());
+        if (id.startsWith("east_")) return "EAST".equals(cell.macro());
+        if (id.startsWith("north_")) return "NORTH".equals(cell.macro());
+        if (id.startsWith("south_")) return "SOUTH".equals(cell.macro());
+        return true;
+    }
+
+    static boolean isRegionScoped(Definition definition) {
+        if (definition == null) return false;
+        String id = definition.id;
+        return id.startsWith("west_") || id.startsWith("east_")
+                || id.startsWith("north_") || id.startsWith("south_");
     }
 
     static ResourceLocation id(String path) {
@@ -84,12 +121,6 @@ final class VillageQuestCatalog {
         );
     }
 
-    /**
-     * Recover a quest-bound object from a real generated structure. Recovery deliberately reuses the
-     * structure-survey lifecycle so all existing target selection, local-knowledge and exact-instance
-     * safeguards stay intact; a non-empty recoveryObjectName tells the visit bridge to create evidence
-     * only after the player physically enters the assigned structure.
-     */
     static Definition recovery(
             String id, String title, List<VillagerProfession> professions,
             VillageProgressState.AccomplishmentCategory category, String tier, int maxTierOffset,
