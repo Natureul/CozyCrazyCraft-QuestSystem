@@ -34,11 +34,11 @@ public final class CozyCrazyQuests {
 
         // Structure/recovery proof is physical. Survey completion requires sustained real-piece occupancy;
         // recovery evidence is bound to an actual container in the exact assigned structure and only
-        // completes after the player takes that quest-bound object.
+        // completes after the player takes that quest-bound object. The old manager radius tick is
+        // intentionally not registered: locator proximity is never structure-survey completion proof.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, StructureSurveyCompletionBridge::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, RecoveryQuestRuntime::onRightClickBlock);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, RecoveryQuestRuntime::onPlayerTick);
-        MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(GoreTunnelLead::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onLivingDeath);
         MinecraftForge.EVENT_BUS.addListener(VillageConversationQuestManager::onPlayerClone);
