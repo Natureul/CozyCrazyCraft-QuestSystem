@@ -14,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -27,15 +28,19 @@ import java.util.Map;
  * This deliberately does not turn the lair into radial progression. The structure remains a vertical,
  * underground encounter; the social system merely notices a real nearby instance and lets a child
  * occasionally become the first person to mention it. A mason/toolsmith/librarian can then turn the
- * rumor into a usable lead. Reaching the real lair and returning pays a one-off expedition reward.
+ * rumor into a usable lead. Reaching the real lair and returning pays a one-off expedition reward;
+ * defeating the Tunnel Gore at its own lair upgrades that reward without making an old/empty lair
+ * impossible to report.
  *
  * No structure means no rumor. No global scan runs in the background: the expensive locate happens
  * lazily on the rare child dialogue roll and is cached per village for five Minecraft minutes.
  */
 final class GoreTunnelLead {
     private static final ResourceLocation GORE_LAIR = new ResourceLocation("skarrier_mobs", "tunnel_gore_lair_x");
+    private static final ResourceLocation GORE_ENTITY = new ResourceLocation("skarrier_mobs", "tunnel_gore");
     private static final int SEARCH_RADIUS = 2200;
     private static final int DISCOVERY_RADIUS = 96;
+    private static final int KILL_CREDIT_RADIUS = 160;
     private static final int VERTICAL_TOLERANCE = 72;
     private static final long CACHE_LIFETIME = 6000L;
     private static final String ROOT = "CozyCrazyGoreTunnelLead";
@@ -56,9 +61,8 @@ final class GoreTunnelLead {
     }
 
     static boolean completedFor(ServerPlayer player, VillageContext village) {
-        return village != null
-                && sameVillage(state(player), village)
-                && STAGE_COMPLETE.equals(state(player).getString("stage"));
+        CompoundTag state = state(player);
+        return village != null && sameVillage(state, village) && STAGE_COMPLETE.equals(state.getString("stage"));
     }
 
     static ResourceLocation adultDialogue(ServerPlayer player, Villager villager, VillageContext village) {
@@ -66,7 +70,9 @@ final class GoreTunnelLead {
         CompoundTag state = state(player);
         if (!sameVillage(state, village) || !state.contains("targetX")) return null;
         if (STAGE_COMPLETE.equals(state.getString("stage"))) return null;
-        if (state.getBoolean("surveyed")) return id("gore_tunnel_return");
+        if (state.getBoolean("surveyed")) {
+            return state.getBoolean("gore_killed") ? id("gore_tunnel_return_killed") : id("gore_tunnel_return");
+        }
         if (STAGE_LEAD.equals(state.getString("stage"))) return id("gore_tunnel_adult_active");
         if (STAGE_RUMOR.equals(state.getString("stage"))) return id("gore_tunnel_adult_followup");
         return null;
@@ -105,9 +111,39 @@ final class GoreTunnelLead {
                 PlayerKnowledgeState.Provenance.LOCAL_OBSERVATION
         );
         player.sendSystemMessage(
-                Component.literal("You found the place beneath the rumor. Return to a mason, toolsmith, or librarian in "
-                                + displayVillage(state) + ".")
+                Component.literal("You found the place beneath the rumor. If the thing that dug it is still here, dealing with it may matter. You can return to "
+                                + displayVillage(state) + " either way.")
                         .withStyle(ChatFormatting.AQUA)
+        );
+    }
+
+    static void onLivingDeath(LivingDeathEvent event) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
+        ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
+        if (!GORE_ENTITY.equals(entityId)) return;
+
+        CompoundTag state = state(player);
+        if (!STAGE_LEAD.equals(state.getString("stage")) || !state.contains("targetX")) return;
+        if (!player.serverLevel().dimension().location().toString().equals(state.getString("dimension"))) return;
+
+        BlockPos target = readTarget(state);
+        long dx = (long) event.getEntity().blockPosition().getX() - target.getX();
+        long dz = (long) event.getEntity().blockPosition().getZ() - target.getZ();
+        if (dx * dx + dz * dz > (long) KILL_CREDIT_RADIUS * KILL_CREDIT_RADIUS) return;
+
+        state.putBoolean("surveyed", true);
+        state.putBoolean("gore_killed", true);
+        save(player, state);
+        PlayerKnowledgeState.advance(
+                player,
+                state.getString("target_key"),
+                PlayerKnowledgeState.Knowledge.KNOWN,
+                PlayerKnowledgeState.Provenance.QUEST_PROOF
+        );
+        player.sendSystemMessage(
+                Component.literal("Tunnel Gore defeated at the deep-road lair. Return to " + displayVillage(state)
+                                + "; they promised more than a story for proof like that.")
+                        .withStyle(ChatFormatting.GOLD)
         );
     }
 
@@ -201,24 +237,31 @@ final class GoreTunnelLead {
         enchant(weapon, "minecraft:sharpness", 2);
         enchant(weapon, "minecraft:unbreaking", 2);
         giveOrDrop(player, weapon);
+        giveOrDrop(player, new ItemStack(Items.EMERALD, state.getBoolean("gore_killed") ? 10 : 6));
 
-        ItemStack boots = stack("minecraft:iron_boots", "Deep-Road Boots");
-        enchant(boots, "minecraft:feather_falling", 2);
-        enchant(boots, "minecraft:unbreaking", 1);
-        giveOrDrop(player, boots);
-        giveOrDrop(player, new ItemStack(Items.EMERALD, 8));
-        player.giveExperiencePoints(12);
+        if (state.getBoolean("gore_killed")) {
+            ItemStack boots = stack("minecraft:iron_boots", "Deep-Road Boots");
+            enchant(boots, "minecraft:feather_falling", 2);
+            enchant(boots, "minecraft:unbreaking", 1);
+            giveOrDrop(player, boots);
+            player.giveExperiencePoints(16);
+        } else {
+            player.giveExperiencePoints(10);
+        }
 
+        boolean goreKilled = state.getBoolean("gore_killed");
         state.putString("stage", STAGE_COMPLETE);
         save(player, state);
         PlayerKnowledgeState.advance(
                 player,
                 state.getString("target_key"),
                 PlayerKnowledgeState.Knowledge.CONFIRMED,
-                PlayerKnowledgeState.Provenance.QUEST_PROOF
+                PlayerKnowledgeState.Provenance.PLAYER_REPORT
         );
         player.sendSystemMessage(
-                Component.literal("The village believes the story now. Gorebreaker and the Deep-Road Boots are yours.")
+                Component.literal(goreKilled
+                                ? "The village believes the story now. Gorebreaker and the Deep-Road Boots are yours."
+                                : "The village believes the place is real. Gorebreaker is yours; the lair itself may still have unfinished business.")
                         .withStyle(ChatFormatting.GREEN)
         );
         return true;
