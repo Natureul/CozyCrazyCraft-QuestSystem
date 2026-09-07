@@ -170,6 +170,9 @@ public final class VillageConversationQuestManager {
                     && definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR) continue;
             if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
+            ExactHuntRegistry.Spec exactHunt = ExactHuntRegistry.forQuest(definition.id());
+            if (exactHunt != null && !exactHunt.matches(event.getEntity().getType())) continue;
+
             BlockPos target = readPos(active, "target");
             int radius = active.getInt("target_radius");
             long dx = (long) event.getEntity().blockPosition().getX() - target.getX();
@@ -184,17 +187,25 @@ public final class VillageConversationQuestManager {
             changed = true;
 
             if (count >= required) {
-                String cleared = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR
-                        ? active.getString("target_name") + " is clear enough to report back"
-                        : "the area is clear";
+                String cleared;
+                if (exactHunt != null) {
+                    cleared = exactHunt.targetLabel() + " is defeated at " + active.getString("target_name");
+                } else if (definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_HOSTILE_CLEAR) {
+                    cleared = active.getString("target_name") + " is clear enough to report back";
+                } else {
+                    cleared = "the area is clear";
+                }
                 player.sendSystemMessage(
                         Component.literal(definition.title() + ": " + cleared + ". "
                                         + returnInstruction(definition, active.getString("village_name")))
                                 .withStyle(ChatFormatting.AQUA)
                 );
             } else {
+                String progress = exactHunt == null
+                        ? count + "/" + required + " hostiles cleared"
+                        : count + "/" + required + " " + exactHunt.targetLabel() + " defeated";
                 player.displayClientMessage(
-                        Component.literal(definition.title() + "  •  " + count + "/" + required + " hostiles cleared")
+                        Component.literal(definition.title() + "  •  " + progress)
                                 .withStyle(ChatFormatting.GOLD),
                         true
                 );
@@ -453,12 +464,15 @@ public final class VillageConversationQuestManager {
         else prefix += " — " + definition.title();
 
         String objective;
+        ExactHuntRegistry.Spec exactHunt = ExactHuntRegistry.forQuest(definition.id());
         if (definition.isRecovery()) {
             objective = "recover " + definition.recoveryObjectName() + " from " + active.getString("target_name");
         } else {
             objective = switch (definition.objectiveType()) {
                 case STRUCTURE_SURVEY -> "survey " + active.getString("target_name");
-                case STRUCTURE_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles at " + active.getString("target_name");
+                case STRUCTURE_HOSTILE_CLEAR -> exactHunt == null
+                        ? "clear " + definition.requiredKills() + " hostiles at " + active.getString("target_name")
+                        : "defeat " + exactHunt.targetLabel() + " at " + active.getString("target_name");
                 case LOCAL_HOSTILE_CLEAR -> "clear " + definition.requiredKills() + " hostiles around " + active.getString("target_name");
             };
         }
@@ -627,7 +641,30 @@ public final class VillageConversationQuestManager {
                 definition.structureCandidates(),
                 definition.searchRadiusBlocks()
         );
-        if (found != null && !legalTarget(level, village.cell(), found, definition)) found = null;
+
+        // A mixed structure family can return an illegal nearest member even though another candidate
+        // type has a legal local instance. Retry candidate types individually only in that failure case;
+        // this keeps normal lookup cheap while preventing a Frontier ruin from masking a Wildlands
+        // temple that the village could legitimately know about.
+        if (found != null && !legalTarget(level, village.cell(), found, definition)) {
+            NearbyStructureResolver.ResolvedStructure nearestLegal = null;
+            if (definition.structureCandidates().size() > 1) {
+                for (ResourceLocation candidate : definition.structureCandidates()) {
+                    NearbyStructureResolver.ResolvedStructure alternate = NearbyStructureResolver.findNearest(
+                            level,
+                            village.anchor(),
+                            List.of(candidate),
+                            definition.searchRadiusBlocks()
+                    );
+                    if (alternate == null || !legalTarget(level, village.cell(), alternate, definition)) continue;
+                    if (nearestLegal == null || alternate.distanceBlocks() < nearestLegal.distanceBlocks()) {
+                        nearestLegal = alternate;
+                    }
+                }
+            }
+            found = nearestLegal;
+        }
+
         TARGET_CACHE.put(cacheKey, new CachedTarget(found, level.getGameTime()));
         return found;
     }
