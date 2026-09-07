@@ -92,9 +92,13 @@ public final class VillageContractItem extends Item {
             String object = definition.recoveryObjectName().isBlank() ? "the requested evidence" : definition.recoveryObjectName();
             return "Recover " + object + " from " + place;
         }
+
+        ExactHuntRegistry.Spec exactHunt = ExactHuntRegistry.forQuest(definition.id());
         return switch (definition.objectiveType()) {
             case STRUCTURE_SURVEY -> "Survey " + place;
-            case STRUCTURE_HOSTILE_CLEAR -> "Clear " + definition.requiredKills() + " hostiles at " + place;
+            case STRUCTURE_HOSTILE_CLEAR -> exactHunt == null
+                    ? "Clear " + definition.requiredKills() + " hostiles at " + place
+                    : "Defeat " + exactHunt.targetLabel() + " at " + place;
             case LOCAL_HOSTILE_CLEAR -> "Clear " + definition.requiredKills() + " hostiles around " + place;
         };
     }
