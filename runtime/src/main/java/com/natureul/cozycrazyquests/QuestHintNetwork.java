@@ -20,15 +20,10 @@ import java.util.Optional;
 /**
  * Daggerfall-style social navigation for an already accepted authored contract.
  *
- * The contract gives the player a credible starting bearing, not an instruction to blindly walk
- * hundreds of blocks and hope. Once work is active, ordinary residents can know nothing, repeat a
- * rumor, refer the player to somebody better informed, narrow the approach, identify the place by
- * name, or (where plausible) mark it on the Atlas. At least one loaded adult in the issuing village
- * is designated as a fallback guide so bad NPC rolls cannot make the whole settlement useless.
- *
- * The original giver is part of this network too. Before completion, asking the person who issued the
- * contract for more help is a sensible player action and must not dead-end into a generic reminder.
- * Completion/turn-in dialogue still wins because this network returns nothing once the objective is done.
+ * NPC speech belongs in Conversations. Runtime actions here only change knowledge, create a justified Atlas
+ * marker, or emit tiny state feedback. RUMOR and LEAD never silently reveal an exact marker; KNOWN may mark
+ * a destination when the speaker's conversation establishes reliable knowledge. Underground/submerged KNOWN
+ * markers use a surface approach rather than the chamber/structure center.
  */
 final class QuestHintNetwork {
     private static final int SOCIAL_RADIUS = 176;
@@ -45,12 +40,21 @@ final class QuestHintNetwork {
         VillageQuestState.noteConversation(root, village.key(), speaker.getUUID().toString());
         VillageQuestState.save(player, root);
 
+        String approach = active.getString("target_approach");
+        boolean underground = "UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach);
+        PlayerKnowledgeState.Knowledge current = PlayerKnowledgeState.knowledge(player, active.getString("target_key"));
+        if (current == PlayerKnowledgeState.Knowledge.CONFIRMED) {
+            return id(underground ? "hint_underground_confirmed" : "hint_structure_confirmed");
+        }
+        if (current == PlayerKnowledgeState.Knowledge.KNOWN) {
+            return id(underground ? "hint_underground_known" : "hint_structure_known");
+        }
+
         if (!(speaker instanceof Villager villager)) {
             return id("hint_structure_guard");
         }
 
         VillagerProfession profession = villager.getVillagerData().getProfession();
-        String approach = active.getString("target_approach");
         if (profession == VillagerProfession.CARTOGRAPHER) return id("hint_cartographer_target");
         if (profession == VillagerProfession.MASON) return id("hint_structure_mason");
         if (profession == VillagerProfession.LIBRARIAN || profession == VillagerProfession.CLERIC) {
@@ -89,20 +93,17 @@ final class QuestHintNetwork {
         if (specialist.isPresent()) {
             Villager villager = specialist.get();
             VillagerNameService.ensureNamed(level, villager);
-            long dx = (long) villager.blockPosition().getX() - player.blockPosition().getX();
-            long dz = (long) villager.blockPosition().getZ() - player.blockPosition().getZ();
-            int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
-            String where = distance <= 10 ? "right nearby" : "about " + distance + " blocks " + direction(dx, dz);
             player.displayClientMessage(
-                    Component.literal("Ask " + villager.getDisplayName().getString() + ", the "
-                                    + professionLabel(villager.getVillagerData().getProfession()) + ". They're " + where + ".")
+                    Component.literal("Referral: " + villager.getDisplayName().getString() + " — "
+                                    + professionLabel(villager.getVillagerData().getProfession()) + ".")
                             .withStyle(ChatFormatting.GOLD),
                     true
             );
             return true;
         }
 
-        // No specialist loaded? The village still must not strand the player. Give a usable lead now.
+        // No specialist loaded? The village still must not strand the player. The spoken Conversation
+        // gives the bounded route; this action only records that the player now has a LEAD.
         return giveLead(player, PlayerKnowledgeState.Knowledge.LEAD, 100, false);
     }
 
@@ -139,26 +140,44 @@ final class QuestHintNetwork {
             PlayerKnowledgeState.advance(player, targetKey, knowledge, provenance);
         }
 
-        BlockPos village = readPos(active, "village");
-        BlockPos target = readPos(active, "target");
-        int distance = roundedDistance(village, target, rounding);
-        String bearing = direction(
-                (long) target.getX() - village.getX(),
-                (long) target.getZ() - village.getZ()
-        );
-        String approach = active.getString("target_approach");
-        String subject = descriptiveOnly ? descriptiveSubject(active) : active.getString("target_name");
-        if (subject.isBlank()) subject = descriptiveSubject(active);
+        boolean marked = false;
+        if (knowledge == PlayerKnowledgeState.Knowledge.KNOWN) {
+            ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
+            if (structureId != null) {
+                BlockPos target = readPos(active, "target");
+                String approach = active.getString("target_approach");
+                BlockPos navigationAnchor = ("UNDERGROUND".equals(approach) || "SUBMERGED".equals(approach))
+                        ? NamedPlaceBridge.surfaceApproach(player.serverLevel(), structureId, target, readPos(active, "village"))
+                        : target;
+                marked = NamedPlaceBridge.revealStructureToAtlas(
+                        player,
+                        structureId,
+                        target,
+                        active.getString("target_name"),
+                        navigationAnchor
+                );
+                if (marked && !targetKey.isBlank()) {
+                    PlayerKnowledgeState.advance(
+                            player,
+                            targetKey,
+                            PlayerKnowledgeState.Knowledge.KNOWN,
+                            PlayerKnowledgeState.Provenance.MAP_RECORD
+                    );
+                }
+            }
+        }
 
-        String extra = switch (approach) {
-            case "UNDERGROUND" -> " It's underground; the surface bearing is only where to begin looking for a descent. Once you are actually inside the place, the survey counts — do not chase an imaginary depth below it.";
-            case "SUBMERGED" -> " It's below the waterline; search the water around that bearing rather than the shore alone.";
-            default -> " Look for the landmark itself once you're in that area.";
+        String status = switch (knowledge) {
+            case UNKNOWN -> "No reliable lead yet.";
+            case RUMOR -> "Rumor noted.";
+            case LEAD -> "Lead noted.";
+            case KNOWN -> marked ? "Atlas marked: " + active.getString("target_name") + "." : "Place identified.";
+            case CONFIRMED -> "Place already confirmed.";
         };
-
         player.displayClientMessage(
-                Component.literal(subject + ": roughly " + distance + " blocks " + bearing + "." + extra)
-                        .withStyle(knowledge == PlayerKnowledgeState.Knowledge.KNOWN ? ChatFormatting.AQUA : ChatFormatting.GOLD),
+                Component.literal(status)
+                        .withStyle(knowledge.ordinal() >= PlayerKnowledgeState.Knowledge.KNOWN.ordinal()
+                                ? ChatFormatting.AQUA : ChatFormatting.GOLD),
                 true
         );
         return true;
@@ -223,14 +242,6 @@ final class QuestHintNetwork {
                 .orElse(false);
     }
 
-    private static String descriptiveSubject(CompoundTag active) {
-        ResourceLocation id = ResourceLocation.tryParse(active.getString("target_structure"));
-        if (id == null) return "The place you're looking for";
-        String path = id.getPath().replace('_', ' ');
-        if (path.endsWith(" x")) path = path.substring(0, path.length() - 2);
-        return "The " + path;
-    }
-
     private static boolean objectiveComplete(CompoundTag active) {
         return active.getBoolean("objective_complete") || active.getBoolean("surveyed");
     }
@@ -239,31 +250,9 @@ final class QuestHintNetwork {
         return new BlockPos(tag.getInt(prefix + "X"), tag.getInt(prefix + "Y"), tag.getInt(prefix + "Z"));
     }
 
-    private static int roundedDistance(BlockPos from, BlockPos to, int step) {
-        long dx = (long) to.getX() - from.getX();
-        long dz = (long) to.getZ() - from.getZ();
-        int exact = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
-        return Math.max(step, (int) Math.round(exact / (double) step) * step);
-    }
-
     private static String professionLabel(VillagerProfession profession) {
         ResourceLocation key = ForgeRegistries.VILLAGER_PROFESSIONS.getKey(profession);
         return key == null ? "villager" : key.getPath().replace('_', ' ');
-    }
-
-    private static String direction(long dx, long dz) {
-        double angle = Math.atan2(dx, -dz);
-        int octant = Math.floorMod((int) Math.round(angle / (Math.PI / 4.0)), 8);
-        return switch (octant) {
-            case 0 -> "north";
-            case 1 -> "northeast";
-            case 2 -> "east";
-            case 3 -> "southeast";
-            case 4 -> "south";
-            case 5 -> "southwest";
-            case 6 -> "west";
-            default -> "northwest";
-        };
     }
 
     private static ResourceLocation id(String path) {
