@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static guardrails for 0.4.1 jobless-village and regional quest routing."""
+"""Static guardrails for 0.4.1 jobless/tiny-village and regional quest routing."""
 from pathlib import Path
 import json
 import re
@@ -23,6 +23,7 @@ def require(src: str, needle: str, label: str) -> None:
 roles = read(JAVA / "VillageCivicRoleService.java")
 social = read(JAVA / "VillageSocialConversationManager.java")
 fallback = read(JAVA / "CivicQuestFallbackManager.java")
+hints = read(JAVA / "QuestHintNetwork.java")
 catalog = read(JAVA / "VillageQuestCatalog.java")
 context = read(JAVA / "VillageContext.java")
 mod = read(JAVA / "CozyCrazyQuests.java")
@@ -31,6 +32,8 @@ for role in ("STEWARD", "ROADWARDEN", "QUARTERMASTER", "WATCH_CONTACT"):
     require(roles, role, f"stable role {role}")
 require(roles, "Comparator.comparing(Villager::getUUID)", "deterministic civic assignment")
 require(roles, "village.key().equals(theirs.key())", "civic roles cannot cross settlement identity")
+require(roles, "case 0 -> Role.STEWARD", "a one-adult surviving village still has a civic contact")
+require(roles, "case 1 -> Role.ROADWARDEN", "a two-adult village exposes a second civic surface")
 
 for forbidden in ("setVillagerData", "setProfession", "setJobSite", "setVillagerXp", "setOffers"):
     if forbidden in roles or forbidden in fallback:
@@ -38,7 +41,17 @@ for forbidden in ("setVillagerData", "setProfession", "setJobSite", "setVillager
 
 require(social, "VillageCivicRoleService.roleFor", "civic roles have distinct ambient Conversations")
 require(social, "VillageCivicRoleService.isCivicContact", "useful-person routing falls back to civic contacts")
-require(social, 'Component.literal("Ask "', "routing action bar is compact waypoint feedback")
+require(social, "QuestHintNetwork.routeForActiveQuest(player)", "route-help enters the central active/progression router first")
+require(hints, "routeForVillageProgress(", "wrong-villager route-help can route ordinary village progression")
+require(hints, "VillageCivicRoleService.isCivicContact", "progress router falls back to civic contacts without professions")
+require(hints, "compactReferral(player, villager)", "named referral feedback stays compact")
+
+# If the original profession-specific giver dies, a deterministic civic contact must still be able to
+# present the active/turn-in conversation for the village-owned contract.
+require(fallback, "if (!active.isEmpty())", "civic fallback handles already-active contracts")
+require(fallback, "definition.turninDialogue()", "civic successor can present completed-contract turn-in dialogue")
+require(fallback, "definition.activeDialogue()", "civic successor can present active-contract reminder dialogue")
+require(fallback, "sameIssuingVillage(active, level, village)", "successor only represents its own village")
 
 require(catalog, ".filter(definition -> !isRegionScoped(definition))", "legacy profession lookup cannot leak regional banks")
 for prefix, macro in (("west_", "WEST"), ("east_", "EAST"), ("north_", "NORTH"), ("south_", "SOUTH")):
@@ -74,4 +87,4 @@ for stem in ("civic_steward", "civic_roadwarden", "civic_quartermaster", "civic_
     raw = path.read_text(encoding="utf-8")
     require(raw, 'ccc_action:\\"route_help\\"', f"{stem} routes the player to useful work")
 
-print("OK: civic-role routing, jobless-village fallback, and macro-scoped regional issuance validated")
+print("OK: civic roles guard jobless, tiny-village, successor, wrong-villager and macro-scoped routing")
