@@ -20,79 +20,123 @@ RUNTIME_LIBS = ROOT / "runtime" / "build" / "libs"
 BUILD = ROOT / "build"
 OUTPUT = BUILD / "CozyCrazyCraft-QuestSystem-INTEGRATED_PLAYTEST_ROOT_OVERLAY.zip"
 
-README = """CozyCrazyCraft Quest System — 0.3.1 NAMED-PLACE / AUTHORED DIALOGUE PLAYTEST
+README = """CozyCrazyCraft Quest System — 0.4.0 SOCIAL PROGRESSION / AUTHORED QUEST PLAYTEST
 
 Target: Minecraft Forge 1.20.1
+Built for the current CozyCrazyCraft instance.
+
 Requires your normal installed pack, including:
 - Bountiful 6.0.4
-- Conversations 1.0.5 (user-installed; NOT bundled here)
-- Lazr's Lib required by your Conversations installation
-- your CURRENT CozyCrazyZones build (the build that supplies persistent village/place names and Atlas discovery markers)
-- Dungeons Enhanced 5.4.3
-- Valhelsia Structures if present in your normal pack
+- Conversations 1.0.5 and Lazr's Lib
+- your current CozyCrazyZones build
+- the structure, creature, reward, Atlas, and utility mods already present in CozyCrazyCraft
 
 IMPORTANT WHEN UPGRADING
-- Remove any older mods/CozyCrazyQuests-*.jar before copying this overlay.
-- Keep your normal Bountiful, Conversations, Lazr's Lib, CozyCrazyZones, Dungeons Enhanced, and other pack jars.
-- This ZIP contains only CozyCrazyCraft-owned config/resources and one CozyCrazyQuests runtime jar.
+1. Remove every older mods/CozyCrazyQuests-*.jar from the instance.
+2. Copy this ZIP's config/ and mods/ folders into the Minecraft instance root and merge/replace when asked.
+3. Keep your normal third-party mod jars. They are deliberately NOT bundled here.
+4. This overlay contains CozyCrazyCraft-owned Bountiful configuration plus CozyCrazyQuests-0.4.0.jar.
+5. Existing worlds/player state are expected to survive the upgrade, but this is a playtest branch: back up a world you care about before testing progression changes.
 
-0.3.1 architecture goal
-Bountiful remains the public civic notice board. Important profession requests and story contracts move into an authored villager layer. The first end-to-end proof is a Cartographer quest whose availability depends on a real nearby structure.
+WHAT 0.4.0 IS NOW
+The old Cartographer-only proof has grown into an authored village social-progression runtime.
+Bountiful remains the civic/public notice layer, while meaningful village work can now be offered and discussed directly by professions through Conversations.
 
-IMPORTANT NAMING RULE
-CozyCrazyZones already owns persistent world-global names for villages and discoverable places. This quest build reuses those exact identities. A settlement shown elsewhere as Pumpkin Hollow should be Pumpkin Hollow in the contract/return instructions; a named tower should use the same name on the contract, Atlas, and later discovery. The quest system must never create an alternate quest-only name for the same place.
+The runtime now includes:
+- Hearthlands authored village progression;
+- Frontier authored expedition and side-work catalogs;
+- the first executable Wildlands authored contracts and Great Hunts;
+- multiple simultaneous village-local contracts without making one NPC UUID critical;
+- profession-aware referrals and active-quest clue networks;
+- persistent village/place identity shared with CozyCrazyZones and the Atlas;
+- explicit player knowledge states: UNKNOWN -> RUMOR -> LEAD -> KNOWN -> CONFIRMED;
+- exact generated-structure targeting and occupancy checks for surveys/recoveries;
+- quest-bound recovered evidence for structure recovery jobs;
+- exact-creature boss hunt semantics where a verified hunt is enabled;
+- stable per-villager ambient dialogue variants and rare child rumor/help routes;
+- physical Village Contracts that preserve issuing village, objective, direction, approach, and return information.
 
-The First Real Map test
-1. Use an inhabited HEARTHLANDS village with a working bounty board and a vanilla Cartographer.
-2. Right-click the Cartographer. If a legal nearby landmark can be resolved, Conversations should open a dialogue titled "The First Real Map" instead of immediately opening trade.
-3. The dialogue must still offer "Show me your trades instead" so adding quests does not destroy normal villager trading.
-4. The spoken line is intentionally much shorter/faster than the first 0.3.0 visual prototype. A blank leading line is also used as a temporary workaround for Conversations 1.0.5's speaker-title overlap.
-5. Accept the survey. A named Village Contract should appear. Check all of these carefully:
-   - "Issued in <actual village name>" matches that settlement's existing CozyCrazyZones name;
-   - "Survey: <actual place name>" uses a stable world place-name rather than a raw structure type;
-   - approximate distance and compass direction are present;
-   - return instruction names the issuing settlement.
-6. Acceptance should queue that exact named destination into CozyCrazyZones' existing Map Atlas marker ledger. If you have an Atlas, verify the marker appears under the SAME place-name used by the contract. This is permanent geographical knowledge, not a temporary quest waypoint.
-7. Walk to that exact target. The prototype accepts same-tier or one-tier-outward targets and requires the same macro-region outside the shared core.
-8. When you come within 56 horizontal blocks of the cached target, you should receive a survey-complete message naming the target and the issuing settlement. The target/name must NOT change if you relog, wander away, or discover another structure.
-9. Physically discovering the place may still trigger CozyCrazyZones' normal discovery/stinger. That is expected: being told where a place is (KNOWN) and personally reaching it (CONFIRMED) are distinct facts, but both must use the same persistent name.
-10. Return to any Cartographer in the NAMED ISSUING village. The dialogue should switch to the turn-in state.
-11. Choose "The survey is finished." Expected reward: 5 emeralds + one spyglass + 5 XP points, plus one completion added to the same Bountiful board ledger used for Village Trust.
-12. Speak to the Cartographer again. This first-clear survey should not be re-offered to the same player in that village; normal trading should remain available.
+CORE PROGRESSION RULE
+Progression is semantic, not a raw quest counter. Hearthlands trust is built through different kinds of contribution such as COMMUNITY, EXPLORATION, PROFESSION, and DANGER work. Repeating one easy verb is not intended to substitute for broad village involvement.
 
-Nearby-structure eligibility
-- The initial legal target families are Dungeons Enhanced Watch Tower, Valhelsia Tower Ruin, and Dungeons Enhanced Stables, with the current regional candidate additions on this branch where legal.
-- A structure-dependent quest is withheld if no legal nearby instance resolves.
-- The locate happens lazily when the Cartographer needs an offer and is cached. There is no background structure-search tick.
-- The structure instance is frozen into the accepted quest state. This is the foundation for the larger Master Bible rule: villages should talk about what is actually near them.
+SOCIAL ROUTING TEST
+1. Enter an inhabited village and speak to several adult professions rather than only the Cartographer.
+2. A villager with relevant authored work may offer it through Conversations. Ordinary villagers should still have profession/ambient dialogue instead of every person becoming a quest dispenser.
+3. Accept a structure contract. Inspect the Village Contract tooltip: it should preserve the actual issuing village, objective, initial bearing, approach information, and valid return professions.
+4. Ask other residents about the active job. Cartographers, masons, librarians/clerics, smiths, fishermen, guards, and other residents should vary in what they plausibly know.
+5. Referral dialogue should route you to a named useful resident when one is loaded. If no specialist is available, the fallback lead must still prevent the quest from becoming a dead end.
+6. IMPORTANT 0.4.0 FIX: referrals and fallback guides are scoped to the issuing VillageContext. A nearby second village must not donate its residents to the first village's clue network.
+7. Rumor-level knowledge must not silently create a precise Atlas pin. More authoritative local/map evidence may identify or mark a place.
 
-Named-place identity hardening
-- The quest bridge resolves the real StructureStart chunk before asking CozyCrazyZones for a name, matching normal physical discovery identity.
-- The Atlas marker uses the same structure-start discovery key and structure bounding-box center as CozyCrazyZones' discovery system when available.
-- Village names likewise resolve through CozyCrazyZones' persistent VillageNameSavedData rather than a quest-local naming table.
-- If reflection ever fails, the quest fails gracefully to a readable generic label instead of corrupting quest state.
+STRUCTURE / RECOVERY TEST
+- Structure-dependent work is withheld if no legal real target can be resolved within its bounded search policy.
+- Accepted structure instances are frozen into quest state; the target must not jump after relogging or discovering another structure.
+- Underground/submerged locator Y values are navigation hints, not fake room objectives.
+- Normal structure surveys complete from exact generated-structure occupancy, with a compatibility path for older non-recovery discovery state.
+- Recovery contracts require physically entering the exact assigned structure instance. Only then is the quest-bound recovered object created.
+- Return the object to an accepted profession in the named issuing village; the system must not require the original NPC UUID to survive.
 
-Existing 0.2.1 board behavior remains in this build
-- authored titles on board hover;
-- ordinary radiant pay uses emeralds rather than generic food roulette;
-- roughly 120-second gradual board rotation;
-- same-board bounty redemption;
-- outdoor/path-biased automatic board placement and throttled in-village board locator;
-- current prototype Bountiful recovery contracts and proof loot remain for comparison, but they are now considered transitional content rather than the final story-delivery architecture.
+WILDLANDS PLAYTEST SLICE
+Verified executable Wildlands content currently includes:
+- Frostmarch: The Sleeping Mountain — exact Frostmaw Great Hunt at a real Frostmaw spawn structure; signature reward White Reach.
+- Frostmarch: The Last Warm Camp — recover a marked stove plate from an Ice Pit; Cold Sweat expedition utility rewards.
+- Greenveil: Temple of Eight Roots — recover a seed reliquary from a real jungle-temple/monument target; signature reward Greenwake.
+- Sunscar: The Sunbird — exact Umvuthi/Umvuthana Great Hunt at the real grove; signature reward Sunspike.
 
-Known limitations of 0.3.1
-- Only the Cartographer survey lifecycle has been moved to Conversations so far. This is deliberate: validate one complete lifecycle before importing hundreds of Master Bible hooks.
-- Cartographer is NOT intended to become the universal quest funnel. The next authored layer is profession/local-knowledge routing (Farmer -> Fletcher/Guard/etc. when that person actually knows the next fact), while Cartographers mainly remain map/travel specialists and merchants.
-- Conversations' stock screen is still physically too large. We fixed pacing/copy and the current overlap cheaply, but a real screen redesign is intentionally behind the quest-state/Atlas/knowledge-network work.
-- Conversations supports per-character type sounds; a restrained custom villager/character voice treatment is possible later, but it is not part of this functional test.
-- Conversations 1.0.5 integration is reflection-based and CI can compile it without the third-party jar, but the actual UI/action handshake must be smoke-tested in the real modpack.
-- A Conversations villager carries one dialogue id at a time. 0.3.1 selects that id immediately before interaction; multiplayer simultaneous use of the exact same villager is a later hardening target.
-- The survey detects arrival near the resolved structure position; it does not yet require a photograph or room-level interaction.
-- The old weighted Bountiful Recovery Contracts remain present during this transition and will later be replaced by deterministic Trust/featured contracts.
+INTENTIONAL ENCOUNTER RESTRAINT
+Not every dangerous creature is a radiant kill target.
+- The Tunnel Gore path treats the ore-rich underground lair as the discovery/reward. Killing the Gore is explicitly NOT the objective.
+- West Pumpkinhead content remains out of ordinary random rotation until its authoritative encounter/spawn path is suitable for authored progression.
+- The eastern Jungle Abomination final remains feature-gated rather than inventing a fake boss path.
+- Ancient Remnant remains feature-gated as well.
+Asymmetry here is intentional: verified encounters are preferable to fabricated regional symmetry.
 
-Next architecture after this smoke test
-The authored layer will use explicit knowledge states: UNKNOWN -> RUMOR -> LEAD -> KNOWN -> CONFIRMED. NPC handoffs should be purposeful, usually zero or one intermediary, never "ask random villagers until hidden RNG succeeds." Any profession may reveal/mark a place if its role and local facts justify knowing it.
+TUNNEL GORE / DEEP ROAD TEST
+- A rare child rumor can point toward a real nearby Tunnel Gore lair, but children are not required progression routers.
+- Once locally Recognized, appropriate stone/tool specialists can independently reveal the deep-road lead if a real lair exists.
+- A specialist can mark the surface reference on the Atlas and give a small torch courtesy; the ore-rich location is the real reward.
+- Entering the actual lair confirms the discovery. No Gore kill counter should appear.
 
+NAMED-PLACE / ATLAS RULE
+CozyCrazyZones owns persistent world-global village/place identity. CozyCrazyQuests reuses that identity instead of inventing quest-only duplicate names. A structure should retain the same name in dialogue, contract text, Atlas discovery, and later references.
+
+BOUNTIFUL ROLE
+Bountiful remains useful for civic notices, field work, trust-adjacent public tasks, and compatibility. It is no longer expected to carry the entire authored progression experience by itself.
+The deployment baseline intentionally excludes default Bountiful pool/decree content so CozyCrazyCraft's custom civic layer controls what appears.
+
+CURRENT CONTENT / VALIDATION SNAPSHOT
+CI for this package validates:
+- 108 authored/story-capable quest definitions;
+- 16 regional repeatable field jobs;
+- 32 live ordinary objective cards under the one-objective/payment policy;
+- four structure-bound recovery contracts;
+- the executable Wildlands structure jobs and exact Great Hunts;
+- target-distance/tier/macro legality;
+- semantic trust and knowledge-state policy;
+- Conversations dialogue schema/copy limits;
+- Bountiful configuration and story metadata;
+- Java compilation and integrated overlay packaging.
+
+KNOWN PLAYTEST NOTES
+- Conversations integration uses runtime/reflection bridges because the third-party Conversations jar is not bundled into this repository. The CI build proves our side compiles and packages; the real UI/action handshake still deserves in-client smoke testing whenever Conversations changes.
+- Conversations still permits only one dialogue id on an entity at a time. Simultaneous multiplayer interaction with the exact same NPC remains a later hardening target.
+- Four prototype Bountiful command-map rewards (jungle temple, Frostmaw, Umvuthi, stables) remain yellow-path features that should be explicitly smoke-tested in the real pack before being treated as final shipping behavior.
+- The checked-in static world-binding audit snapshot originated from CozyCrazyZones 0.3.6. The runtime ZoneBridge calls CozyZonesApi.regionalCellAt reflectively; that API remains the compatibility boundary for newer CozyCrazyZones builds.
+- Dread Reaches is not being filled with invented legendary content merely to complete a grid. Continue validating actual structures/encounters first.
+
+FAST SMOKE TEST ORDER
+1. Remove the old CozyCrazyQuests jar and install this overlay.
+2. Launch an existing test world and confirm no duplicate CozyCrazyQuests jars are loaded.
+3. Talk to multiple villagers in one Hearthlands village; verify ambient/profession variation and authored offers.
+4. Accept one structure quest, ask several residents for help, and inspect the physical contract.
+5. If two villages are near each other, deliberately test that referrals stay inside the issuing village.
+6. Complete a structure survey/recovery and turn it in to an accepted profession in the issuing village.
+7. Test a Frontier village for expedition-style authored work.
+8. If convenient, test one verified Wildlands contract/Great Hunt rather than forcing every region in one session.
+9. Test the Tunnel Gore rumor/lead only as a discovery path; do not expect a kill objective.
+10. Report any dialogue that feels repetitive, any target that is absurdly distant/wrong-tier, any contract that loses its village/place identity, or any case where a player can become stranded without a usable lead.
+
+Build identity: CozyCrazyQuests 0.4.0 — social-progression / authored-quest playtest.
 """
 
 
