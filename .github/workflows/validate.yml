@@ -40,6 +40,8 @@ jobs:
         run: python tools/validate_qa_regression_contracts.py
       - name: Validate civic roles and regional issuance
         run: python tools/validate_civic_roles.py
+      - name: Validate refreshable social dialogue state
+        run: python tools/validate_social_dialogue_refresh.py
       - name: Validate authored target and reward novelty
         run: python tools/validate_quest_novelty_runtime.py
       - name: Validate structure-proof and UI invariants
