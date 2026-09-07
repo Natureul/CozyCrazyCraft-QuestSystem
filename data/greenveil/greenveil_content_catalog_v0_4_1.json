@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "region": "EAST",
+  "region_name": "Greenveil",
+  "branch_target": "0.4.1",
+  "design_rules": {
+    "mandatory_wildlands_boss": false,
+    "jungle_abomination_live": false,
+    "wildlife_is_not_generic_kill_currency": true,
+    "territorial_plants_require_place_context": true,
+    "preferred_bands": ["FRONTIER", "WILDLANDS"]
+  },
+  "executable_content": [
+    {"id":"frontier_overgrown_route","band":"FRONTIER","surface":"CONVERSATIONS_RUNTIME","status":"LIVE_EXISTING_RUNTIME_REWRITTEN","structure_ids":["dungeons_enhanced:jungle_monument"],"focus":"clear the hostile approach without treating the caged resident as scenery"},
+    {"id":"frontier_vine_shrine","band":"FRONTIER","surface":"CONVERSATIONS_RUNTIME","status":"LIVE_EXISTING_RUNTIME_REWRITTEN","structure_ids":["betterjungletemples:jungle_temple"],"focus":"wet-route temple clear and route recovery"},
+    {"id":"recovery_greenveil_folio","band":"FRONTIER","surface":"CONVERSATIONS_RUNTIME","status":"LIVE_EXISTING_RUNTIME_REWRITTEN","structure_ids":["bettermineshafts:mineshaft_lush","bettermineshafts:mineshaft_overgrown"],"focus":"cave recovery and route evidence"},
+    {"id":"frontier_greenwake","band":"FRONTIER","surface":"CONVERSATIONS_RUNTIME","status":"LIVE_EXISTING_RUNTIME_REWRITTEN","structure_ids":[],"focus":"reach-weapon field trial with practical Greenveil voice"},
+    {"id":"frontier_side_overgrown_mine","band":"FRONTIER","surface":"CONVERSATIONS_RUNTIME","status":"LIVE_EXISTING_RUNTIME_REWRITTEN","structure_ids":["bettermineshafts:mineshaft_overgrown"],"focus":"optional cave expedition"},
+    {"id":"east_w3_temple_eight_roots","band":"WILDLANDS","surface":"CONVERSATIONS_RUNTIME","status":"LIVE_EXISTING_RUNTIME_REWRITTEN","structure_ids":["betterjungletemples:jungle_temple","dungeons_enhanced:jungle_monument"],"focus":"major deep-canopy expedition, not a boss substitute"},
+    {"id":"ccc_east_frontier_bamboo_bridge","band":"FRONTIER","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_frontier_east_objs","focus":"washout repair supplies"},
+    {"id":"ccc_east_frontier_scaffold","band":"FRONTIER","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_frontier_east_objs","focus":"high flood markers and vertical route support"},
+    {"id":"ccc_east_frontier_boats","band":"FRONTIER","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_frontier_east_objs","focus":"river-watch logistics"},
+    {"id":"ccc_east_frontier_arrows","band":"FRONTIER","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_frontier_east_objs","focus":"dry ranged supplies for canopy travel"},
+    {"id":"ccc_east_frontier_zombiflore","band":"FRONTIER","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_frontier_east_objs","encounter":{"registry_id":"skarrier_mobs:zombiflore","class":"E2/E3"},"focus":"regional hostile on maintained routes"},
+    {"id":"ccc_east_frontier_glowberries","band":"FRONTIER","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_frontier_east_objs","focus":"cave crew food/light supplies"},
+    {"id":"ccc_east_wildlands_high_route","band":"WILDLANDS","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_wildlands_east_objs","focus":"scaffolding for routes above floodwater"},
+    {"id":"ccc_east_wildlands_survey_boats","band":"WILDLANDS","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_wildlands_east_objs","focus":"deep-river survey logistics"},
+    {"id":"ccc_east_wildlands_rations","band":"WILDLANDS","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_wildlands_east_objs","focus":"compact deep-canopy expedition food"},
+    {"id":"ccc_east_wildlands_cave_lamps","band":"WILDLANDS","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_wildlands_east_objs","focus":"cave-line lighting"},
+    {"id":"ccc_east_wildlands_fletching","band":"WILDLANDS","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_wildlands_east_objs","focus":"ranged expedition resupply"},
+    {"id":"ccc_east_wildlands_zombiflore","band":"WILDLANDS","surface":"BOUNTIFUL","status":"LIVE_DATA","objective_pool":"ccc_wildlands_east_objs","encounter":{"registry_id":"skarrier_mobs:zombiflore","class":"E2/E3"},"focus":"stronger return-route hostile work"}
+  ],
+  "staged_runtime_content": [
+    {"id":"east_treehouse_lone_resident","band":"FRONTIER","structure_id":"dungeons_enhanced:tree_house","status":"NEEDS_HABITATION_CONTEXT","purpose":"lone-resident rumor and local route knowledge"},
+    {"id":"east_jungle_monument_rescue","band":"FRONTIER","structure_id":"dungeons_enhanced:jungle_monument","status":"NEEDS_CAPTIVE_RESCUE_STATE","purpose":"rescue plus redundant regional knowledge handoff"},
+    {"id":"east_carniflore_boundary","band":"FRONTIER_WILDLANDS","encounter":{"registry_id":"skarrier_mobs:carniflore","class":"E5","disposition":"TERRITORIAL"},"status":"NEEDS_LOCATION_AWARE_OBJECTIVE","purpose":"mark or clear one specific stationary territorial patch, never global cull spam"},
+    {"id":"east_foliaath_boundary","band":"FRONTIER_WILDLANDS","encounter":{"registry_id":"mowziesmobs:foliaath","class":"E5","disposition":"TERRITORIAL"},"status":"NEEDS_LOCATION_AWARE_OBJECTIVE","purpose":"observe, route around, grow, or address a specific plant site"},
+    {"id":"east_crocodile_crossing","band":"FRONTIER","encounter":{"registry_id":"alexsmobs:crocodile","class":"E1/E3","disposition":"PREDATOR"},"status":"NEEDS_OBSERVATION_OR_ROUTE_OBJECTIVE","purpose":"river-crossing ecology; avoid generic kill quota"},
+    {"id":"east_leapleaf_warning","band":"WILDLANDS","encounter":{"registry_id":null,"class":"E4"},"status":"REGISTRY_ID_NOT_AUTHORED_HERE","purpose":"rare apex warning only after encounter registry/spawn audit"},
+    {"id":"east_whisper_warning","band":"FRONTIER_WILDLANDS","encounter":{"registry_id":null,"class":"E3"},"status":"REGISTRY_ID_NOT_AUTHORED_HERE","purpose":"night specialist language only after registry/spawn audit"},
+    {"id":"east_jungle_abomination","band":"DREAD_REACHES","encounter":{"registry_id":null,"class":"E9"},"status":"FUTURE_FEATURE_GATE_DISABLED","purpose":"no live objective, location, or completion path"}
+  ]
+}

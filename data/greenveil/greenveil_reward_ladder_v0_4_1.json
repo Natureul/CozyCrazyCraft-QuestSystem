@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "region": "EAST",
+  "principle": "Only grant a modded signature item when its installed registry ID and reward path are already authoritative; otherwise keep the design semantic and visible in the validation backlog.",
+  "live_or_repo_authoritative": [
+    {"reward":"Greenwake","band":"WILDLANDS","registry_id":"spartanweaponry:glaive_diamond","source":"existing WildlandsQuestCatalog","identity":"reach + partial sweep","enchant_plan":["minecraft:sharpness III","minecraft:unbreaking II"],"quality_plan":"positive when shared Quality integration supports semantic quality grants"}
+  ],
+  "safe_bountiful_additions": [
+    {"pool":"ccc_frontier_east_rews","entries":["Frontier Payment","Survey Maps","Route Compass","Canopy Spyglass","Trail Boots","Dry Expedition Rations"]},
+    {"pool":"ccc_wildlands_east_rews","entries":["Wildlands Payment","Expedition Diamond","Deep-Canopy Spyglass","Deep-Canopy Boots","Deep Expedition Rations","Vertical Escape Reserve"]}
+  ],
+  "semantic_signature_ladder": [
+    {"reward":"Canopy Staff","band":"HEARTHLANDS_FRONTIER","registry_id":null,"item_family":"quarterstaff","status":"VERIFY_INSTALLED_REGISTRY_ID","quality":"ordinary-to-positive","notes":"early reach training, not a damage spike"},
+    {"reward":"River Javelin","band":"FRONTIER","registry_id":null,"item_family":"javelin","status":"VERIFY_INSTALLED_REGISTRY_ID_AND_ENCHANT_IDS","desired_enchants":["Propel","Hydrodynamic"],"notes":"waterway expedition identity"},
+    {"reward":"Survey Bow","band":"FRONTIER","registry_id":null,"item_family":"longbow","status":"VERIFY_INSTALLED_REGISTRY_ID_AND_HUNTER_COMPATIBILITY","notes":"cartographer/fletcher route survey"},
+    {"reward":"Canopy Glider","band":"FRONTIER_WILDLANDS","registry_id":null,"item_family":"hang glider","status":"VERIFY_HANG_GLIDER_REGISTRY_ID","notes":"iconic Greenveil mobility reward; pair with food/map/repair kit"},
+    {"reward":"Deep-Canopy Boots","band":"DREAD_REACHES","registry_id":"minecraft:diamond_boots","status":"VANILLA_BASE_ONLY","desired_enchants":["Feather Falling IV","Depth Strider III"],"quality":"strong-positive when shared Quality integration supports it"},
+    {"reward":"Crocodile Chestplate","band":"WILDLANDS","registry_id":null,"item_family":"ecology-derived armor","status":"VERIFY_ALEXS_MOBS_ITEM_ID","notes":"major river ecology chain, not a generic animal farm reward"},
+    {"reward":"Vine Lasso","band":"WILDLANDS","registry_id":null,"item_family":"ecology-derived traversal/control","status":"VERIFY_ALEXS_MOBS_ITEM_ID","notes":"strong thematic utility for anaconda/jungle expedition chain"},
+    {"reward":"Camera Kit","band":"HEARTHLANDS_WILDLANDS","registry_id":null,"item_family":"camera + atlas/survey supplies","status":"VERIFY_CAMERA_MOD_ITEM_ID","notes":"photography/observation reward path"}
+  ]
+}

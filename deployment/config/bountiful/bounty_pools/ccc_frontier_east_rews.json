@@ -1,0 +1,10 @@
+{
+  "content": {
+    "ccc_east_frontier_pay": {"type":"item","content":"minecraft:emerald","amount":{"min":5,"max":10},"unitWorth":900,"name":"Frontier Payment"},
+    "ccc_east_frontier_maps": {"type":"item","content":"minecraft:map","amount":{"min":1,"max":2},"unitWorth":650,"name":"Survey Maps"},
+    "ccc_east_frontier_compass": {"type":"item","content":"minecraft:compass","amount":{"min":1,"max":1},"unitWorth":1500,"rarity":"UNCOMMON","name":"Route Compass"},
+    "ccc_east_frontier_spyglass": {"type":"item","content":"minecraft:spyglass","amount":{"min":1,"max":1},"unitWorth":1800,"rarity":"UNCOMMON","name":"Canopy Spyglass"},
+    "ccc_east_frontier_boots": {"type":"item","content":"minecraft:iron_boots","amount":{"min":1,"max":1},"unitWorth":2200,"rarity":"UNCOMMON","name":"Trail Boots"},
+    "ccc_east_frontier_rations": {"type":"item","content":"minecraft:golden_carrot","amount":{"min":6,"max":12},"unitWorth":260,"name":"Dry Expedition Rations"}
+  }
+}

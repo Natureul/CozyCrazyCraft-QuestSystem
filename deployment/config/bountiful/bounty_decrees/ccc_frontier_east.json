@@ -1,0 +1,5 @@
+{
+  "objectives": ["ccc_frontier_east_objs"],
+  "rewards": ["ccc_frontier_east_rews", "ccc_map_east_rews"],
+  "name": "Greenveil Frontier Work"
+}

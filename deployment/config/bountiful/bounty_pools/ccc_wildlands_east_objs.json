@@ -1,0 +1,10 @@
+{
+  "content": {
+    "ccc_east_wildlands_high_route": {"type":"item","content":"minecraft:scaffolding","amount":{"min":24,"max":48},"unitWorth":190,"name":"High Route Reserve","icon":"minecraft:scaffolding"},
+    "ccc_east_wildlands_survey_boats": {"type":"item","content":"minecraft:oak_boat","amount":{"min":2,"max":3},"unitWorth":1300,"name":"Blackwater Survey Boats","icon":"minecraft:oak_boat"},
+    "ccc_east_wildlands_rations": {"type":"item","content":"minecraft:golden_carrot","amount":{"min":12,"max":20},"unitWorth":280,"name":"Rations Beyond the Last Marker","icon":"minecraft:golden_carrot"},
+    "ccc_east_wildlands_cave_lamps": {"type":"item","content":"minecraft:torch","amount":{"min":32,"max":64},"unitWorth":75,"name":"Cave-Line Lamps","icon":"minecraft:torch"},
+    "ccc_east_wildlands_fletching": {"type":"item","content":"minecraft:arrow","amount":{"min":48,"max":64},"unitWorth":70,"name":"Fletching for the Deep Trail","icon":"minecraft:arrow"},
+    "ccc_east_wildlands_zombiflore": {"type":"entity","content":"skarrier_mobs:zombiflore","amount":{"min":4,"max":7},"unitWorth":1900,"rarity":"RARE","name":"Zombiflore on the Return Trail"}
+  }
+}
