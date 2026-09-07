@@ -36,6 +36,8 @@ jobs:
         run: python tools/validate_structure_recovery.py
       - name: Validate executable recovery semantics
         run: python tools/validate_runtime_recovery_semantics.py
+      - name: Validate Wildlands exact-hunt runtime
+        run: python tools/validate_wildlands_runtime.py
       - name: Validate target distance and selection policy
         run: python tools/validate_targeting_policy.py
       - name: Validate CozyCrazyZones world bindings
