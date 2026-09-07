@@ -25,9 +25,13 @@ import java.util.List;
  *
  * This bridge mirrors CozyCrazyZones' own discovery criterion instead: once the player is inside the
  * bounding box of the exact structure type/instance represented by the contract, the survey is done.
- * The original distance fallback remains in VillageConversationQuestManager for surface landmarks.
+ * It can also recover an older active contract after the fact when CozyCrazyZones already recorded the
+ * matching structure as discovered near the quest's locate position.
  */
 final class StructureSurveyCompletionBridge {
+    private static final String ZONES_DISCOVERED = "cozycrazyzones:discovered_structures";
+    private static final int LEGACY_DISCOVERY_MATCH_BLOCKS = 160;
+
     private StructureSurveyCompletionBridge() {}
 
     static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -56,14 +60,17 @@ final class StructureSurveyCompletionBridge {
                     ? active.getInt("target_start_chunk_z")
                     : Integer.MIN_VALUE;
 
-            if (!NamedPlaceBridge.insideExactStructure(
+            boolean physicallyInside = NamedPlaceBridge.insideExactStructure(
                     level,
                     player.blockPosition(),
                     structureId,
                     expectedChunkX,
                     expectedChunkZ,
                     locate
-            )) continue;
+            );
+            boolean previouslyDiscovered = !physicallyInside
+                    && alreadyDiscoveredMatchingTarget(player, structureId, locate, expectedChunkX, expectedChunkZ);
+            if (!physicallyInside && !previouslyDiscovered) continue;
 
             active.putBoolean("objective_complete", true);
             active.putBoolean("surveyed", true);
@@ -87,13 +94,52 @@ final class StructureSurveyCompletionBridge {
                     true
             );
             CozyCrazyQuests.LOGGER.info(
-                    "Completed structure survey '{}' by exact structure occupancy at {}",
+                    "Completed structure survey '{}' by {} at/near {}",
                     active.getString("quest_id"),
-                    player.blockPosition()
+                    physicallyInside ? "exact structure occupancy" : "recovered CozyCrazyZones discovery",
+                    locate
             );
         }
 
         if (changed) VillageQuestState.save(player, root);
+    }
+
+    private static boolean alreadyDiscoveredMatchingTarget(
+            ServerPlayer player,
+            ResourceLocation structureId,
+            BlockPos locate,
+            int expectedChunkX,
+            int expectedChunkZ
+    ) {
+        CompoundTag discovered = player.getPersistentData().getCompound(ZONES_DISCOVERED);
+        if (discovered.isEmpty()) return false;
+
+        String prefix = "structure@" + structureId + "@";
+        long maxSq = (long) LEGACY_DISCOVERY_MATCH_BLOCKS * LEGACY_DISCOVERY_MATCH_BLOCKS;
+        for (String key : discovered.getAllKeys()) {
+            if (!discovered.getBoolean(key) || !key.startsWith(prefix)) continue;
+            String raw = key.substring(prefix.length());
+            int comma = raw.indexOf(',');
+            if (comma <= 0 || comma >= raw.length() - 1) continue;
+
+            try {
+                int chunkX = Integer.parseInt(raw.substring(0, comma));
+                int chunkZ = Integer.parseInt(raw.substring(comma + 1));
+                if (expectedChunkX != Integer.MIN_VALUE && expectedChunkZ != Integer.MIN_VALUE) {
+                    if (chunkX == expectedChunkX && chunkZ == expectedChunkZ) return true;
+                    continue;
+                }
+
+                long x = chunkX * 16L + 8L;
+                long z = chunkZ * 16L + 8L;
+                long dx = x - locate.getX();
+                long dz = z - locate.getZ();
+                if (dx * dx + dz * dz <= maxSq) return true;
+            } catch (NumberFormatException ignored) {
+                // Ignore malformed/legacy keys and keep looking for the matching generated instance.
+            }
+        }
+        return false;
     }
 
     private static boolean objectiveComplete(CompoundTag active) {
