@@ -26,9 +26,9 @@ import java.util.Optional;
  * interaction mods.
  *
  * Ordinary professional chatter is deliberately stable-but-varied: a villager's UUID chooses one of
- * three authored voice variants for that profession. The same person therefore keeps their conversational
- * flavor across reloads and profession interactions, while two farmers are no longer guaranteed to recite
- * the identical opening line. This is a light personality layer, not a personality stereotype system.
+ * three authored voice variants for that profession. Child villagers are looser: their line can change
+ * by Minecraft day, and a small minority of rolls point at the notice board, a useful adult, or a real
+ * nearby Tunnel Gore rumor. Kids therefore feel chatty without becoming miniature quest terminals.
  */
 public final class VillageSocialConversationManager {
     private static final int BOARD_DIRECTION_RADIUS = 192;
@@ -51,10 +51,24 @@ public final class VillageSocialConversationManager {
             if (ConversationBridge.hasDialogue(villager)) return;
 
             VillageContext village = VillageContext.resolve(level, villager.blockPosition());
+
+            // Children never become paid informants or generic quest hint machines. Their useful
+            // moments are deliberately rarer, simpler and handled by the child dialogue bank below.
+            if (villager.isBaby()) {
+                ConversationBridge.setDialogue(villager, childDialogue(player, villager, village));
+                return;
+            }
+
             if (village != null) {
                 ResourceLocation hint = VillageConversationQuestManager.socialHintDialogue(player, villager, village);
                 if (hint != null) {
                     ConversationBridge.setDialogue(villager, hint);
+                    return;
+                }
+
+                ResourceLocation deepRoad = GoreTunnelLead.adultDialogue(player, villager, village);
+                if (deepRoad != null) {
+                    ConversationBridge.setDialogue(villager, deepRoad);
                     return;
                 }
             }
@@ -103,6 +117,7 @@ public final class VillageSocialConversationManager {
         if ("mark_active_target".equals(action)) {
             return VillageConversationQuestManager.markCurrentTargetOnAtlas(player);
         }
+        if (GoreTunnelLead.consumeAction(player, action)) return true;
         return false;
     }
 
@@ -111,8 +126,6 @@ public final class VillageSocialConversationManager {
             Villager villager,
             VillageContext village
     ) {
-        if (villager.isBaby()) return id("villager_child");
-
         VillagerProfession profession = villager.getVillagerData().getProfession();
         if (profession == VillagerProfession.NONE) {
             return findUsefulPerson(player, village).isPresent()
@@ -141,6 +154,43 @@ public final class VillageSocialConversationManager {
         else if (profession == VillagerProfession.WEAPONSMITH) path = "weaponsmith";
         else path = "unemployed";
         return ambientVariant(villager, "villager_" + path);
+    }
+
+    /**
+     * Child chatter changes only once per Minecraft day, not every click. Roughly three out of sixteen
+     * day/person rolls are potentially useful. The rarest branch mentions the Tunnel Gore only when
+     * the resolver has found a real lair inside the bounded local search radius.
+     */
+    private static ResourceLocation childDialogue(
+            ServerPlayer player,
+            Villager villager,
+            VillageContext village
+    ) {
+        long day = player.serverLevel().getDayTime() / 24000L;
+        int seed = villager.getUUID().hashCode()
+                ^ Integer.rotateLeft(player.getUUID().hashCode(), 7)
+                ^ Long.hashCode(day * 0x9E3779B97F4A7C15L);
+        int roll = Math.floorMod(seed, 16);
+
+        if (roll == 0 && village != null && GoreTunnelLead.hasUsefulRumor(player, village)) {
+            return id("villager_child_gore_rumor");
+        }
+        if (roll == 1 && findUsefulPerson(player, village).isPresent()) {
+            return id("villager_child_helpful_person");
+        }
+        if (roll == 2 && village != null && village.hasBoard()) {
+            return id("villager_child_helpful_board");
+        }
+
+        int variant = Math.floorMod(seed >>> 4, 6);
+        return switch (variant) {
+            case 1 -> id("villager_child_v2");
+            case 2 -> id("villager_child_v3");
+            case 3 -> id("villager_child_v4");
+            case 4 -> id("villager_child_v5");
+            case 5 -> id("villager_child_v6");
+            default -> id("villager_child");
+        };
     }
 
     /**
