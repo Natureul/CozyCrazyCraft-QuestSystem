@@ -96,13 +96,39 @@ final class GoreTunnelLead {
 
         CompoundTag state = state(player);
         if (!STAGE_LEAD.equals(state.getString("stage"))) return;
-        if (!player.serverLevel().dimension().location().toString().equals(state.getString("dimension"))) return;
+        ServerLevel level = player.serverLevel();
+        if (!level.dimension().location().toString().equals(state.getString("dimension"))) return;
 
         BlockPos target = readTarget(state);
-        long dx = (long) player.blockPosition().getX() - target.getX();
-        long dz = (long) player.blockPosition().getZ() - target.getZ();
-        if (dx * dx + dz * dz > (long) DISCOVERY_RADIUS * DISCOVERY_RADIUS) return;
-        if (Math.abs(player.blockPosition().getY() - target.getY()) > VERTICAL_TOLERANCE) return;
+        int expectedChunkX = state.contains("target_start_chunk_x")
+                ? state.getInt("target_start_chunk_x")
+                : Integer.MIN_VALUE;
+        int expectedChunkZ = state.contains("target_start_chunk_z")
+                ? state.getInt("target_start_chunk_z")
+                : Integer.MIN_VALUE;
+
+        // The lair is an underground generated structure, so its locate result's Y coordinate is not
+        // an objective. Prefer the actual generated bounding box just like ordinary authored survey
+        // contracts. This prevents a player who is literally inside the Gore tunnels from being told
+        // to keep digging tens of blocks beneath them merely because the locator anchor was lower.
+        boolean insideLair = NamedPlaceBridge.insideExactStructure(
+                level,
+                player.blockPosition(),
+                GORE_LAIR,
+                expectedChunkX,
+                expectedChunkZ,
+                target
+        );
+
+        if (!insideLair) {
+            // Compatibility fallback for an older saved Deep Road lead that predates stable instance
+            // identity, or an unusual third-party structure whose occupied pieces are not exposed by
+            // StructureManager. This path remains intentionally stricter than the normal exact check.
+            long dx = (long) player.blockPosition().getX() - target.getX();
+            long dz = (long) player.blockPosition().getZ() - target.getZ();
+            if (dx * dx + dz * dz > (long) DISCOVERY_RADIUS * DISCOVERY_RADIUS) return;
+            if (Math.abs(player.blockPosition().getY() - target.getY()) > VERTICAL_TOLERANCE) return;
+        }
 
         state.putString("stage", STAGE_COMPLETE);
         state.putBoolean("surveyed", true);
@@ -218,6 +244,12 @@ final class GoreTunnelLead {
         state.putString("target_structure", target.id().toString());
         state.putString("target_name", NamedPlaceBridge.structureName(level, target.id(), target.pos()));
         state.putString("target_key", targetKey(level, target));
+
+        NamedPlaceBridge.StructureInstance instance = NamedPlaceBridge.structureInstance(level, target.id(), target.pos());
+        if (instance != null) {
+            state.putInt("target_start_chunk_x", instance.startChunk().x);
+            state.putInt("target_start_chunk_z", instance.startChunk().z);
+        }
     }
 
     private static NearbyStructureResolver.ResolvedStructure resolve(ServerLevel level, VillageContext village) {
