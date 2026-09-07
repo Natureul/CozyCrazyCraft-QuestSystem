@@ -1,0 +1,1 @@
+{"title":"Three Roads, One Rider","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"This is evidence work. Do not hunt Sir Pumpkinhead because a rumor made you impatient.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

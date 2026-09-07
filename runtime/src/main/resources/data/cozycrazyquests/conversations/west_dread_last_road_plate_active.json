@@ -1,0 +1,1 @@
+{"title":"The Last Reliable Road","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Do not treat every tower as the same place. Bring back the plate from the assigned one.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

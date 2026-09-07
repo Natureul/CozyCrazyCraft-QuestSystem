@@ -1,0 +1,1 @@
+{"title":"The Fog-Watch Ledger","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"The tower sits off an old timber road. Bring the ledger back intact, even if the ink is ugly.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

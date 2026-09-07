@@ -1,0 +1,1 @@
+{"title":"Made for One Journey","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Clear the assigned tower approach. Do not wander deeper because the equipment feels good.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

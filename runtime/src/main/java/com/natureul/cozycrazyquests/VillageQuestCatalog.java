@@ -25,6 +25,7 @@ final class VillageQuestCatalog {
         all.addAll(FrontierQuestCatalog.ALL);
         all.addAll(FrontierSideQuestCatalog.ALL);
         all.addAll(WildlandsQuestCatalog.ALL);
+        all.addAll(HarvestwoodQuestCatalog.ALL);
         return List.copyOf(all);
     }
 
