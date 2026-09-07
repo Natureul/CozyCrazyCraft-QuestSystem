@@ -157,9 +157,10 @@ public final class VillageSocialConversationManager {
     }
 
     /**
-     * Child chatter changes only once per Minecraft day, not every click. Roughly three out of sixteen
+     * Child chatter changes only once per Minecraft day, not every click. Only three out of thirty-two
      * day/person rolls are potentially useful. The rarest branch mentions the Tunnel Gore only when
-     * the resolver has found a real lair inside the bounded local search radius.
+     * the resolver has found a real lair inside the bounded local search radius. If the player already
+     * followed that rumor through, the same rare slot becomes a small continuity reaction instead.
      */
     private static ResourceLocation childDialogue(
             ServerPlayer player,
@@ -170,10 +171,11 @@ public final class VillageSocialConversationManager {
         int seed = villager.getUUID().hashCode()
                 ^ Integer.rotateLeft(player.getUUID().hashCode(), 7)
                 ^ Long.hashCode(day * 0x9E3779B97F4A7C15L);
-        int roll = Math.floorMod(seed, 16);
+        int roll = Math.floorMod(seed, 32);
 
-        if (roll == 0 && village != null && GoreTunnelLead.hasUsefulRumor(player, village)) {
-            return id("villager_child_gore_rumor");
+        if (roll == 0 && village != null) {
+            if (GoreTunnelLead.completedFor(player, village)) return id("villager_child_gore_after");
+            if (GoreTunnelLead.hasUsefulRumor(player, village)) return id("villager_child_gore_rumor");
         }
         if (roll == 1 && findUsefulPerson(player, village).isPresent()) {
             return id("villager_child_helpful_person");
@@ -182,7 +184,7 @@ public final class VillageSocialConversationManager {
             return id("villager_child_helpful_board");
         }
 
-        int variant = Math.floorMod(seed >>> 4, 6);
+        int variant = Math.floorMod(seed >>> 5, 6);
         return switch (variant) {
             case 1 -> id("villager_child_v2");
             case 2 -> id("villager_child_v3");
