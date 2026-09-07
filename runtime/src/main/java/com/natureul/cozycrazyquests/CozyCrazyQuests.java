@@ -20,6 +20,10 @@ public final class CozyCrazyQuests {
         // Pack-level structure compatibility has to run before the source mod mutates village pools.
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, BeautifyCompat::onServerAboutToStart);
 
+        // Real generated structure starts are indexed as chunks load. Authored NPC targeting reads this
+        // bounded persisted index instead of synchronously asking worldgen/Structure Gel to locate things.
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, GeneratedStructureIndexSavedData::onChunkLoad);
+
         MinecraftForge.EVENT_BUS.addListener(VillageBoardManager::onPlayerTick);
         MinecraftForge.EVENT_BUS.addListener(ProofLootInjector::onLootTableLoad);
         MinecraftForge.EVENT_BUS.addListener(BountyStoryTooltip::onTooltip);
