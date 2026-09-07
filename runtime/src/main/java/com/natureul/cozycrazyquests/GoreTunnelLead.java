@@ -10,38 +10,32 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Small word-of-mouth side chain for Skarrier's Tunnel Gore lair.
+ * Word-of-mouth discovery path for Skarrier's ore-rich Tunnel Gore lair.
  *
- * This deliberately does not turn the lair into radial progression. The structure remains a vertical,
- * underground encounter; the social system merely notices a real nearby instance and lets a child
- * occasionally become the first person to mention it. A mason/toolsmith/librarian can then turn the
- * rumor into a usable lead. Reaching the real lair and returning pays a one-off expedition reward;
- * defeating the Tunnel Gore at its own lair upgrades that reward without making an old/empty lair
- * impossible to report.
+ * The lair is the reward. Killing the Gore is explicitly NOT an objective and is not tracked here.
+ * A child can very rarely start the rumor, but children are only one route: once the player is at
+ * least Recognized in a village, appropriate stone/tool specialists may independently share a real
+ * nearby deep-road site as valuable local knowledge. The social lead can mark the surface position
+ * on the Atlas, and reaching the real underground structure simply confirms the discovery.
  *
- * No structure means no rumor. No global scan runs in the background: the expensive locate happens
- * lazily on the rare child dialogue roll and is cached per village for five Minecraft minutes.
+ * No structure means no rumor or reward. The structure locate is lazy and cached per village; there
+ * is no background world scan.
  */
 final class GoreTunnelLead {
     private static final ResourceLocation GORE_LAIR = new ResourceLocation("skarrier_mobs", "tunnel_gore_lair_x");
-    private static final ResourceLocation GORE_ENTITY = new ResourceLocation("skarrier_mobs", "tunnel_gore");
-    private static final int SEARCH_RADIUS = 2200;
-    private static final int DISCOVERY_RADIUS = 96;
-    private static final int KILL_CREDIT_RADIUS = 160;
-    private static final int VERTICAL_TOLERANCE = 72;
+    private static final int SEARCH_RADIUS = 2000;
+    private static final int DISCOVERY_RADIUS = 104;
+    private static final int VERTICAL_TOLERANCE = 80;
     private static final long CACHE_LIFETIME = 6000L;
     private static final String ROOT = "CozyCrazyGoreTunnelLead";
     private static final String STAGE_RUMOR = "RUMOR";
@@ -66,23 +60,31 @@ final class GoreTunnelLead {
     }
 
     static ResourceLocation adultDialogue(ServerPlayer player, Villager villager, VillageContext village) {
-        if (village == null || !suitableAdult(villager.getVillagerData().getProfession())) return null;
+        if (village == null) return null;
+        VillagerProfession profession = villager.getVillagerData().getProfession();
         CompoundTag state = state(player);
-        if (!sameVillage(state, village) || !state.contains("targetX")) return null;
-        if (STAGE_COMPLETE.equals(state.getString("stage"))) return null;
-        if (state.getBoolean("surveyed")) {
-            return state.getBoolean("gore_killed") ? id("gore_tunnel_return_killed") : id("gore_tunnel_return");
+
+        if (sameVillage(state, village) && state.contains("targetX")) {
+            if (STAGE_COMPLETE.equals(state.getString("stage"))) return null;
+            if (STAGE_LEAD.equals(state.getString("stage")) && usefulSpecialist(profession)) {
+                return id("gore_tunnel_adult_active");
+            }
+            if (STAGE_RUMOR.equals(state.getString("stage")) && rumorInterpreter(profession)) {
+                return id("gore_tunnel_adult_followup");
+            }
         }
-        if (STAGE_LEAD.equals(state.getString("stage"))) return id("gore_tunnel_adult_active");
-        if (STAGE_RUMOR.equals(state.getString("stage"))) return id("gore_tunnel_adult_followup");
-        return null;
+
+        if (!originSpecialist(profession)) return null;
+        VillageProgressState.Trust trust = VillageProgressState.snapshot(player, village.key()).trust();
+        if (trust.ordinal() < VillageProgressState.Trust.RECOGNIZED.ordinal()) return null;
+        if (resolve(player.serverLevel(), village) == null) return null;
+        return id("gore_tunnel_specialist_offer");
     }
 
     static boolean consumeAction(ServerPlayer player, String action) {
         return switch (action) {
             case "child_gore_hint" -> shareChildRumor(player);
-            case "gore_tunnel_accept" -> acceptAdultLead(player);
-            case "gore_tunnel_turnin" -> turnIn(player);
+            case "gore_tunnel_accept", "gore_tunnel_specialist_reveal" -> revealSpecialistLead(player);
             default -> false;
         };
     }
@@ -93,7 +95,7 @@ final class GoreTunnelLead {
         if (player.tickCount % 20 != 0) return;
 
         CompoundTag state = state(player);
-        if (!STAGE_LEAD.equals(state.getString("stage")) || state.getBoolean("surveyed")) return;
+        if (!STAGE_LEAD.equals(state.getString("stage"))) return;
         if (!player.serverLevel().dimension().location().toString().equals(state.getString("dimension"))) return;
 
         BlockPos target = readTarget(state);
@@ -102,48 +104,20 @@ final class GoreTunnelLead {
         if (dx * dx + dz * dz > (long) DISCOVERY_RADIUS * DISCOVERY_RADIUS) return;
         if (Math.abs(player.blockPosition().getY() - target.getY()) > VERTICAL_TOLERANCE) return;
 
+        state.putString("stage", STAGE_COMPLETE);
         state.putBoolean("surveyed", true);
         save(player, state);
         PlayerKnowledgeState.advance(
                 player,
                 state.getString("target_key"),
-                PlayerKnowledgeState.Knowledge.KNOWN,
+                PlayerKnowledgeState.Knowledge.CONFIRMED,
                 PlayerKnowledgeState.Provenance.LOCAL_OBSERVATION
         );
-        player.sendSystemMessage(
-                Component.literal("You found the place beneath the rumor. If the thing that dug it is still here, dealing with it may matter. You can return to "
-                                + displayVillage(state) + " either way.")
-                        .withStyle(ChatFormatting.AQUA)
-        );
-    }
-
-    static void onLivingDeath(LivingDeathEvent event) {
-        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
-        ResourceLocation entityId = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
-        if (!GORE_ENTITY.equals(entityId)) return;
-
-        CompoundTag state = state(player);
-        if (!STAGE_LEAD.equals(state.getString("stage")) || !state.contains("targetX")) return;
-        if (!player.serverLevel().dimension().location().toString().equals(state.getString("dimension"))) return;
-
-        BlockPos target = readTarget(state);
-        long dx = (long) event.getEntity().blockPosition().getX() - target.getX();
-        long dz = (long) event.getEntity().blockPosition().getZ() - target.getZ();
-        if (dx * dx + dz * dz > (long) KILL_CREDIT_RADIUS * KILL_CREDIT_RADIUS) return;
-
-        state.putBoolean("surveyed", true);
-        state.putBoolean("gore_killed", true);
-        save(player, state);
-        PlayerKnowledgeState.advance(
-                player,
-                state.getString("target_key"),
-                PlayerKnowledgeState.Knowledge.KNOWN,
-                PlayerKnowledgeState.Provenance.QUEST_PROOF
-        );
-        player.sendSystemMessage(
-                Component.literal("Tunnel Gore defeated at the deep-road lair. Return to " + displayVillage(state)
-                                + "; they promised more than a story for proof like that.")
-                        .withStyle(ChatFormatting.GOLD)
+        player.displayClientMessage(
+                Component.literal("You found " + state.getString("target_name")
+                                + ". The deep-road story was true; what you do with the tunnels is up to you.")
+                        .withStyle(ChatFormatting.AQUA),
+                true
         );
     }
 
@@ -162,109 +136,88 @@ final class GoreTunnelLead {
         CompoundTag state = state(player);
         if (!sameVillage(state, village) || !state.contains("targetX")) {
             NearbyStructureResolver.ResolvedStructure target = resolve(level, village);
-            if (target == null) {
-                player.displayClientMessage(Component.literal("Whatever the child heard, it is not close enough to place.")
-                        .withStyle(ChatFormatting.GRAY), true);
-                return true;
-            }
+            if (target == null) return true;
             state = new CompoundTag();
-            state.putString("village_key", village.key());
-            state.putString("village_name", village.name());
-            state.putString("dimension", level.dimension().location().toString());
-            state.putString("stage", STAGE_RUMOR);
-            putTarget(state, target.pos());
-            state.putString("target_structure", target.id().toString());
-            String targetName = NamedPlaceBridge.structureName(level, target.id(), target.pos());
-            state.putString("target_name", targetName);
-            state.putString("target_key", targetKey(level, target));
+            writeTargetState(state, level, village, target, STAGE_RUMOR);
             save(player, state);
         }
 
         BlockPos target = readTarget(state);
-        int distance = roundedDistance(player.blockPosition(), target, 100);
-        String where = direction(player.blockPosition(), target);
+        int distance = roundedDistance(village.anchor(), target, 200);
+        String where = direction(village.anchor(), target);
         PlayerKnowledgeState.advance(
                 player,
                 state.getString("target_key"),
                 PlayerKnowledgeState.Knowledge.RUMOR,
                 PlayerKnowledgeState.Provenance.RUMOR_NETWORK
         );
-        player.sendSystemMessage(
-                Component.literal("The child points " + where + ". \"Somewhere under there. Maybe about " + distance
-                                + " blocks? Ask somebody who knows stone.\"")
-                        .withStyle(ChatFormatting.GOLD)
+        player.displayClientMessage(
+                Component.literal("The child points " + where + ": somewhere underground, maybe " + distance
+                                + " blocks out. They insist someone who knows stone has heard it too.")
+                        .withStyle(ChatFormatting.GOLD),
+                true
         );
         return true;
     }
 
-    private static boolean acceptAdultLead(ServerPlayer player) {
-        CompoundTag state = state(player);
-        if (!STAGE_RUMOR.equals(state.getString("stage")) || !state.contains("targetX")) return true;
+    private static boolean revealSpecialistLead(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        VillageContext village = VillageContext.resolve(level, player.blockPosition());
+        if (village == null) return true;
 
-        state.putString("stage", STAGE_LEAD);
+        CompoundTag state = state(player);
+        if (!sameVillage(state, village) || !state.contains("targetX")) {
+            NearbyStructureResolver.ResolvedStructure target = resolve(level, village);
+            if (target == null) return true;
+            state = new CompoundTag();
+            writeTargetState(state, level, village, target, STAGE_LEAD);
+        } else {
+            state.putString("stage", STAGE_LEAD);
+        }
         save(player, state);
+
         PlayerKnowledgeState.advance(
                 player,
                 state.getString("target_key"),
-                PlayerKnowledgeState.Knowledge.LEAD,
+                PlayerKnowledgeState.Knowledge.KNOWN,
                 PlayerKnowledgeState.Provenance.PROFESSION_EVIDENCE
         );
 
-        BlockPos target = readTarget(state);
-        int distance = roundedDistance(player.blockPosition(), target, 50);
-        player.sendSystemMessage(
-                Component.literal("Deep-road lead: roughly " + distance + " blocks "
-                                + direction(player.blockPosition(), target)
-                                + ". The source is underground; do not expect a surface doorway.")
-                        .withStyle(ChatFormatting.GOLD)
+        boolean marked = NamedPlaceBridge.revealStructureToAtlas(
+                player,
+                GORE_LAIR,
+                readTarget(state),
+                state.getString("target_name")
         );
+
+        // A small prospector's courtesy; the valuable reward is the ore-rich location itself.
         giveOrDrop(player, new ItemStack(Items.TORCH, 12));
+
+        BlockPos target = readTarget(state);
+        int distance = roundedDistance(village.anchor(), target, 50);
+        String message = state.getString("target_name") + ": about " + distance + " blocks "
+                + direction(village.anchor(), target)
+                + ". It is underground; the surface position is a reference, not an entrance.";
+        if (marked) message += " I've marked that surface position on your Atlas.";
+        player.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.GOLD), true);
         return true;
     }
 
-    private static boolean turnIn(ServerPlayer player) {
-        CompoundTag state = state(player);
-        if (!state.getBoolean("surveyed") || STAGE_COMPLETE.equals(state.getString("stage"))) return true;
-
-        VillageContext village = VillageContext.resolve(player.serverLevel(), player.blockPosition());
-        if (village == null || !sameVillage(state, village)) {
-            player.displayClientMessage(Component.literal("Return to the village that gave the deep-road lead.")
-                    .withStyle(ChatFormatting.GRAY), true);
-            return true;
-        }
-
-        ItemStack weapon = stack("spartanweaponry:iron_warhammer", "Gorebreaker");
-        enchant(weapon, "minecraft:sharpness", 2);
-        enchant(weapon, "minecraft:unbreaking", 2);
-        giveOrDrop(player, weapon);
-        giveOrDrop(player, new ItemStack(Items.EMERALD, state.getBoolean("gore_killed") ? 10 : 6));
-
-        if (state.getBoolean("gore_killed")) {
-            ItemStack boots = stack("minecraft:iron_boots", "Deep-Road Boots");
-            enchant(boots, "minecraft:feather_falling", 2);
-            enchant(boots, "minecraft:unbreaking", 1);
-            giveOrDrop(player, boots);
-            player.giveExperiencePoints(16);
-        } else {
-            player.giveExperiencePoints(10);
-        }
-
-        boolean goreKilled = state.getBoolean("gore_killed");
-        state.putString("stage", STAGE_COMPLETE);
-        save(player, state);
-        PlayerKnowledgeState.advance(
-                player,
-                state.getString("target_key"),
-                PlayerKnowledgeState.Knowledge.CONFIRMED,
-                PlayerKnowledgeState.Provenance.PLAYER_REPORT
-        );
-        player.sendSystemMessage(
-                Component.literal(goreKilled
-                                ? "The village believes the story now. Gorebreaker and the Deep-Road Boots are yours."
-                                : "The village believes the place is real. Gorebreaker is yours; the lair itself may still have unfinished business.")
-                        .withStyle(ChatFormatting.GREEN)
-        );
-        return true;
+    private static void writeTargetState(
+            CompoundTag state,
+            ServerLevel level,
+            VillageContext village,
+            NearbyStructureResolver.ResolvedStructure target,
+            String stage
+    ) {
+        state.putString("village_key", village.key());
+        state.putString("village_name", village.name());
+        state.putString("dimension", level.dimension().location().toString());
+        state.putString("stage", stage);
+        putTarget(state, target.pos());
+        state.putString("target_structure", target.id().toString());
+        state.putString("target_name", NamedPlaceBridge.structureName(level, target.id(), target.pos()));
+        state.putString("target_key", targetKey(level, target));
     }
 
     private static NearbyStructureResolver.ResolvedStructure resolve(ServerLevel level, VillageContext village) {
@@ -281,10 +234,22 @@ final class GoreTunnelLead {
         return found;
     }
 
-    private static boolean suitableAdult(VillagerProfession profession) {
+    private static boolean originSpecialist(VillagerProfession profession) {
         return profession == VillagerProfession.MASON
                 || profession == VillagerProfession.TOOLSMITH
+                || profession == VillagerProfession.WEAPONSMITH;
+    }
+
+    private static boolean rumorInterpreter(VillagerProfession profession) {
+        return usefulSpecialist(profession)
+                || profession == VillagerProfession.CARTOGRAPHER
                 || profession == VillagerProfession.LIBRARIAN;
+    }
+
+    private static boolean usefulSpecialist(VillagerProfession profession) {
+        return profession == VillagerProfession.MASON
+                || profession == VillagerProfession.TOOLSMITH
+                || profession == VillagerProfession.WEAPONSMITH;
     }
 
     private static CompoundTag state(ServerPlayer player) {
@@ -297,11 +262,6 @@ final class GoreTunnelLead {
 
     private static boolean sameVillage(CompoundTag state, VillageContext village) {
         return !state.isEmpty() && village.key().equals(state.getString("village_key"));
-    }
-
-    private static String displayVillage(CompoundTag state) {
-        String name = state.getString("village_name");
-        return name.isBlank() || "the village".equalsIgnoreCase(name) ? "the issuing village" : name;
     }
 
     private static String targetKey(ServerLevel level, NearbyStructureResolver.ResolvedStructure target) {
@@ -343,22 +303,7 @@ final class GoreTunnelLead {
         };
     }
 
-    private static ItemStack stack(String itemId, String name) {
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
-        if (item == null || item == Items.AIR) return ItemStack.EMPTY;
-        ItemStack stack = new ItemStack(item);
-        stack.setHoverName(Component.literal(name).withStyle(ChatFormatting.GOLD));
-        return stack;
-    }
-
-    private static void enchant(ItemStack stack, String enchantId, int level) {
-        if (stack.isEmpty()) return;
-        var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantId));
-        if (enchantment != null) stack.enchant(enchantment, level);
-    }
-
     private static void giveOrDrop(ServerPlayer player, ItemStack stack) {
-        if (stack.isEmpty()) return;
         if (!player.addItem(stack)) player.drop(stack, false);
     }
 
