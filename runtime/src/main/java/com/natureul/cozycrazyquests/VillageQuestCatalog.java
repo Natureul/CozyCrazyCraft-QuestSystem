@@ -21,6 +21,7 @@ final class VillageQuestCatalog {
     private static List<Definition> allDefinitions() {
         List<Definition> all = new ArrayList<>();
         all.addAll(HearthlandsQuestCatalog.ALL);
+        all.addAll(HearthlandsRecoveryQuestCatalog.ALL);
         all.addAll(FrontierQuestCatalog.ALL);
         all.addAll(FrontierSideQuestCatalog.ALL);
         return List.copyOf(all);
@@ -60,7 +61,7 @@ final class VillageQuestCatalog {
         return new Definition(
                 id, title, professions, category, false, ObjectiveType.STRUCTURE_SURVEY,
                 tier, 0, maxTierOffset, true, searchRadius, targetRadius, 0, 0, LocalTerrain.ANY,
-                targetLabel, candidates, kills,
+                targetLabel, "", candidates, kills,
                 id(dialogueStem + ("cartographer_first_real_map".equals(dialogueStem) ? "" : "_offer")),
                 activeDialogue, turninDialogue, revealAtlas, List.of(), rewards, emeralds, xp
         );
@@ -75,9 +76,30 @@ final class VillageQuestCatalog {
         return new Definition(
                 id, title, professions, category, false, ObjectiveType.STRUCTURE_HOSTILE_CLEAR,
                 tier, 0, maxTierOffset, true, searchRadius, targetRadius, 0, 0, LocalTerrain.ANY,
-                targetLabel, candidates, kills,
+                targetLabel, "", candidates, kills,
                 id(dialogueStem + "_offer"), id(dialogueStem + "_active"), id(dialogueStem + "_turnin"),
                 false, List.of(), rewards, emeralds, xp
+        );
+    }
+
+    /**
+     * Recover a quest-bound object from a real generated structure. The runtime creates the evidence
+     * only after the player physically enters the exact assigned structure instance, so this does not
+     * depend on arbitrary mob drops or on globally polluting every matching loot table.
+     */
+    static Definition recovery(
+            String id, String title, List<VillagerProfession> professions,
+            VillageProgressState.AccomplishmentCategory category, String tier, int maxTierOffset,
+            int searchRadius, int targetRadius, String targetLabel, List<ResourceLocation> candidates,
+            String recoveryObjectName, String dialogueStem, boolean revealAtlas,
+            List<RewardStack> rewards, int emeralds, int xp
+    ) {
+        return new Definition(
+                id, title, professions, category, false, ObjectiveType.STRUCTURE_RECOVERY,
+                tier, 0, maxTierOffset, true, searchRadius, targetRadius, 0, 0, LocalTerrain.ANY,
+                targetLabel, recoveryObjectName, candidates, 0,
+                id(dialogueStem + "_offer"), id(dialogueStem + "_active"), id(dialogueStem + "_turnin"),
+                revealAtlas, List.of(), rewards, emeralds, xp
         );
     }
 
@@ -89,7 +111,7 @@ final class VillageQuestCatalog {
         return new Definition(
                 id, title, professions, null, true, ObjectiveType.STRUCTURE_HOSTILE_CLEAR,
                 "FRONTIER", 1, 1, true, searchRadius, targetRadius, 0, 0, LocalTerrain.ANY,
-                targetLabel, candidates, kills,
+                targetLabel, "", candidates, kills,
                 id(dialogueStem + "_offer"), id(dialogueStem + "_active"), id(dialogueStem + "_turnin"),
                 true, List.of(), rewards, emeralds, xp
         );
@@ -114,7 +136,7 @@ final class VillageQuestCatalog {
         return new Definition(
                 id, title, professions, category, false, ObjectiveType.LOCAL_HOSTILE_CLEAR,
                 tier, 0, 0, true, 0, targetRadius, minDistance, maxDistance, terrain,
-                targetLabel, List.of(), kills,
+                targetLabel, "", List.of(), kills,
                 id(dialogueStem + "_offer"), id(dialogueStem + "_active"), id(dialogueStem + "_turnin"),
                 false, acceptanceItems, rewards, emeralds, xp
         );
@@ -153,6 +175,7 @@ final class VillageQuestCatalog {
     enum ObjectiveType {
         STRUCTURE_SURVEY,
         STRUCTURE_HOSTILE_CLEAR,
+        STRUCTURE_RECOVERY,
         LOCAL_HOSTILE_CLEAR
     }
 
@@ -186,6 +209,7 @@ final class VillageQuestCatalog {
             int localTargetMaxDistance,
             LocalTerrain localTerrain,
             String targetLabel,
+            String recoveryObjectName,
             List<ResourceLocation> structureCandidates,
             int requiredKills,
             ResourceLocation offerDialogue,
