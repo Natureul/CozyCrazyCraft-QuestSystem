@@ -8,25 +8,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reliable completion path for structure-survey contracts.
+ * Reliable completion path for authored structure visits.
  *
- * The older proximity test compared the player's Y coordinate against the locate result's Y. That is
- * fundamentally unsafe for modded underground structures: map/locate coordinates can point at the
- * surface, a jigsaw anchor, or another navigation position while the actual room is dozens of blocks
- * above or below it. The result was exactly the bad failure mode we want to avoid: the player digs to
- * the marked place, physically enters the correct generated structure, and the quest still refuses to
- * complete.
- *
- * This bridge mirrors CozyCrazyZones' own discovery criterion instead: once the player is inside the
- * bounding box of the exact structure type/instance represented by the contract, the survey is done.
- * It can also recover an older active contract after the fact when CozyCrazyZones already recorded the
- * matching structure as discovered near the quest's locate position.
+ * Locate Y values are navigation hints, not proof that the player reached a room. Survey jobs therefore
+ * complete from exact generated-structure occupancy, while recovery jobs create their quest-bound object
+ * only after the player physically enters the exact assigned structure instance. Legacy survey contracts
+ * can also recover from CozyCrazyZones' prior discovery record; recovery jobs intentionally cannot, because
+ * an old discovery is not the same thing as going back inside and retrieving the requested object.
  */
 final class StructureSurveyCompletionBridge {
     private static final String ZONES_DISCOVERED = "cozycrazyzones:discovered_structures";
@@ -46,7 +41,10 @@ final class StructureSurveyCompletionBridge {
         for (CompoundTag active : VillageQuestState.allActives(root)) {
             if (objectiveComplete(active)) continue;
             VillageQuestCatalog.Definition definition = VillageQuestCatalog.byId(active.getString("quest_id"));
-            if (definition == null || definition.objectiveType() != VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY) continue;
+            if (definition == null) continue;
+            boolean survey = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_SURVEY;
+            boolean recovery = definition.objectiveType() == VillageQuestCatalog.ObjectiveType.STRUCTURE_RECOVERY;
+            if (!survey && !recovery) continue;
             if (!level.dimension().location().toString().equals(active.getString("target_dimension"))) continue;
 
             ResourceLocation structureId = ResourceLocation.tryParse(active.getString("target_structure"));
@@ -68,12 +66,20 @@ final class StructureSurveyCompletionBridge {
                     expectedChunkZ,
                     locate
             );
-            boolean previouslyDiscovered = !physicallyInside
+            boolean previouslyDiscovered = survey && !physicallyInside
                     && alreadyDiscoveredMatchingTarget(player, structureId, locate, expectedChunkX, expectedChunkZ);
             if (!physicallyInside && !previouslyDiscovered) continue;
 
-            active.putBoolean("objective_complete", true);
-            active.putBoolean("surveyed", true);
+            if (recovery) {
+                ItemStack evidence = RecoveredEvidence.create(definition, active);
+                if (!player.addItem(evidence)) player.drop(evidence, false);
+                active.putBoolean("recovery_collected", true);
+                active.putBoolean("objective_complete", true);
+                active.putBoolean("visited_target", true);
+            } else {
+                active.putBoolean("objective_complete", true);
+                active.putBoolean("surveyed", true);
+            }
             VillageQuestState.putActive(root, active.getString("village_key"), active);
             changed = true;
 
@@ -87,18 +93,32 @@ final class StructureSurveyCompletionBridge {
                 );
             }
 
-            player.displayClientMessage(
-                    Component.literal("Survey complete: " + active.getString("target_name") + ". "
-                                    + returnInstruction(definition, active.getString("village_name")))
-                            .withStyle(ChatFormatting.AQUA),
-                    true
-            );
-            CozyCrazyQuests.LOGGER.info(
-                    "Completed structure survey '{}' by {} at/near {}",
-                    active.getString("quest_id"),
-                    physicallyInside ? "exact structure occupancy" : "recovered CozyCrazyZones discovery",
-                    locate
-            );
+            if (recovery) {
+                String object = definition.recoveryObjectName().isBlank() ? "the requested evidence" : definition.recoveryObjectName();
+                player.displayClientMessage(
+                        Component.literal("Recovered " + object + " from " + active.getString("target_name") + ". "
+                                        + returnInstruction(definition, active.getString("village_name")))
+                                .withStyle(ChatFormatting.AQUA),
+                        true
+                );
+                CozyCrazyQuests.LOGGER.info(
+                        "Recovered quest evidence for '{}' by exact structure occupancy at/near {}",
+                        active.getString("quest_id"), locate
+                );
+            } else {
+                player.displayClientMessage(
+                        Component.literal("Survey complete: " + active.getString("target_name") + ". "
+                                        + returnInstruction(definition, active.getString("village_name")))
+                                .withStyle(ChatFormatting.AQUA),
+                        true
+                );
+                CozyCrazyQuests.LOGGER.info(
+                        "Completed structure survey '{}' by {} at/near {}",
+                        active.getString("quest_id"),
+                        physicallyInside ? "exact structure occupancy" : "recovered CozyCrazyZones discovery",
+                        locate
+                );
+            }
         }
 
         if (changed) VillageQuestState.save(player, root);
