@@ -58,7 +58,7 @@ if "VillageConversationQuestManager::onPlayerTick" in mod_main:
 require(mod_main, "StructureSurveyCompletionBridge::onPlayerTick", "physical structure survey bridge is registered")
 
 require(turnin, "PlayerInteractEvent.RightClickBlock", "recovery starts from a physical block interaction")
-require(turnin, "instanceof Container container", "recovery source is a real container")
+require(turnin, "instanceof RandomizableContainerBlockEntity container", "recovery source is a loot/storage cache")
 require(turnin, "NamedPlaceBridge.insideExactStructure", "recovery container must be in the exact assigned structure")
 require(turnin, "RecoveredEvidence.create(definition, active)", "physical recovery source creates quest-bound evidence")
 require(turnin, "container.setItem(emptySlot, evidence)", "evidence is inserted into the opened physical container")
@@ -66,6 +66,9 @@ require(turnin, '"recovery_evidence_seeded"', "one active contract does not repe
 require(turnin, "RecoveredEvidence.has(player, active)", "objective waits until the player actually possesses evidence")
 require(turnin, 'active.putBoolean("objective_complete", true)', "physical evidence possession completes recovery")
 require(turnin, "RecoveredEvidence.consume(player, active)", "turn-in consumes the matching recovered object")
+require(turnin, "This cache is full. Free one slot and check it again.", "full caches stay physical instead of auto-awarding evidence")
+if "player.addItem(evidence)" in turnin or "player.drop(evidence" in turnin:
+    raise SystemExit("ERROR: recovery evidence must not bypass the physical cache when storage is full")
 require(mod_main, "RecoveryQuestRuntime::onRightClickBlock", "physical recovery interaction is registered")
 require(mod_main, "RecoveryQuestRuntime::onPlayerTick", "physical recovery possession check is registered")
 
