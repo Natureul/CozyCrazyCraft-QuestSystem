@@ -56,10 +56,9 @@ final class CivicQuestFallbackManager {
         if (ConversationBridge.hasOwnDialogue(villager)) return;
 
         VillageProgressState.Snapshot progress = VillageProgressState.snapshot(player, village.key());
-        Offer offer = selectRegionalProfessionOffer(level, player, villager, village, progress, root);
-        if (offer == null && civic) {
-            offer = selectCivicOffer(level, player, village, progress, root);
-        }
+        Offer regional = selectRegionalProfessionOffer(level, player, villager, village, progress, root);
+        Offer civicOffer = civic ? selectCivicOffer(level, player, village, progress, root) : null;
+        Offer offer = betterOffer(regional, civicOffer);
         if (offer == null) return;
 
         writePending(root, level, player, villager, village, offer.definition(), offer.target());
@@ -75,13 +74,18 @@ final class CivicQuestFallbackManager {
             VillageProgressState.Snapshot progress,
             CompoundTag root
     ) {
+        Offer fallback = null;
         for (VillageQuestCatalog.Definition definition :
                 VillageQuestCatalog.regionalForProfession(villager.getVillagerData().getProfession(), village.cell())) {
             if (!eligible(root, definition, level, village, progress)) continue;
             PreparedTarget target = prepareTarget(level, player, village, definition);
-            if (target != null) return new Offer(definition, target);
+            if (target == null) continue;
+            int penalty = QuestNoveltyPolicy.penalty(root, village.key(), definition, target.targetKey());
+            Offer candidate = new Offer(definition, target, penalty);
+            if (penalty == 0) return candidate;
+            if (fallback == null || penalty < fallback.noveltyPenalty()) fallback = candidate;
         }
-        return null;
+        return fallback;
     }
 
     private static Offer selectCivicOffer(
@@ -91,12 +95,23 @@ final class CivicQuestFallbackManager {
             VillageProgressState.Snapshot progress,
             CompoundTag root
     ) {
+        Offer fallback = null;
         for (VillageQuestCatalog.Definition definition : VillageQuestCatalog.civicCandidates(village.cell())) {
             if (!eligible(root, definition, level, village, progress)) continue;
             PreparedTarget target = prepareTarget(level, player, village, definition);
-            if (target != null) return new Offer(definition, target);
+            if (target == null) continue;
+            int penalty = QuestNoveltyPolicy.penalty(root, village.key(), definition, target.targetKey());
+            Offer candidate = new Offer(definition, target, penalty);
+            if (penalty == 0) return candidate;
+            if (fallback == null || penalty < fallback.noveltyPenalty()) fallback = candidate;
         }
-        return null;
+        return fallback;
+    }
+
+    private static Offer betterOffer(Offer preferredOnTie, Offer alternate) {
+        if (preferredOnTie == null) return alternate;
+        if (alternate == null) return preferredOnTie;
+        return alternate.noveltyPenalty() < preferredOnTie.noveltyPenalty() ? alternate : preferredOnTie;
     }
 
     private static boolean eligible(
@@ -304,5 +319,5 @@ final class CivicQuestFallbackManager {
     ) {}
 
     private record ApproachInfo(String kind, int depthBlocks) {}
-    private record Offer(VillageQuestCatalog.Definition definition, PreparedTarget target) {}
+    private record Offer(VillageQuestCatalog.Definition definition, PreparedTarget target, int noveltyPenalty) {}
 }
