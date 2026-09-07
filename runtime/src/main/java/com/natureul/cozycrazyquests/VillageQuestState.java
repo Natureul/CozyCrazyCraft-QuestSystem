@@ -15,6 +15,10 @@ import java.util.List;
  * while the player was doing work elsewhere. 0.3.6 migrates that legacy slot into a village-keyed
  * contract book: at most one authored contract per village, but contracts from different villages
  * can coexist. The physical contract papers remain the lightweight player-facing reminder.
+ *
+ * 0.4.1 also keeps one compact recent-completion record per village. That is enough to prevent the
+ * most visible generated-feeling sequence — immediately returning to the exact same structure for the
+ * same reward family — without turning quest history into an unbounded player NBT archive.
  */
 final class VillageQuestState {
     static final String ROOT = "CozyCrazyVillagerQuests";
@@ -22,6 +26,7 @@ final class VillageQuestState {
     static final String LEGACY_ACTIVE = "active";
     static final String ACTIVES = "active_by_village";
     static final String COMPLETED = "completed";
+    static final String RECENT_COMPLETIONS = "recent_completion_by_village";
     static final String CONVERSATION_VILLAGE = "conversation_village_key";
     static final String CONVERSATION_SPEAKER = "conversation_speaker_uuid";
     static final String PAID_HINTS = "paid_hints";
@@ -71,6 +76,31 @@ final class VillageQuestState {
             if (!active.isEmpty()) result.add(active);
         }
         return result;
+    }
+
+    static CompoundTag recentCompletion(CompoundTag root, String villageKey) {
+        if (villageKey == null || villageKey.isBlank()) return new CompoundTag();
+        return root.getCompound(RECENT_COMPLETIONS).getCompound(slot(villageKey));
+    }
+
+    static void noteRecentCompletion(
+            CompoundTag root,
+            String villageKey,
+            String questId,
+            String targetKey,
+            String rewardFamily,
+            long gameTime
+    ) {
+        if (villageKey == null || villageKey.isBlank()) return;
+        CompoundTag entry = new CompoundTag();
+        entry.putString("quest_id", questId == null ? "" : questId);
+        entry.putString("target_key", targetKey == null ? "" : targetKey);
+        entry.putString("reward_family", rewardFamily == null ? "" : rewardFamily);
+        entry.putLong("completed_game_time", gameTime);
+
+        CompoundTag recent = root.getCompound(RECENT_COMPLETIONS);
+        recent.put(slot(villageKey), entry);
+        root.put(RECENT_COMPLETIONS, recent);
     }
 
     static void noteConversation(CompoundTag root, String villageKey, String speakerUuid) {
