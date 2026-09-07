@@ -1,0 +1,1 @@
+{"title":"The Road Goes Quiet","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"If a leader is there, do not let the pack pull you off the road. The route matters more than the chase.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

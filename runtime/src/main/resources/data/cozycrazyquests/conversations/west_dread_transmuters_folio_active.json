@@ -1,0 +1,1 @@
+{"title":"What the Old Alchemists Changed","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Bring the folio intact. Do not test an elixir just because a margin says you can.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

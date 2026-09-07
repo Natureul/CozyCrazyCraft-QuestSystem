@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "region": "WEST",
+  "display_region": "Harvestwood",
+  "status": "EXECUTABLE_CONTENT_CATALOG",
+  "base_commit": "2e413cba282af6a11d5372b177d6c51d9df4503b",
+  "design_contract": [
+    "Harvestwood stays agricultural and inhabited as it becomes uncanny; pumpkin imagery is not synonymous with hostility.",
+    "Sir Pumpkinhead is the protected Wildlands anchor and Lord Pumpkinhead is the protected Dread final. Neither is a routine quest target.",
+    "Tunnel Gore is intentionally absent from this catalog because its bespoke underground encounter needs dedicated runtime/location semantics."
+  ],
+  "runtime_assumptions": [
+    "Only existing quest primitives are used: structure survey, structure recovery, and structure hostile clear.",
+    "Every structure target is an exact registry ID already present in the current registry/structure audit.",
+    "Definitions use sameMacroRegion=true through the existing catalog helpers; there is no explicit issuing-region field in Definition, so region specificity still depends on the selected generated target being in the issuing village's macro-region.",
+    "Quest list order gives a best-effort authored cadence inside a profession/tier, but hard prerequisites are not encoded by the current Definition schema.",
+    "No semantic Quality Equipment floor/reroll API is assumed; executable rewards use already-established exact item/enchantment IDs or vanilla items."
+  ],
+  "quests": [
+    {"id":"west_h1_farmstead_guardian","tier":"HEARTHLANDS","mode":"structure","title":"A Guardian in the Field","giver_professions":["FARMER","LIBRARIAN","CARTOGRAPHER"],"targets":["born_in_chaos_v1:farm"],"recovery_object":null,"required_kills":0,"dialogue_stem":"west_farmstead_guardian","reward_summary":["Fieldwake Hoe","minecraft:pumpkin_pie"]},
+    {"id":"west_h1_forest_watch_ledger","tier":"HEARTHLANDS","mode":"recovery","title":"The Fog-Watch Ledger","giver_professions":["CARTOGRAPHER","FLETCHER","LIBRARIAN"],"targets":["born_in_chaos_v1:observation_tower_forest"],"recovery_object":"Fog-Watch Ledger","required_kills":0,"dialogue_stem":"west_forest_watch_ledger","reward_summary":["Hedgerow Axe","minecraft:lantern"]},
+    {"id":"west_f2_watch_dispatch","tier":"FRONTIER","mode":"recovery","title":"Two Towers, One Story","giver_professions":["CARTOGRAPHER","FLETCHER","LIBRARIAN"],"targets":["born_in_chaos_v1:observation_tower_forest"],"recovery_object":"Western Watch Dispatch","required_kills":0,"dialogue_stem":"west_frontier_watch_dispatch","reward_summary":["Oldwood Longbow","Roadwatch Glass"]},
+    {"id":"west_f2_hound_road","tier":"FRONTIER","mode":"clear","title":"The Road Around the Mound","giver_professions":["SHEPHERD","FLETCHER","WEAPONSMITH"],"targets":["born_in_chaos_v1:mound_of_hounds"],"recovery_object":null,"required_kills":6,"dialogue_stem":"west_frontier_hound_road","reward_summary":["Roadcutter Battleaxe","minecraft:lantern"]},
+    {"id":"west_f2_forge_stamp","tier":"FRONTIER","mode":"recovery","title":"The Old-Road Maker's Stamp","giver_professions":["WEAPONSMITH","TOOLSMITH","ARMORER"],"targets":["valhelsia_structures:forge"],"recovery_object":"Old-Road Maker's Stamp","required_kills":0,"dialogue_stem":"west_frontier_forge_stamp","reward_summary":["Harvest-Road Scythe","minecraft:iron_ingot"]},
+    {"id":"west_f2_route_plate","tier":"FRONTIER","mode":"recovery","title":"Where the Timber Road Split","giver_professions":["CARTOGRAPHER","MASON","TOOLSMITH"],"targets":["valhelsia_structures:castle_ruin","valhelsia_structures:tower_ruin"],"recovery_object":"Timber-Road Plate","required_kills":0,"dialogue_stem":"west_frontier_route_plate","reward_summary":["Roadwright Axe","minecraft:lantern"]},
+    {"id":"west_w3_hound_mound","tier":"WILDLANDS","mode":"clear","title":"The Road Goes Quiet","giver_professions":["FLETCHER","WEAPONSMITH","ARMORER"],"targets":["born_in_chaos_v1:mound_of_hounds"],"recovery_object":null,"required_kills":7,"dialogue_stem":"west_wildlands_hound_mound","reward_summary":["Old-Growth Road Axe","minecraft:golden_carrot"]},
+    {"id":"west_w3_infernal_evidence","tier":"WILDLANDS","mode":"recovery","title":"Ash Where No Barn Burned","giver_professions":["CLERIC","LIBRARIAN","FARMER"],"targets":["born_in_chaos_v1:infernal_pumpkin"],"recovery_object":"Charred Spirit Ledger","required_kills":0,"dialogue_stem":"west_wildlands_infernal_evidence","reward_summary":["Ashwood Axe","Spiritkeeper's Water"]},
+    {"id":"west_w3_headless_witness","tier":"WILDLANDS","mode":"recovery","title":"Three Roads, One Rider","giver_professions":["CARTOGRAPHER","LIBRARIAN","CLERIC"],"targets":["born_in_chaos_v1:observation_tower_forest"],"recovery_object":"Last Headless-Road Ledger","required_kills":0,"dialogue_stem":"west_wildlands_headless_witness","reward_summary":["Frontiersman's Hood","Headless-Road Compass"]},
+    {"id":"west_d4_last_road_plate","tier":"DREAD_REACHES","mode":"recovery","title":"The Last Reliable Road","giver_professions":["CARTOGRAPHER","MASON","LIBRARIAN"],"targets":["born_in_chaos_v1:dark_tower_forest","born_in_chaos_v1:dark_tower_plain","born_in_chaos_v1:dark_tower_taiga"],"recovery_object":"Last Reliable Route Plate","required_kills":0,"dialogue_stem":"west_dread_last_road_plate","reward_summary":["Last-Road Axe","minecraft:lantern"]},
+    {"id":"west_d4_transmuters_folio","tier":"DREAD_REACHES","mode":"recovery","title":"What the Old Alchemists Changed","giver_professions":["CLERIC","LIBRARIAN","TOOLSMITH"],"targets":["born_in_chaos_v1:dark_tower_forest","born_in_chaos_v1:dark_tower_plain","born_in_chaos_v1:dark_tower_taiga"],"recovery_object":"Black-Alchemist Folio","required_kills":0,"dialogue_stem":"west_dread_transmuters_folio","reward_summary":["Black-Road Pick","minecraft:obsidian"]},
+    {"id":"west_d4_one_journey_cache","tier":"DREAD_REACHES","mode":"clear","title":"Made for One Journey","giver_professions":["ARMORER","WEAPONSMITH","CLERIC"],"targets":["born_in_chaos_v1:dark_tower_forest","born_in_chaos_v1:dark_tower_plain","born_in_chaos_v1:dark_tower_taiga"],"recovery_object":null,"required_kills":8,"dialogue_stem":"west_dread_one_journey_cache","reward_summary":["One-Journey Coat","minecraft:golden_apple"]}
+  ],
+  "knowledge_rewards": [
+    {"stage":"HEARTHLANDS","quest_id":"west_h1_farmstead_guardian","knowledge":"A scarecrow built from dark oak, hay, and a carved pumpkin can be awakened with an Ethereal Spirit into a Pumpkin Spirit.","implementation":"Post-completion dialogue only; no recipe interception or entity spawning is added."},
+    {"stage":"WILDLANDS","quest_id":"west_w3_infernal_evidence","knowledge":"Fire transforms a Pumpkin Spirit into a hostile Seared Spirit; a Transmuting Elixir can transform Seared into Infernal Spirit.","implementation":"Knowledge reward only. The quest does not give a Transmuting Elixir."},
+    {"stage":"DREAD_REACHES","quest_id":"west_d4_transmuters_folio","knowledge":"Transmuting Elixir can also convert iron blocks into Dark Metal, tying deep Harvestwood investigation to the occult material economy.","implementation":"Knowledge reward only; no repeatable high-value transmutation reagent is granted."}
+  ],
+  "protected_encounters": {"sir_pumpkinhead":"NO_EXECUTABLE_KILL_OBJECTIVE_ADDED","lord_pumpkinhead":"NO_EXECUTABLE_KILL_OBJECTIVE_ADDED","tunnel_gore":"NOT_REFERENCED"},
+  "gated_future": [
+    "Direct conversation/relationship content for the verified Born in Chaos farm resident requires a HabitationContext path because the current village conversation quest manager intentionally operates on VillageContext.",
+    "A formal Sir Pumpkinhead commission should be added only after exact encounter/kill-credit binding is authoritative; evidence and preparation quests are executable now.",
+    "Fel Lamp/Felsteed knowledge belongs after Sir Pumpkinhead or another progression-appropriate discovery, not in early repeatable content.",
+    "Lord Pumpkinhead remains a one-time Dread final after readiness and final-route prerequisites; the current final encounter binding is not authoritative enough to make executable here.",
+    "True entity observation/photography objectives need a dedicated objective primitive; current ecology content therefore uses structure observation/evidence rather than fake kill counters.",
+    "Hard authored chain prerequisites and an explicit issuer macro-region field would require shared runtime/schema work and are deliberately not added on this regional branch.",
+    "Semantic positive/strong-positive Quality Equipment rewards and reforge services remain gated until the live Quality API/config contract is frozen."
+  ]
+}

@@ -1,0 +1,1 @@
+{"title":"The Old-Road Maker's Stamp","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"If someone still lives at the forge, treat it as a workshop, not a ruin. The stamp is the job.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}

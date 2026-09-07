@@ -1,0 +1,1 @@
+{"title":"A Guardian in the Field","starting_index":0,"dialogues":[{"dialogue_options":[{"dialogue":"Look before you swing. A healthy Pumpkin Spirit guards against monsters and does not hunt travelers.","condition":"*","closable":"never","timings":[0.18,0.04,0.35,0.6],"replies":[{"reply":"I know what I'm looking for.","action":[{"action":"dialogue.close"}]}],"actions":[]}]}]}
