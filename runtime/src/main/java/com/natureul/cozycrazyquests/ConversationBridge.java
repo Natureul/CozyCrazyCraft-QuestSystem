@@ -58,6 +58,15 @@ final class ConversationBridge {
         return id != null && id.startsWith(OWN_PREFIX);
     }
 
+    /**
+     * Package-visible read used only to distinguish refreshable ambient/social pages from authored
+     * quest pages. The bridge still exposes no third-party implementation details beyond the public
+     * string ID already returned by Conversations' ICanDialogue surface.
+     */
+    static String currentDialogueId(LivingEntity entity) {
+        return dialogueId(entity);
+    }
+
     static void clearOwnDialogue(LivingEntity entity) {
         resolve();
         if (!available || !dialogueType.isInstance(entity)) return;
