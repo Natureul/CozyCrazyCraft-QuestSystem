@@ -21,14 +21,14 @@ import java.util.Optional;
  * Ambient/social layer beneath authored quest dialogue.
  *
  * The quest manager runs first. If it did not select a giver/turn-in conversation, ordinary residents
- * can still supply local knowledge, referrals, rumors, or normal profession chatter. Guards now use
+ * can still supply local knowledge, referrals, rumors, or normal profession chatter. Guards use
  * ordinary right click; sneak-right-click is deliberately left alone for Carry On and other entity
  * interaction mods.
  *
- * Ordinary professional chatter is deliberately stable-but-varied: a villager's UUID chooses one of
- * three authored voice variants for that profession. Child villagers are looser: their line can change
- * by Minecraft day, and a small minority of rolls point at the notice board, a useful adult, or a real
- * nearby Tunnel Gore rumor. Kids therefore feel chatty without becoming miniature quest terminals.
+ * An important exception is an active structure contract: a non-giver who plausibly knows the route
+ * may replace the generic active reminder with QuestHintNetwork dialogue. This is intentional. It
+ * lets a cartographer, mason, librarian, guard, etc. actually help even when their profession also
+ * happens to be a legal turn-in profession for that quest.
  */
 public final class VillageSocialConversationManager {
     private static final int BOARD_DIRECTION_RADIUS = 192;
@@ -45,27 +45,33 @@ public final class VillageSocialConversationManager {
 
         if (target instanceof Villager villager) {
             VillagerNameService.ensureNamed(level, villager);
-
-            // Authored giver/turn-in dialogue always wins.
-            if (ConversationBridge.hasOwnDialogue(villager)) return;
-            if (ConversationBridge.hasDialogue(villager)) return;
-
             VillageContext village = VillageContext.resolve(level, villager.blockPosition());
 
             // Children never become paid informants or generic quest hint machines. Their useful
-            // moments are deliberately rarer, simpler and handled by the child dialogue bank below.
+            // moments are deliberately rare and handled by the child dialogue bank below.
             if (villager.isBaby()) {
-                ConversationBridge.setDialogue(villager, childDialogue(player, villager, village));
+                if (!ConversationBridge.hasOwnDialogue(villager) && !ConversationBridge.hasDialogue(villager)) {
+                    ConversationBridge.setDialogue(villager, childDialogue(player, villager, village));
+                }
                 return;
             }
 
             if (village != null) {
-                ResourceLocation hint = VillageConversationQuestManager.socialHintDialogue(player, villager, village);
-                if (hint != null) {
-                    ConversationBridge.setDialogue(villager, hint);
+                // This deliberately runs before the "quest manager already attached something" guard.
+                // It fixes cases where a second cartographer/fisherman/etc. inherited the generic active
+                // reminder and therefore could not actually give the player the clue they came to ask for.
+                ResourceLocation activeHint = QuestHintNetwork.dialogue(player, villager, village);
+                if (activeHint != null) {
+                    ConversationBridge.setDialogue(villager, activeHint);
                     return;
                 }
+            }
 
+            // Authored offers, original-giver reminders and completed turn-ins still win.
+            if (ConversationBridge.hasOwnDialogue(villager)) return;
+            if (ConversationBridge.hasDialogue(villager)) return;
+
+            if (village != null) {
                 ResourceLocation deepRoad = GoreTunnelLead.adultDialogue(player, villager, village);
                 if (deepRoad != null) {
                     ConversationBridge.setDialogue(villager, deepRoad);
@@ -89,7 +95,7 @@ public final class VillageSocialConversationManager {
 
         VillageContext village = VillageContext.resolve(level, target.blockPosition());
         if (village != null) {
-            ResourceLocation hint = VillageConversationQuestManager.socialHintDialogue(player, target, village);
+            ResourceLocation hint = QuestHintNetwork.dialogue(player, target, village);
             if (hint != null) {
                 ConversationBridge.setDialogue(target, hint);
                 return;
@@ -108,7 +114,7 @@ public final class VillageSocialConversationManager {
             return true;
         }
         if ("route_help".equals(action)) {
-            routeToUsefulPerson(player);
+            if (!QuestHintNetwork.routeForActiveQuest(player)) routeToUsefulPerson(player);
             return true;
         }
         if ("buy_hint".equals(action)) {
@@ -117,6 +123,7 @@ public final class VillageSocialConversationManager {
         if ("mark_active_target".equals(action)) {
             return VillageConversationQuestManager.markCurrentTargetOnAtlas(player);
         }
+        if (QuestHintNetwork.consumeAction(player, action)) return true;
         if (GoreTunnelLead.consumeAction(player, action)) return true;
         return false;
     }
@@ -195,11 +202,7 @@ public final class VillageSocialConversationManager {
         };
     }
 
-    /**
-     * Stable per-person ambient voice. Variant 0 is the original conversation; variants 1 and 2
-     * are Bible-authored alternates. UUID hashing means the person does not change voice because the
-     * player reopened the screen or reloaded the world.
-     */
+    /** Stable per-person ambient voice; a villager does not change personality on every click. */
     private static ResourceLocation ambientVariant(Villager villager, String basePath) {
         int variant = Math.floorMod(villager.getUUID().hashCode(), 3);
         return switch (variant) {
@@ -226,10 +229,11 @@ public final class VillageSocialConversationManager {
         String profession = professionLabel(villager.getVillagerData().getProfession());
         String where = distance <= 10 ? "right nearby" : "about " + distance + " blocks " + direction(dx, dz);
 
-        player.sendSystemMessage(
+        player.displayClientMessage(
                 Component.literal(villager.getDisplayName().getString() + ", the " + profession
                                 + ", is the person I'd ask. They're " + where + ".")
-                        .withStyle(ChatFormatting.GOLD)
+                        .withStyle(ChatFormatting.GOLD),
+                true
         );
     }
 
