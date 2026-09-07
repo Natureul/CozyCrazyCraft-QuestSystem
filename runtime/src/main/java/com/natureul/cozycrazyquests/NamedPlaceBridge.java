@@ -86,7 +86,7 @@ final class NamedPlaceBridge {
             Method get = namesClass.getMethod("get", ServerLevel.class);
             Object names = get.invoke(null, level);
             Method getOrAssign = namesClass.getMethod("getOrAssign", macro.getClass(), long.class, ChunkPos.class);
-            Object value = getOrAssign.invoke(names, macro, level.getSeed(), identity.startChunk());
+            Object value = getOrAssign.invoke(names, macro, celllessSeed(level), identity.startChunk());
             if (value instanceof String name && !name.isBlank()) return name;
         } catch (Throwable error) {
             if (!warnedVillageName) {
@@ -95,6 +95,10 @@ final class NamedPlaceBridge {
             }
         }
         return "the village";
+    }
+
+    private static long celllessSeed(ServerLevel level) {
+        return level.getSeed();
     }
 
     static boolean revealStructureToAtlas(ServerPlayer player, ResourceLocation structureId, BlockPos locatedPos, String name) {
@@ -142,13 +146,29 @@ final class NamedPlaceBridge {
         }
     }
 
-    /** Stable identity for the exact generated structure instance represented by a locate result. */
+    /**
+     * Stable identity for the exact generated structure instance represented by a locate result.
+     *
+     * This method is intentionally strict. If StructureManager cannot prove that the locator position
+     * belongs to a real StructureStart, return null instead of fabricating a start chunk from the locate
+     * point. A fabricated identity can make a perfectly valid modded structure impossible to complete
+     * when its /locate navigation point sits outside its actual bounding box.
+     */
     static StructureInstance structureInstance(ServerLevel level, ResourceLocation structureId, BlockPos locatedPos) {
         Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         Structure structure = registry.get(structureId);
         if (structure == null) return null;
-        StructureIdentity identity = structureIdentity(level, structure, locatedPos);
-        return new StructureInstance(identity.startChunk(), identity.markerPos());
+
+        StructureStart start = level.structureManager().getStructureAt(locatedPos, structure);
+        if (start == null || !start.isValid()) return null;
+
+        BoundingBox box = start.getBoundingBox();
+        BlockPos marker = new BlockPos(
+                (box.minX() + box.maxX()) / 2,
+                locatedPos.getY(),
+                (box.minZ() + box.maxZ()) / 2
+        );
+        return new StructureInstance(start.getChunkPos(), marker);
     }
 
     /**
@@ -176,7 +196,8 @@ final class NamedPlaceBridge {
             return currentStart.x == expectedStartChunkX && currentStart.z == expectedStartChunkZ;
         }
 
-        // Compatibility for contracts accepted by older builds that did not persist the start chunk.
+        // Compatibility for contracts accepted by older builds or locators that could not prove an
+        // exact start chunk at offer time.
         StructureIdentity expected = structureIdentity(level, structure, legacyLocatePos);
         if (expected.startChunk().equals(currentStart)) return true;
 
@@ -188,7 +209,7 @@ final class NamedPlaceBridge {
         long cz = ((long) box.minZ() + box.maxZ()) / 2L;
         long dx = cx - legacyLocatePos.getX();
         long dz = cz - legacyLocatePos.getZ();
-        return dx * dx + dz * dz <= 128L * 128L;
+        return dx * dx + dz * dz <= 192L * 192L;
     }
 
     private static StructureIdentity structureIdentity(ServerLevel level, Structure structure, BlockPos locatedPos) {
