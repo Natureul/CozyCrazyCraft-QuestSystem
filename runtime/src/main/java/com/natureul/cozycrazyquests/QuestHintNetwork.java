@@ -92,22 +92,20 @@ final class QuestHintNetwork {
             Villager villager = specialist.get();
             VillagerNameService.ensureNamed(level, villager);
             player.displayClientMessage(
-                    Component.literal("Referral: " + villager.getDisplayName().getString() + " — "
-                                    + professionLabel(villager.getVillagerData().getProfession()) + ".")
-                            .withStyle(ChatFormatting.GOLD),
+                    Component.literal(compactReferral(player, villager)).withStyle(ChatFormatting.GOLD),
                     true
             );
             return true;
         }
 
-        return giveLead(player, PlayerKnowledgeState.Knowledge.LEAD, 100, false);
+        return giveLead(player, PlayerKnowledgeState.Knowledge.LEAD, 100);
     }
 
     static boolean consumeAction(ServerPlayer player, String action) {
         return switch (action) {
-            case "quest_hint_rumor" -> giveLead(player, PlayerKnowledgeState.Knowledge.RUMOR, 200, true);
-            case "quest_hint_lead" -> giveLead(player, PlayerKnowledgeState.Knowledge.LEAD, 100, true);
-            case "quest_hint_identify" -> giveLead(player, PlayerKnowledgeState.Knowledge.KNOWN, 50, false);
+            case "quest_hint_rumor" -> giveLead(player, PlayerKnowledgeState.Knowledge.RUMOR, 200);
+            case "quest_hint_lead" -> giveLead(player, PlayerKnowledgeState.Knowledge.LEAD, 100);
+            case "quest_hint_identify" -> giveLead(player, PlayerKnowledgeState.Knowledge.KNOWN, 50);
             case "quest_hint_referral" -> routeForActiveQuest(player);
             default -> false;
         };
@@ -116,8 +114,7 @@ final class QuestHintNetwork {
     private static boolean giveLead(
             ServerPlayer player,
             PlayerKnowledgeState.Knowledge knowledge,
-            int rounding,
-            boolean descriptiveOnly
+            int rounding
     ) {
         CompoundTag root = VillageQuestState.root(player);
         String villageKey = VillageQuestState.conversationVillage(root);
@@ -138,11 +135,11 @@ final class QuestHintNetwork {
 
         boolean marked = knowledge == PlayerKnowledgeState.Knowledge.KNOWN && markKnownTarget(player, active);
         String status = switch (knowledge) {
-            case UNKNOWN -> "No reliable lead yet.";
-            case RUMOR -> "Rumor noted.";
-            case LEAD -> "Lead noted.";
-            case KNOWN -> marked ? "Atlas marked: " + active.getString("target_name") + "." : "Place identified.";
-            case CONFIRMED -> "Place already confirmed.";
+            case UNKNOWN -> "No reliable lead.";
+            case RUMOR -> "Rumor: " + compactRoute(active, rounding);
+            case LEAD -> "Lead: " + compactRoute(active, rounding);
+            case KNOWN -> marked ? "Atlas marked." : "Place identified.";
+            case CONFIRMED -> "Already confirmed.";
         };
         player.displayClientMessage(
                 Component.literal(status)
@@ -238,6 +235,66 @@ final class QuestHintNetwork {
                 .min(Comparator.comparingInt(villager -> Math.floorMod(villager.getUUID().hashCode() ^ questId.hashCode(), Integer.MAX_VALUE)))
                 .map(villager -> villager.getUUID().equals(speaker.getUUID()))
                 .orElse(false);
+    }
+
+    private static String compactReferral(ServerPlayer player, Villager villager) {
+        long dx = (long) villager.blockPosition().getX() - player.blockPosition().getX();
+        long dz = (long) villager.blockPosition().getZ() - player.blockPosition().getZ();
+        int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
+        String name = villager.getDisplayName().getString();
+        String route = distance <= 10 ? "nearby" : distance + " " + shortDirection(dx, dz);
+        String message = name + " • " + professionLabel(villager.getVillagerData().getProfession()) + " • " + route;
+        if (message.length() <= 45) return message;
+        message = name + " • " + route;
+        if (message.length() <= 45) return message;
+        if (name.length() > 26) name = name.substring(0, 23) + "...";
+        return name + " • " + route;
+    }
+
+    private static String compactRoute(CompoundTag active, int rounding) {
+        int distance = Math.max(0, active.getInt("target_distance"));
+        String direction = shortDirection(active.getString("target_direction"));
+        if (distance <= 0) return direction.isBlank() ? "local area" : direction;
+
+        String range;
+        if (rounding > 1 && distance < rounding) {
+            range = "<" + rounding;
+        } else if (rounding > 1) {
+            int rounded = Math.max(rounding, (int) Math.round(distance / (double) rounding) * rounding);
+            range = "~" + rounded;
+        } else {
+            range = Integer.toString(distance);
+        }
+        return direction.isBlank() ? range : range + " " + direction;
+    }
+
+    private static String shortDirection(String direction) {
+        return switch (direction == null ? "" : direction.toLowerCase()) {
+            case "north" -> "N";
+            case "northeast" -> "NE";
+            case "east" -> "E";
+            case "southeast" -> "SE";
+            case "south" -> "S";
+            case "southwest" -> "SW";
+            case "west" -> "W";
+            case "northwest" -> "NW";
+            default -> "";
+        };
+    }
+
+    private static String shortDirection(long dx, long dz) {
+        double angle = Math.atan2(dx, -dz);
+        int octant = Math.floorMod((int) Math.round(angle / (Math.PI / 4.0)), 8);
+        return switch (octant) {
+            case 0 -> "N";
+            case 1 -> "NE";
+            case 2 -> "E";
+            case 3 -> "SE";
+            case 4 -> "S";
+            case 5 -> "SW";
+            case 6 -> "W";
+            default -> "NW";
+        };
     }
 
     private static boolean objectiveComplete(CompoundTag active) {
